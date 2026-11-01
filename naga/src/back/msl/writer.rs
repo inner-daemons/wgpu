@@ -8026,6 +8026,7 @@ template <typename A>
                     }
                     _ => {
                         if var.space == crate::AddressSpace::WorkGroup {
+                            // Written later as function variables rather than entry point inputs.
                             continue;
                         }
                         let tyvar = TypedGlobalVariable {
@@ -8351,6 +8352,9 @@ template <typename A>
                         }
                     };
                 } else if var.space == crate::AddressSpace::WorkGroup {
+                    // Workgroup variables are declared as function variables but can
+                    // only be declared in the entry point. So we receive them as an
+                    // input reference here.
                     if !is_wrapped {
                         let tyvar = TypedGlobalVariable {
                             module,
