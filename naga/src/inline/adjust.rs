@@ -1,67 +1,24 @@
-//! TODO: Maybe we can somehow give extra information to the compaction pass so that the adjustment only happens once.
-//! Otherwise, we can still try to share code with the compactor. This code is mostly copy-pasted from there.
+//! Rewriting the handles in expressions and statements copied from one
+//! function into another. The matches mirror those in [`crate::compact`].
 
-use core::unreachable;
-
-use crate::{non_max_u32::NonMaxU32, Arena, Expression, Handle, Statement};
+use crate::{Block, Expression, Handle, LocalVariable, Range, Statement};
 use alloc::{vec, vec::Vec};
-use nt::FastHashMap;
 
-pub struct AdjustInfo<'a> {
-    pub function_args: &'a [Handle<Expression>],
-    pub function_return: Option<Handle<Expression>>,
-    pub expressions: &'a mut Arena<Expression>,
-    pub statements: &'a mut [Statement],
-    pub expr_offset: u32,
-    pub local_variable_offset: u32,
-}
-impl AdjustInfo<'_> {
-    pub fn adjust_all(self) {
-        let mut function_arg_map: FastHashMap<Handle<Expression>, Handle<Expression>> =
-            Default::default();
-        for (handle, expr) in self.expressions.iter_mut().skip(self.expr_offset as usize) {
-            if let Expression::FunctionArgument(idx) = *expr {
-                // Placeholder, will get removed by compactor
-                *expr = Expression::Literal(crate::Literal::Bool(false));
-                function_arg_map.insert(handle, self.function_args[idx as usize]);
-            }
-        }
-        if let Some(function_return) = self.function_return {
-            function_arg_map.insert(
-                Handle::new(NonMaxU32::new(u32::MAX - 1).unwrap()),
-                function_return,
-            );
-        }
-        for (_, expr) in self.expressions.iter_mut().skip(self.expr_offset as usize) {
-            adjust_expression(
-                self.expr_offset,
-                self.local_variable_offset,
-                expr,
-                &function_arg_map,
-            )
-        }
-        adjust_statements(self.expr_offset, self.statements, &function_arg_map);
-    }
-}
-
-fn adjust_expression(
-    expr_offset: u32,
-    local_variable_offset: u32,
+/// Apply `adjust` to every expression handle in `expr`, and `adjust_local` to
+/// its local variable handle, if any.
+pub fn adjust_expression(
     expr: &mut Expression,
-    function_arg_map: &FastHashMap<Handle<Expression>, Handle<Expression>>,
+    adjust: &mut dyn FnMut(&mut Handle<Expression>),
+    adjust_local: &mut dyn FnMut(&mut Handle<LocalVariable>),
 ) {
-    let adjust = |handle: &mut Handle<Expression>| {
-        if let Some(val) = function_arg_map.get(handle) {
-            *handle = *val;
-        } else {
-            *handle = Handle::new(NonMaxU32::new(handle.index() as u32 + expr_offset).unwrap())
-        }
-    };
-    let adjust_option = |handle: &mut Option<Handle<Expression>>| {
-        if let Some(handle) = handle {
+    fn adjust_option(
+        handle: &mut Option<Handle<Expression>>,
+        adjust: &mut dyn FnMut(&mut Handle<Expression>),
+    ) {
+        if let Some(ref mut handle) = *handle {
             adjust(handle);
         }
-    };
+    }
     use crate::Expression as Ex;
     match *expr {
         // Expressions that do not contain handles that need to be adjusted.
@@ -75,12 +32,10 @@ fn adjust_expression(
         | Ex::CallResult(_)
         | Ex::AtomicResult { .. }
         | Ex::WorkGroupUniformLoadResult { .. }
-        | Ex::SubgroupOperationResult { .. } => {}
+        | Ex::SubgroupOperationResult { .. }
+        | Ex::FunctionArgument(_) => {}
 
-        Ex::FunctionArgument(_) => unreachable!(),
-        Ex::LocalVariable(ref mut l) => {
-            *l = Handle::new(NonMaxU32::new(l.index() as u32 + local_variable_offset).unwrap())
-        }
+        Ex::LocalVariable(ref mut local) => adjust_local(local),
 
         // Expressions that contain handles that need to be adjusted.
         Ex::Compose {
@@ -125,8 +80,8 @@ fn adjust_expression(
             adjust(image);
             adjust(sampler);
             adjust(coordinate);
-            adjust_option(array_index);
-            adjust_option(offset);
+            adjust_option(array_index, adjust);
+            adjust_option(offset, adjust);
             use crate::SampleLevel as Sl;
             match *level {
                 Sl::Auto | Sl::Zero => {}
@@ -140,7 +95,7 @@ fn adjust_expression(
                     adjust(y);
                 }
             }
-            adjust_option(depth_ref);
+            adjust_option(depth_ref, adjust);
         }
         Ex::ImageLoad {
             ref mut image,
@@ -151,9 +106,9 @@ fn adjust_expression(
         } => {
             adjust(image);
             adjust(coordinate);
-            adjust_option(array_index);
-            adjust_option(sample);
-            adjust_option(level);
+            adjust_option(array_index, adjust);
+            adjust_option(sample, adjust);
+            adjust_option(level, adjust);
         }
         Ex::ImageQuery {
             ref mut image,
@@ -163,7 +118,7 @@ fn adjust_expression(
             use crate::ImageQuery as Iq;
 
             match *query {
-                Iq::Size { ref mut level } => adjust_option(level),
+                Iq::Size { ref mut level } => adjust_option(level, adjust),
                 Iq::NumLevels | Iq::NumLayers | Iq::NumSamples => {}
             }
         }
@@ -205,14 +160,17 @@ fn adjust_expression(
             ref mut arg3,
         } => {
             adjust(arg);
-            adjust_option(arg1);
-            adjust_option(arg2);
-            adjust_option(arg3);
+            adjust_option(arg1, adjust);
+            adjust_option(arg2, adjust);
+            adjust_option(arg3, adjust);
         }
         Ex::As {
             ref mut expr,
-            kind: _,
-            convert: _,
+            target: _,
+        } => adjust(expr),
+        Ex::Bitcast {
+            ref mut expr,
+            ty: _,
         } => adjust(expr),
         Ex::ArrayLength(ref mut expr) => adjust(expr),
         Ex::RayQueryGetIntersection {
@@ -239,18 +197,10 @@ fn adjust_expression(
     }
 }
 
-fn adjust_statements(
-    expr_offset: u32,
-    statements: &mut [Statement],
-    function_arg_map: &FastHashMap<Handle<Expression>, Handle<Expression>>,
-) {
-    let adjust = |handle: &mut Handle<Expression>| {
-        if let Some(val) = function_arg_map.get(handle) {
-            *handle = *val;
-        } else {
-            *handle = Handle::new(NonMaxU32::new(handle.index() as u32 + expr_offset).unwrap())
-        }
-    };
+/// Apply `adjust` to every expression handle in `block`, including the bounds
+/// of `Emit` ranges.
+pub fn adjust_block(block: &mut Block, adjust: &mut dyn FnMut(&mut Handle<Expression>)) {
+    let statements: &mut [Statement] = block;
     let mut worklist: Vec<&mut [Statement]> = vec![statements];
 
     while let Some(last) = worklist.pop() {
@@ -393,6 +343,7 @@ fn adjust_statements(
                         }
                         Qf::ConfirmIntersection => {}
                         Qf::Terminate => {}
+                        Qf::Begin => {}
                     }
                 }
                 St::SubgroupBallot {
@@ -450,8 +401,22 @@ fn adjust_statements(
                         adjust(payload);
                     }
                 },
-                St::Emit(..)
-                | St::Break
+                St::Emit(ref mut range) => {
+                    if let Some((mut first, mut last)) = range.first_and_last() {
+                        adjust(&mut first);
+                        adjust(&mut last);
+                        *range = Range::new_from_bounds(first, last);
+                    }
+                }
+                St::DebugPrintf {
+                    format: _,
+                    ref mut arguments,
+                } => {
+                    for expr in arguments {
+                        adjust(expr);
+                    }
+                }
+                St::Break
                 | St::Continue
                 | St::Kill
                 | St::ControlBarrier(_)

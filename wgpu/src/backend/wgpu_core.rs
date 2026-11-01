@@ -851,6 +851,9 @@ impl dispatch::InstanceInterface for ContextWgpuCore {
                     ImplementedLanguageExtension::Packed4x8IntegerDotProduct => {
                         crate::WgslLanguageFeatures::Packed4x8IntegerDotProduct
                     }
+                    ImplementedLanguageExtension::UnrestrictedPointerParameters => {
+                        crate::WgslLanguageFeatures::UnrestrictedPointerParameters
+                    }
                     ImplementedLanguageExtension::PointerCompositeAccess => {
                         crate::WgslLanguageFeatures::PointerCompositeAccess
                     }

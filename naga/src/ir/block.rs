@@ -9,9 +9,9 @@ use crate::{Span, Statement};
 #[cfg_attr(feature = "serialize", serde(transparent))]
 #[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 pub struct Block {
-    pub(crate) body: Vec<Statement>,
+    body: Vec<Statement>,
     #[cfg_attr(feature = "serialize", serde(skip))]
-    pub(crate) span_info: Vec<Span>,
+    span_info: Vec<Span>,
 }
 
 impl Block {

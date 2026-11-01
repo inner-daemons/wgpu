@@ -331,7 +331,7 @@ bitflags::bitflags! {
     /// Validation flags.
     #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
     #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
-    #[derive(Clone, Copy, Debug, Eq, PartialEq, Default)]
+    #[derive(Clone, Copy, Debug, Eq, PartialEq)]
     pub struct ShaderStages: u16 {
         const VERTEX = 0x1;
         const FRAGMENT = 0x2;
@@ -351,9 +351,8 @@ bitflags::bitflags! {
 #[cfg_attr(feature = "deserialize", derive(serde::Deserialize))]
 pub struct ModuleInfo {
     type_flags: Vec<TypeFlags>,
-    // Need to be pub(crate) so they can be modified by the inlining pass.
-    pub(crate) functions: Vec<FunctionInfo>,
-    pub(crate) entry_points: Vec<FunctionInfo>,
+    functions: Vec<FunctionInfo>,
+    entry_points: Vec<FunctionInfo>,
     const_expression_types: Box<[TypeResolution]>,
 }
 

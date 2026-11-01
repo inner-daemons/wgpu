@@ -109,12 +109,6 @@ pub enum FunctionError {
     InvalidArgumentType { index: usize, name: String },
     #[error("The function's given return type cannot be returned from functions")]
     NonConstructibleReturnType,
-    #[error("Argument '{name}' at index {index} is a pointer of space {space:?}, which can't be passed into functions.")]
-    InvalidArgumentPointerSpace {
-        index: usize,
-        name: String,
-        space: crate::AddressSpace,
-    },
     #[error("The `break` is used outside of a `loop` or `switch` context")]
     BreakOutsideOfLoopOrSwitch,
     #[error("The `continue` is used outside of a `loop` context")]
