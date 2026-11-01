@@ -8025,9 +8025,7 @@ template <typename A>
                         });
                     }
                     _ => {
-                        if var.space == crate::AddressSpace::WorkGroup
-                            && ep.stage == crate::ShaderStage::Mesh
-                        {
+                        if var.space == crate::AddressSpace::WorkGroup {
                             continue;
                         }
                         let tyvar = TypedGlobalVariable {
@@ -8125,7 +8123,7 @@ template <typename A>
                 }
                 writeln!(self.out)?;
             }
-            if ep.stage == crate::ShaderStage::Mesh {
+            if is_wrapped {
                 for (handle, var) in module.global_variables.iter() {
                     if var.space != crate::AddressSpace::WorkGroup || fun_info[handle].is_empty() {
                         continue;
@@ -8352,6 +8350,19 @@ template <typename A>
                             writeln!(self.out, " = {{}};")?;
                         }
                     };
+                } else if var.space == crate::AddressSpace::WorkGroup {
+                    if !is_wrapped {
+                        let tyvar = TypedGlobalVariable {
+                            module,
+                            names: &self.names,
+                            handle,
+                            usage,
+                            reference: false,
+                        };
+                        write!(self.out, "{}", back::INDENT)?;
+                        tyvar.try_fmt(&mut self.out)?;
+                        writeln!(self.out, ";")?;
+                    }
                 } else if let Some(ref binding) = var.binding {
                     let resolved = options.resolve_resource_binding(ep, binding).unwrap();
                     if let Some(sampler) = resolved.as_inline_sampler(options) {
