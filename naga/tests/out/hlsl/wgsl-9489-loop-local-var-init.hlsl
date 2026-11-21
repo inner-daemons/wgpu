@@ -8,11 +8,15 @@ float4 ZeroValuefloat4() {
 [numthreads(1, 1, 1)]
 void main()
 {
-    uint t = 0u;
-    float4 acc_noinit = (float4)0;
-    float4 acc_init = (float4)0;
-    uint d = (uint)0;
+    uint t;
+    float4 acc_noinit;
+    float4 acc_init;
+    uint d;
 
+    t = 0u;
+    acc_noinit = ZeroValuefloat4();
+    acc_init = ZeroValuefloat4();
+    d = 0u;
     uint2 loop_bound = uint2(4294967295u, 4294967295u);
     bool loop_init = true;
     while(true) {

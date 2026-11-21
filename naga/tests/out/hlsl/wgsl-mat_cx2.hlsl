@@ -38,8 +38,9 @@ cbuffer u_sasm : register(b1, space3) { StructWithArrayOfStructOfMat u_sasm; }
 
 void access_m()
 {
-    int idx = int(1);
+    int idx;
 
+    idx = int(1);
     int _e3 = idx;
     idx = asint(asuint(_e3) - asuint(int(1)));
     float2x2 l_s_m = float2x2(asfloat(s_m.Load2(0)), asfloat(s_m.Load2(8)));
@@ -117,8 +118,9 @@ void SetMatScalarmOnStructWithMat(StructWithMat obj, float scalar, uint mat_idx,
 
 void access_sm()
 {
-    int idx_1 = int(1);
+    int idx_1;
 
+    idx_1 = int(1);
     int _e3 = idx_1;
     idx_1 = asint(asuint(_e3) - asuint(int(1)));
     StructWithMat l_s_s = ConstructStructWithMat(float2x2(asfloat(s_sm.Load2(0+0)), asfloat(s_sm.Load2(0+8))));
@@ -181,8 +183,9 @@ ret_Constructarray4_float2x2_ Constructarray4_float2x2_(float2x2 arg0, float2x2 
 
 void access_am()
 {
-    int idx_2 = int(1);
+    int idx_2;
 
+    idx_2 = int(1);
     int _e3 = idx_2;
     idx_2 = asint(asuint(_e3) - asuint(int(1)));
     float2x2 l_s_a[4] = Constructarray4_float2x2_(float2x2(asfloat(s_am.Load2(0+0)), asfloat(s_am.Load2(0+8))), float2x2(asfloat(s_am.Load2(16+0)), asfloat(s_am.Load2(16+8))), float2x2(asfloat(s_am.Load2(32+0)), asfloat(s_am.Load2(32+8))), float2x2(asfloat(s_am.Load2(48+0)), asfloat(s_am.Load2(48+8))));
@@ -328,8 +331,9 @@ StructWithArrayOfStructOfMat ConstructStructWithArrayOfStructOfMat(StructWithMat
 
 void access_sasm()
 {
-    int idx_3 = int(1);
+    int idx_3;
 
+    idx_3 = int(1);
     int _e3 = idx_3;
     idx_3 = asint(asuint(_e3) - asuint(int(1)));
     StructWithArrayOfStructOfMat l_s_s_1 = ConstructStructWithArrayOfStructOfMat(Constructarray4_StructWithMat_(ConstructStructWithMat(float2x2(asfloat(s_sasm.Load2(0+0+0+0)), asfloat(s_sasm.Load2(0+0+0+8)))), ConstructStructWithMat(float2x2(asfloat(s_sasm.Load2(0+16+0+0)), asfloat(s_sasm.Load2(0+16+0+8)))), ConstructStructWithMat(float2x2(asfloat(s_sasm.Load2(0+32+0+0)), asfloat(s_sasm.Load2(0+32+0+8)))), ConstructStructWithMat(float2x2(asfloat(s_sasm.Load2(0+48+0+0)), asfloat(s_sasm.Load2(0+48+0+8))))));

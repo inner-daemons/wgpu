@@ -26,8 +26,9 @@ ret_Constructarray4_int_ Constructarray4_int_(int arg0, int arg1, int arg2, int 
 
 void local_var(uint i)
 {
-    int arr[4] = Constructarray4_int_(int(1), int(2), int(3), int(4));
+    int arr[4];
 
+    arr = Constructarray4_int_(int(1), int(2), int(3), int(4));
     takes_ptr(arr[min(uint(i), 3u)]);
     takes_array_ptr(arr);
     return;
@@ -70,10 +71,16 @@ void index_from_self(inout int v_3[4], uint i_5)
     return;
 }
 
+typedef int ret_ZeroValuearray4_int_[4];
+ret_ZeroValuearray4_int_ ZeroValuearray4_int_() {
+    return (int[4])0;
+}
+
 void local_var_from_arg(int a[4], uint i_6)
 {
-    int b[4] = (int[4])0;
+    int b[4];
 
+    b = ZeroValuearray4_int_();
     b = a;
     takes_ptr(b[min(uint(i_6), 3u)]);
     return;
@@ -86,15 +93,40 @@ void let_binding(inout int a_1[4], uint i_7)
     return;
 }
 
+typedef int2 ret_ZeroValuearray4_int2_[4];
+ret_ZeroValuearray4_int2_ ZeroValuearray4_int2_() {
+    return (int2[4])0;
+}
+
+typedef float2x2 ret_ZeroValuearray4_float2x2_[4];
+ret_ZeroValuearray4_float2x2_ ZeroValuearray4_float2x2_() {
+    return (float2x2[4])0;
+}
+
+typedef int ret_ZeroValuearray4_array4_int__[4][4];
+ret_ZeroValuearray4_array4_int__ ZeroValuearray4_array4_int__() {
+    return (int[4][4])0;
+}
+
+typedef int ret_ZeroValuearray4_array4_array4_int___[4][4][4];
+ret_ZeroValuearray4_array4_array4_int___ ZeroValuearray4_array4_array4_int___() {
+    return (int[4][4][4])0;
+}
+
 [numthreads(1, 1, 1)]
 void main()
 {
-    int2 vec[4] = (int2[4])0;
-    float2x2 mat[4] = (float2x2[4])0;
-    int arr1d[4] = (int[4])0;
-    int arr2d[4][4] = (int[4][4])0;
-    int arr3d[4][4][4] = (int[4][4][4])0;
+    int2 vec[4];
+    float2x2 mat[4];
+    int arr1d[4];
+    int arr2d[4][4];
+    int arr3d[4][4][4];
 
+    vec = ZeroValuearray4_int2_();
+    mat = ZeroValuearray4_float2x2_();
+    arr1d = ZeroValuearray4_int_();
+    arr2d = ZeroValuearray4_array4_int__();
+    arr3d = ZeroValuearray4_array4_array4_int___();
     local_var(1u);
     mat_vec_ptrs(vec, mat, 1u);
     argument(arr1d, 1u);

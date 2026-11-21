@@ -3,18 +3,25 @@ struct Output {
 };
 
 RWByteAddressBuffer global : register(u0);
-static uint gl_SubgroupInvocationID_1 = (uint)0;
-static uint gl_SubgroupSize_1 = (uint)0;
+static uint gl_SubgroupInvocationID_1;
+static uint gl_SubgroupSize_1;
 
 struct ComputeInput_main {
 };
 
+uint4 ZeroValueuint4() {
+    return (uint4)0;
+}
+
 void main_1()
 {
-    uint4 mask = (uint4)0;
-    uint lsb = (uint)0;
-    uint msb = (uint)0;
+    uint4 mask;
+    uint lsb;
+    uint msb;
 
+    mask = ZeroValueuint4();
+    lsb = 0u;
+    msb = 0u;
     uint _e4 = gl_SubgroupInvocationID_1;
     uint _e5 = gl_SubgroupSize_1;
     mask = uint4(_e4, _e5, 3u, 4u);
@@ -43,6 +50,8 @@ void main(ComputeInput_main computeinput_main)
 {
     uint gl_SubgroupInvocationID = WaveGetLaneIndex();
     uint gl_SubgroupSize = WaveGetLaneCount();
+    gl_SubgroupInvocationID_1 = 0u;
+    gl_SubgroupSize_1 = 0u;
     gl_SubgroupInvocationID_1 = gl_SubgroupInvocationID;
     gl_SubgroupSize_1 = gl_SubgroupSize;
     main_1();

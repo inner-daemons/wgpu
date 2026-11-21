@@ -34,10 +34,11 @@ RayDesc_ ConstructRayDesc_(uint arg0, uint arg1, float arg2, float arg3, float3 
 [numthreads(1, 1, 1)]
 void main()
 {
-    uint i = 0u;
+    uint i;
     RayQuery<RAY_FLAG_NONE> sq;
     uint naga_query_init_tracker_for_sq = 0;
 
+    i = 0u;
     uint2 loop_bound = uint2(4294967295u, 4294967295u);
     bool loop_init = true;
     while(true) {

@@ -44,8 +44,9 @@ cbuffer u_sasm : register(b1, space3) { StructWithArrayOfStructOfMat u_sasm; }
 
 void access_m()
 {
-    int idx = int(1);
+    int idx;
 
+    idx = int(1);
     int _e3 = idx;
     idx = asint(asuint(_e3) - asuint(int(1)));
     half4x2 l_s_m = half4x2(s_m.Load<half2>(0), s_m.Load<half2>(4), s_m.Load<half2>(8), s_m.Load<half2>(12));
@@ -133,8 +134,9 @@ void SetMatScalarmOnStructWithMat(StructWithMat obj, half scalar, uint mat_idx, 
 
 void access_sm()
 {
-    int idx_1 = int(1);
+    int idx_1;
 
+    idx_1 = int(1);
     int _e3 = idx_1;
     idx_1 = asint(asuint(_e3) - asuint(int(1)));
     StructWithMat l_s_s = ConstructStructWithMat(half4x2(s_sm.Load<half2>(0+0), s_sm.Load<half2>(0+4), s_sm.Load<half2>(0+8), s_sm.Load<half2>(0+12)));
@@ -201,8 +203,9 @@ ret_Constructarray4_half4x2_ Constructarray4_half4x2_(half4x2 arg0, half4x2 arg1
 
 void access_am()
 {
-    int idx_2 = int(1);
+    int idx_2;
 
+    idx_2 = int(1);
     int _e3 = idx_2;
     idx_2 = asint(asuint(_e3) - asuint(int(1)));
     half4x2 l_s_a[4] = Constructarray4_half4x2_(half4x2(s_am.Load<half2>(0+0), s_am.Load<half2>(0+4), s_am.Load<half2>(0+8), s_am.Load<half2>(0+12)), half4x2(s_am.Load<half2>(16+0), s_am.Load<half2>(16+4), s_am.Load<half2>(16+8), s_am.Load<half2>(16+12)), half4x2(s_am.Load<half2>(32+0), s_am.Load<half2>(32+4), s_am.Load<half2>(32+8), s_am.Load<half2>(32+12)), half4x2(s_am.Load<half2>(48+0), s_am.Load<half2>(48+4), s_am.Load<half2>(48+8), s_am.Load<half2>(48+12)));
@@ -360,8 +363,9 @@ StructWithArrayOfStructOfMat ConstructStructWithArrayOfStructOfMat(StructWithMat
 
 void access_sasm()
 {
-    int idx_3 = int(1);
+    int idx_3;
 
+    idx_3 = int(1);
     int _e3 = idx_3;
     idx_3 = asint(asuint(_e3) - asuint(int(1)));
     StructWithArrayOfStructOfMat l_s_s_1 = ConstructStructWithArrayOfStructOfMat(Constructarray4_StructWithMat_(ConstructStructWithMat(half4x2(s_sasm.Load<half2>(0+0+0+0), s_sasm.Load<half2>(0+0+0+4), s_sasm.Load<half2>(0+0+0+8), s_sasm.Load<half2>(0+0+0+12))), ConstructStructWithMat(half4x2(s_sasm.Load<half2>(0+16+0+0), s_sasm.Load<half2>(0+16+0+4), s_sasm.Load<half2>(0+16+0+8), s_sasm.Load<half2>(0+16+0+12))), ConstructStructWithMat(half4x2(s_sasm.Load<half2>(0+32+0+0), s_sasm.Load<half2>(0+32+0+4), s_sasm.Load<half2>(0+32+0+8), s_sasm.Load<half2>(0+32+0+12))), ConstructStructWithMat(half4x2(s_sasm.Load<half2>(0+48+0+0), s_sasm.Load<half2>(0+48+0+4), s_sasm.Load<half2>(0+48+0+8), s_sasm.Load<half2>(0+48+0+12)))));

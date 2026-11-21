@@ -27,6 +27,14 @@ SamplerComparisonState nagaComparisonSamplerHeap[2048]: register(s0, space1);
 StructuredBuffer<uint> nagaGroup0SamplerIndexArray : register(t0, space255);
 static const SamplerState samp = nagaSamplerHeap[nagaGroup0SamplerIndexArray[0]];
 
+float4 ZeroValuefloat4() {
+    return (float4)0;
+}
+
+uint2 ZeroValueuint2() {
+    return (uint2)0;
+}
+
 float4 nagaTextureSampleBaseClampToEdge(
     Texture2D<float4> plane0,
     Texture2D<float4> plane1,
@@ -135,11 +143,15 @@ uint2 NagaExternalDimensions2D(Texture2D<float4> plane0, Texture2D<float4> plane
 
 float4 test(Texture2D<float4> t_plane0_, Texture2D<float4> t_plane1_, Texture2D<float4> t_plane2_, NagaExternalTextureParams t_params)
 {
-    float4 a = (float4)0;
-    float4 b = (float4)0;
-    float4 c = (float4)0;
-    uint2 d = (uint2)0;
+    float4 a;
+    float4 b;
+    float4 c;
+    uint2 d;
 
+    a = ZeroValuefloat4();
+    b = ZeroValuefloat4();
+    c = ZeroValuefloat4();
+    d = ZeroValueuint2();
     float4 _e4 = nagaTextureSampleBaseClampToEdge(t_plane0_, t_plane1_, t_plane2_, t_params, samp, (0.0).xx);
     a = _e4;
     float4 _e8 = nagaTextureLoadExternal(t_plane0_, t_plane1_, t_plane2_, t_params, (int(0)).xx);

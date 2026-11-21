@@ -45,9 +45,11 @@ VertexOutput ConstructVertexOutput(float4 arg0, float3 arg1) {
 
 VertexOutput_vs_main vs_main(uint vertex_index : SV_VertexID)
 {
-    int tmp1_ = (int)0;
-    int tmp2_ = (int)0;
+    int tmp1_;
+    int tmp2_;
 
+    tmp1_ = int(0);
+    tmp2_ = int(0);
     tmp1_ = naga_div(int((_NagaConstants.first_vertex + vertex_index)), int(2));
     tmp2_ = (int((_NagaConstants.first_vertex + vertex_index)) & int(1));
     int _e9 = tmp1_;

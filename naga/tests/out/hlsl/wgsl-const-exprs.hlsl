@@ -17,33 +17,45 @@ static const bool2 compare_vec = bool2(true, false);
 
 void swizzle_of_compose()
 {
-    int4 out_ = int4(int(4), int(3), int(2), int(1));
+    int4 out_;
 
+    out_ = int4(int(4), int(3), int(2), int(1));
     return;
 }
 
 void index_of_compose()
 {
-    int out_1 = int(2);
+    int out_1;
 
+    out_1 = int(2);
     return;
 }
 
 void compose_three_deep()
 {
-    int out_2 = int(6);
+    int out_2;
 
+    out_2 = int(6);
     return;
+}
+
+int4 ZeroValueint4() {
+    return (int4)0;
 }
 
 void non_constant_initializers()
 {
-    int w = int(30);
-    int x = (int)0;
-    int y = (int)0;
-    int z = int(70);
-    int4 out_3 = (int4)0;
+    int w;
+    int x;
+    int y;
+    int z;
+    int4 out_3;
 
+    w = int(30);
+    x = int(0);
+    y = int(0);
+    z = int(70);
+    out_3 = ZeroValueint4();
     int _e2 = w;
     x = _e2;
     int _e4 = x;
@@ -58,15 +70,17 @@ void non_constant_initializers()
 
 void splat_of_constant()
 {
-    int4 out_4 = int4(int(-4), int(-4), int(-4), int(-4));
+    int4 out_4;
 
+    out_4 = int4(int(-4), int(-4), int(-4), int(-4));
     return;
 }
 
 void compose_of_constant()
 {
-    int4 out_5 = int4(int(-4), int(-4), int(-4), int(-4));
+    int4 out_5;
 
+    out_5 = int4(int(-4), int(-4), int(-4), int(-4));
     return;
 }
 
@@ -90,51 +104,76 @@ uint map_texture_kind(int texture_kind)
 
 void compose_of_splat()
 {
-    float4 x_1 = float4(2.0, 1.0, 1.0, 1.0);
+    float4 x_1;
 
+    x_1 = float4(2.0, 1.0, 1.0, 1.0);
     return;
+}
+
+typedef float ret_ZeroValuearray2_float_[2];
+ret_ZeroValuearray2_float_ ZeroValuearray2_float_() {
+    return (float[2])0;
 }
 
 void test_local_const()
 {
-    float arr[2] = (float[2])0;
+    float arr[2];
 
+    arr = ZeroValuearray2_float_();
     return;
 }
 
 void compose_vector_zero_val_binop()
 {
-    int3 a = int3(int(1), int(1), int(1));
-    int3 b = int3(int(0), int(1), int(2));
-    int3 c = int3(int(1), int(0), int(2));
+    int3 a;
+    int3 b;
+    int3 c;
 
+    a = int3(int(1), int(1), int(1));
+    b = int3(int(0), int(1), int(2));
+    c = int3(int(1), int(0), int(2));
     return;
 }
 
 void relational()
 {
-    bool scalar_any_false = false;
-    bool scalar_any_true = true;
-    bool scalar_all_false = false;
-    bool scalar_all_true = true;
-    bool vec_any_false = false;
-    bool vec_any_true = true;
-    bool vec_all_false = false;
-    bool vec_all_true = true;
+    bool scalar_any_false;
+    bool scalar_any_true;
+    bool scalar_all_false;
+    bool scalar_all_true;
+    bool vec_any_false;
+    bool vec_any_true;
+    bool vec_all_false;
+    bool vec_all_true;
 
+    scalar_any_false = false;
+    scalar_any_true = true;
+    scalar_all_false = false;
+    scalar_all_true = true;
+    vec_any_false = false;
+    vec_any_true = true;
+    vec_all_false = false;
+    vec_all_true = true;
     return;
 }
 
 void packed_dot_product()
 {
-    int signed_four = int(4);
-    uint unsigned_four = 4u;
-    int signed_twelve = int(12);
-    uint unsigned_twelve = 12u;
-    int signed_seventy = int(70);
-    uint unsigned_seventy = 70u;
-    int minus_four = int(-4);
+    int signed_four;
+    uint unsigned_four;
+    int signed_twelve;
+    uint unsigned_twelve;
+    int signed_seventy;
+    uint unsigned_seventy;
+    int minus_four;
 
+    signed_four = int(4);
+    unsigned_four = 4u;
+    signed_twelve = int(12);
+    unsigned_twelve = 12u;
+    signed_seventy = int(70);
+    unsigned_seventy = 70u;
+    minus_four = int(-4);
     return;
 }
 
@@ -146,11 +185,15 @@ ret_Constructarray9_int_ Constructarray9_int_(int arg0, int arg1, int arg2, int 
 
 void abstract_access(uint i)
 {
-    float a_1 = 1.0;
-    uint b_1 = 1u;
-    int c_1 = (int)0;
-    int d = (int)0;
+    float a_1;
+    uint b_1;
+    int c_1;
+    int d;
 
+    a_1 = 1.0;
+    b_1 = 1u;
+    c_1 = int(0);
+    d = int(0);
     c_1 = Constructarray9_int_(int(1), int(2), int(3), int(4), int(5), int(6), int(7), int(8), int(9))[min(uint(i), 8u)];
     d = int4(int(1), int(2), int(3), int(4))[min(uint(i), 3u)];
     return;

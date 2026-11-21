@@ -44,12 +44,16 @@ struct LayoutTest {
 
 static const half constant_variable = 15.203125h;
 
-static half private_variable = 1.0h;
+static half private_variable;
 cbuffer input_uniform : register(b0) { UniformCompatible input_uniform; }
 ByteAddressBuffer input_storage : register(t1);
 ByteAddressBuffer input_arrays : register(t2);
 RWByteAddressBuffer output : register(u3);
 RWByteAddressBuffer output_arrays : register(u4);
+
+LayoutTest ZeroValueLayoutTest() {
+    return (LayoutTest)0;
+}
 
 half2x2 GetMatval_mat2x2_OnUniformCompatible(UniformCompatible obj) {
     return half2x2(obj.val_mat2x2__0, obj.val_mat2x2__1);
@@ -137,9 +141,11 @@ ret_Constructarray2_half_ Constructarray2_half_(half arg0, half arg1) {
 
 half f16_function(half x)
 {
-    LayoutTest l = (LayoutTest)0;
-    half val = 15.203125h;
+    LayoutTest l;
+    half val;
 
+    l = ZeroValueLayoutTest();
+    val = 15.203125h;
     half phony = private_variable;
     half _e5 = val;
     val = (_e5 + -33344.0h);
@@ -353,6 +359,7 @@ half f16_function(half x)
 [numthreads(1, 1, 1)]
 void main()
 {
+    private_variable = 1.0h;
     const half _e3 = f16_function(2.0h);
     output.Store(40, _e3);
     return;

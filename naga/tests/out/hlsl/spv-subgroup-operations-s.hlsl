@@ -1,7 +1,7 @@
-static uint global = (uint)0;
-static uint global_1 = (uint)0;
-static uint global_2 = (uint)0;
-static uint global_3 = (uint)0;
+static uint global;
+static uint global_1;
+static uint global_2;
+static uint global_3;
 
 struct ComputeInput_main {
     uint local_invocation_index : SV_GroupIndex;
@@ -42,6 +42,10 @@ void main(ComputeInput_main computeinput_main)
     uint param_1 = computeinput_main.local_invocation_index / WaveGetLaneCount();
     uint param_2 = WaveGetLaneCount();
     uint param_3 = WaveGetLaneIndex();
+    global = 0u;
+    global_1 = 0u;
+    global_2 = 0u;
+    global_3 = 0u;
     global = param;
     global_1 = param_1;
     global_2 = param_2;

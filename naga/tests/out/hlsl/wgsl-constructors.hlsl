@@ -78,8 +78,9 @@ float2x3 ZeroValuefloat2x3() {
 [numthreads(1, 1, 1)]
 void main()
 {
-    Foo foo = (Foo)0;
+    Foo foo;
 
+    foo = ZeroValueFoo();
     foo = ConstructFoo((1.0).xxxx, int(1));
     float2x2 m0_ = float2x2(float2(1.0, 0.0), float2(0.0, 1.0));
     float4x4 m1_ = float4x4(float4(1.0, 0.0, 0.0, 0.0), float4(0.0, 1.0, 0.0, 0.0), float4(0.0, 0.0, 1.0, 0.0), float4(0.0, 0.0, 0.0, 1.0));

@@ -1,11 +1,14 @@
-static float a = (float)0;
+static float a;
 
 void main_1()
 {
-    float b = (float)0;
-    float c = (float)0;
-    float d = (float)0;
+    float b;
+    float c;
+    float d;
 
+    b = 0.0;
+    c = 0.0;
+    d = 0.0;
     float _e4 = a;
     b = log(_e4 + sqrt(_e4 * _e4 + 1.0));
     float _e6 = a;
@@ -17,5 +20,6 @@ void main_1()
 
 void main()
 {
+    a = 0.0;
     main_1();
 }

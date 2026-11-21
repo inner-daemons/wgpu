@@ -46,6 +46,38 @@ groupshared uint3 vector_;
 groupshared float2x3 matrix_;
 RWByteAddressBuffer output : register(u0);
 
+uint naga_div(uint lhs, uint rhs) {
+    return lhs / (rhs == 0u ? 1u : rhs);
+}
+
+uint naga_mod(uint lhs, uint rhs) {
+    return lhs % (rhs == 0u ? 1u : rhs);
+}
+
+float4 ZeroValuefloat4() {
+    return (float4)0;
+}
+
+float3x2 ZeroValuefloat3x2() {
+    return (float3x2)0;
+}
+
+float2x2 ZeroValuefloat2x2() {
+    return (float2x2)0;
+}
+
+Tagged ZeroValueTagged() {
+    return (Tagged)0;
+}
+
+uint3 ZeroValueuint3() {
+    return (uint3)0;
+}
+
+float2x3 ZeroValuefloat2x3() {
+    return (float2x3)0;
+}
+
 float3x2 GetMatmatrix_OnInner(Inner obj) {
     return float3x2(obj.matrix__0, obj.matrix__1, obj.matrix__2);
 }
@@ -75,80 +107,101 @@ void SetMatScalarmatrix_OnInner(Inner obj, float scalar, uint mat_idx, uint vec_
 [numthreads(8, 2, 1)]
 void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
 {
-    [loop]
-    for (uint zero_flat_index_1 = zero_flat_index; zero_flat_index_1 < 45u; zero_flat_index_1 += 16u) {
-        uint zero_index = zero_flat_index_1 / 15u;
-        uint zero_index_1 = (zero_flat_index_1 / 3u) % 5u;
-        uint zero_index_2 = zero_flat_index_1 % 3u;
-        data[zero_index].values[zero_index_1][zero_index_2] = (float4)0;
+    bool local;
+    bool ok;
+    bool local_1;
+    bool local_2;
+    uint i;
+    uint j;
+    uint k;
+    uint j_1;
+    uint j_2;
+    uint i_1;
+    uint i_2;
+    uint j_3;
+    uint k_1;
+    uint j_4;
+    uint i_3;
+    bool local_3;
+    uint zero_init_index;
+
+    local = false;
+    ok = false;
+    local_1 = false;
+    local_2 = false;
+    i = 0u;
+    j = 0u;
+    k = 0u;
+    j_1 = 0u;
+    j_2 = 0u;
+    i_1 = 0u;
+    i_2 = 0u;
+    j_3 = 0u;
+    k_1 = 0u;
+    j_4 = 0u;
+    i_3 = 0u;
+    local_3 = false;
+    zero_init_index = zero_flat_index;
+    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    while(true) {
+        if (all(loop_bound == uint2(0u, 0u))) { break; }
+        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        uint _e376 = zero_init_index;
+        if ((_e376 >= 45u)) {
+            break;
+        }
+        data[min(uint(naga_div(_e376, 15u)), 2u)].values[min(uint(naga_mod(naga_div(_e376, 3u), 5u)), 4u)][min(uint(naga_mod(_e376, 3u)), 2u)] = ZeroValuefloat4();
+        zero_init_index = (_e376 + 16u);
     }
-    [loop]
-    for (uint zero_flat_index_2 = zero_flat_index; zero_flat_index_2 < 57u; zero_flat_index_2 += 16u) {
-        uint zero_index = zero_flat_index_2 / 19u;
-        uint zero_index_3 = zero_flat_index_2 % 19u;
-        data[zero_index].atoms[zero_index_3] = (uint)0;
+    zero_init_index = zero_flat_index;
+    uint2 loop_bound_1 = uint2(4294967295u, 4294967295u);
+    while(true) {
+        if (all(loop_bound_1 == uint2(0u, 0u))) { break; }
+        loop_bound_1 -= uint2(loop_bound_1.y == 0u, 1u);
+        uint _e396 = zero_init_index;
+        if ((_e396 >= 57u)) {
+            break;
+        }
+        { uint dummy = 0; InterlockedExchange(data[min(uint(naga_div(_e396, 19u)), 2u)].atoms[min(uint(naga_mod(_e396, 19u)), 18u)], 0u, dummy); }
+        zero_init_index = (_e396 + 16u);
     }
-    [loop]
-    for (uint zero_flat_index_3 = zero_flat_index; zero_flat_index_3 < 3u; zero_flat_index_3 += 16u) {
-        uint zero_index = zero_flat_index_3;
-        data[zero_index].matrix__0 = (float2)0;
+    if ((zero_flat_index < 3u)) {
+        SetMatmatrix_OnInner(data[min(uint(zero_flat_index), 2u)], ZeroValuefloat3x2());
     }
-    [loop]
-    for (uint zero_flat_index_4 = zero_flat_index; zero_flat_index_4 < 3u; zero_flat_index_4 += 16u) {
-        uint zero_index = zero_flat_index_4;
-        data[zero_index].matrix__1 = (float2)0;
+    if ((zero_flat_index < 9u)) {
+        data[min(uint(naga_div(zero_flat_index, 3u)), 2u)].matrices[min(uint(naga_mod(zero_flat_index, 3u)), 2u)] = (__mat2x2_f32)ZeroValuefloat2x2();
     }
-    [loop]
-    for (uint zero_flat_index_5 = zero_flat_index; zero_flat_index_5 < 3u; zero_flat_index_5 += 16u) {
-        uint zero_index = zero_flat_index_5;
-        data[zero_index].matrix__2 = (float2)0;
+    zero_init_index = zero_flat_index;
+    uint2 loop_bound_2 = uint2(4294967295u, 4294967295u);
+    while(true) {
+        if (all(loop_bound_2 == uint2(0u, 0u))) { break; }
+        loop_bound_2 -= uint2(loop_bound_2.y == 0u, 1u);
+        uint _e428 = zero_init_index;
+        if ((_e428 >= 37u)) {
+            break;
+        }
+        dynamic[min(uint(_e428), 36u)] = 0u;
+        zero_init_index = (_e428 + 16u);
     }
-    [loop]
-    for (uint zero_flat_index_6 = zero_flat_index; zero_flat_index_6 < 9u; zero_flat_index_6 += 16u) {
-        uint zero_index = zero_flat_index_6 / 3u;
-        uint zero_index_4 = zero_flat_index_6 % 3u;
-        data[zero_index].matrices[zero_index_4] = (__mat2x2_f32)0;
+    zero_init_index = zero_flat_index;
+    uint2 loop_bound_3 = uint2(4294967295u, 4294967295u);
+    while(true) {
+        if (all(loop_bound_3 == uint2(0u, 0u))) { break; }
+        loop_bound_3 -= uint2(loop_bound_3.y == 0u, 1u);
+        uint _e437 = zero_init_index;
+        if ((_e437 >= 37u)) {
+            break;
+        }
+        floats[min(uint(_e437), 36u)] = 0.0;
+        zero_init_index = (_e437 + 16u);
     }
-    [loop]
-    for (uint zero_flat_index_7 = zero_flat_index; zero_flat_index_7 < 37u; zero_flat_index_7 += 16u) {
-        uint zero_index_5 = zero_flat_index_7;
-        dynamic[zero_index_5] = (uint)0;
-    }
-    [loop]
-    for (uint zero_flat_index_8 = zero_flat_index; zero_flat_index_8 < 37u; zero_flat_index_8 += 16u) {
-        uint zero_index_6 = zero_flat_index_8;
-        floats[zero_index_6] = (float)0;
-    }
-    if (zero_flat_index == 0) {
-        tagged.matrix_ = (float2x2)0;
-    }
-    if (zero_flat_index == 0) {
-        scalar = (uint)0;
-    }
-    if (zero_flat_index == 0) {
-        vector_ = (uint3)0;
-    }
-    if (zero_flat_index == 0) {
-        matrix_ = (float2x3)0;
+    if ((zero_flat_index == 0u)) {
+        tagged = ZeroValueTagged();
+        scalar = 0u;
+        vector_ = ZeroValueuint3();
+        matrix_ = ZeroValuefloat2x3();
     }
     GroupMemoryBarrierWithGroupSync();
-    bool local = (bool)0;
-    bool ok = (bool)0;
-    bool local_1 = (bool)0;
-    bool local_2 = (bool)0;
-    uint i = 0u;
-    uint j = (uint)0;
-    uint k = (uint)0;
-    uint j_1 = (uint)0;
-    uint j_2 = (uint)0;
-    uint i_1 = 0u;
-    uint i_2 = 0u;
-    uint j_3 = (uint)0;
-    uint k_1 = (uint)0;
-    uint j_4 = (uint)0;
-    uint i_3 = 0u;
-    bool local_3 = (bool)0;
-
     uint _e3 = scalar;
     if ((_e3 == 0u)) {
         uint3 _e9 = vector_;
@@ -178,11 +231,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
     }
     bool _e57 = local_2;
     ok = (_e37 & _e57);
-    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    uint2 loop_bound_4 = uint2(4294967295u, 4294967295u);
     bool loop_init = true;
     while(true) {
-        if (all(loop_bound == uint2(0u, 0u))) { break; }
-        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        if (all(loop_bound_4 == uint2(0u, 0u))) { break; }
+        loop_bound_4 -= uint2(loop_bound_4.y == 0u, 1u);
         if (!loop_init) {
             uint _e164 = i;
             i = (_e164 + 1u);
@@ -195,11 +248,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
         }
         {
             j = 0u;
-            uint2 loop_bound_1 = uint2(4294967295u, 4294967295u);
+            uint2 loop_bound_5 = uint2(4294967295u, 4294967295u);
             bool loop_init_1 = true;
             while(true) {
-                if (all(loop_bound_1 == uint2(0u, 0u))) { break; }
-                loop_bound_1 -= uint2(loop_bound_1.y == 0u, 1u);
+                if (all(loop_bound_5 == uint2(0u, 0u))) { break; }
+                loop_bound_5 -= uint2(loop_bound_5.y == 0u, 1u);
                 if (!loop_init_1) {
                     uint _e93 = j;
                     j = (_e93 + 1u);
@@ -212,11 +265,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                 }
                 {
                     k = 0u;
-                    uint2 loop_bound_2 = uint2(4294967295u, 4294967295u);
+                    uint2 loop_bound_6 = uint2(4294967295u, 4294967295u);
                     bool loop_init_2 = true;
                     while(true) {
-                        if (all(loop_bound_2 == uint2(0u, 0u))) { break; }
-                        loop_bound_2 -= uint2(loop_bound_2.y == 0u, 1u);
+                        if (all(loop_bound_6 == uint2(0u, 0u))) { break; }
+                        loop_bound_6 -= uint2(loop_bound_6.y == 0u, 1u);
                         if (!loop_init_2) {
                             uint _e90 = k;
                             k = (_e90 + 1u);
@@ -239,11 +292,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                 }
             }
             j_1 = 0u;
-            uint2 loop_bound_3 = uint2(4294967295u, 4294967295u);
+            uint2 loop_bound_7 = uint2(4294967295u, 4294967295u);
             bool loop_init_3 = true;
             while(true) {
-                if (all(loop_bound_3 == uint2(0u, 0u))) { break; }
-                loop_bound_3 -= uint2(loop_bound_3.y == 0u, 1u);
+                if (all(loop_bound_7 == uint2(0u, 0u))) { break; }
+                loop_bound_7 -= uint2(loop_bound_7.y == 0u, 1u);
                 if (!loop_init_3) {
                     uint _e112 = j_1;
                     j_1 = (_e112 + 1u);
@@ -263,11 +316,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                 }
             }
             j_2 = 0u;
-            uint2 loop_bound_4 = uint2(4294967295u, 4294967295u);
+            uint2 loop_bound_8 = uint2(4294967295u, 4294967295u);
             bool loop_init_4 = true;
             while(true) {
-                if (all(loop_bound_4 == uint2(0u, 0u))) { break; }
-                loop_bound_4 -= uint2(loop_bound_4.y == 0u, 1u);
+                if (all(loop_bound_8 == uint2(0u, 0u))) { break; }
+                loop_bound_8 -= uint2(loop_bound_8.y == 0u, 1u);
                 if (!loop_init_4) {
                     uint _e161 = j_2;
                     j_2 = (_e161 + 1u);
@@ -298,11 +351,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
             }
         }
     }
-    uint2 loop_bound_5 = uint2(4294967295u, 4294967295u);
+    uint2 loop_bound_9 = uint2(4294967295u, 4294967295u);
     bool loop_init_5 = true;
     while(true) {
-        if (all(loop_bound_5 == uint2(0u, 0u))) { break; }
-        loop_bound_5 -= uint2(loop_bound_5.y == 0u, 1u);
+        if (all(loop_bound_9 == uint2(0u, 0u))) { break; }
+        loop_bound_9 -= uint2(loop_bound_9.y == 0u, 1u);
         if (!loop_init_5) {
             uint _e188 = i_1;
             i_1 = (_e188 + 1u);
@@ -329,11 +382,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
         scalar = 42u;
         vector_ = (42u).xxx;
         matrix_ = float2x3((42.0).xxx, (42.0).xxx);
-        uint2 loop_bound_6 = uint2(4294967295u, 4294967295u);
+        uint2 loop_bound_10 = uint2(4294967295u, 4294967295u);
         bool loop_init_6 = true;
         while(true) {
-            if (all(loop_bound_6 == uint2(0u, 0u))) { break; }
-            loop_bound_6 -= uint2(loop_bound_6.y == 0u, 1u);
+            if (all(loop_bound_10 == uint2(0u, 0u))) { break; }
+            loop_bound_10 -= uint2(loop_bound_10.y == 0u, 1u);
             if (!loop_init_6) {
                 uint _e250 = i_2;
                 i_2 = (_e250 + 1u);
@@ -346,11 +399,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
             }
             {
                 j_3 = 0u;
-                uint2 loop_bound_7 = uint2(4294967295u, 4294967295u);
+                uint2 loop_bound_11 = uint2(4294967295u, 4294967295u);
                 bool loop_init_7 = true;
                 while(true) {
-                    if (all(loop_bound_7 == uint2(0u, 0u))) { break; }
-                    loop_bound_7 -= uint2(loop_bound_7.y == 0u, 1u);
+                    if (all(loop_bound_11 == uint2(0u, 0u))) { break; }
+                    loop_bound_11 -= uint2(loop_bound_11.y == 0u, 1u);
                     if (!loop_init_7) {
                         uint _e232 = j_3;
                         j_3 = (_e232 + 1u);
@@ -363,11 +416,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                     }
                     {
                         k_1 = 0u;
-                        uint2 loop_bound_8 = uint2(4294967295u, 4294967295u);
+                        uint2 loop_bound_12 = uint2(4294967295u, 4294967295u);
                         bool loop_init_8 = true;
                         while(true) {
-                            if (all(loop_bound_8 == uint2(0u, 0u))) { break; }
-                            loop_bound_8 -= uint2(loop_bound_8.y == 0u, 1u);
+                            if (all(loop_bound_12 == uint2(0u, 0u))) { break; }
+                            loop_bound_12 -= uint2(loop_bound_12.y == 0u, 1u);
                             if (!loop_init_8) {
                                 uint _e229 = k_1;
                                 k_1 = (_e229 + 1u);
@@ -388,11 +441,11 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                     }
                 }
                 j_4 = 0u;
-                uint2 loop_bound_9 = uint2(4294967295u, 4294967295u);
+                uint2 loop_bound_13 = uint2(4294967295u, 4294967295u);
                 bool loop_init_9 = true;
                 while(true) {
-                    if (all(loop_bound_9 == uint2(0u, 0u))) { break; }
-                    loop_bound_9 -= uint2(loop_bound_9.y == 0u, 1u);
+                    if (all(loop_bound_13 == uint2(0u, 0u))) { break; }
+                    loop_bound_13 -= uint2(loop_bound_13.y == 0u, 1u);
                     if (!loop_init_9) {
                         uint _e247 = j_4;
                         j_4 = (_e247 + 1u);
@@ -406,16 +459,16 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
                     {
                         uint _e240 = i_2;
                         uint _e243 = j_4;
-                        { uint dummy = 0; InterlockedExchange(data[min(uint(_e240), 2u)].atoms[min(uint(_e243), 18u)], 42u, dummy); }
+                        { uint dummy_1 = 0; InterlockedExchange(data[min(uint(_e240), 2u)].atoms[min(uint(_e243), 18u)], 42u, dummy_1); }
                     }
                 }
             }
         }
-        uint2 loop_bound_10 = uint2(4294967295u, 4294967295u);
+        uint2 loop_bound_14 = uint2(4294967295u, 4294967295u);
         bool loop_init_10 = true;
         while(true) {
-            if (all(loop_bound_10 == uint2(0u, 0u))) { break; }
-            loop_bound_10 -= uint2(loop_bound_10.y == 0u, 1u);
+            if (all(loop_bound_14 == uint2(0u, 0u))) { break; }
+            loop_bound_14 -= uint2(loop_bound_14.y == 0u, 1u);
             if (!loop_init_10) {
                 uint _e266 = i_3;
                 i_3 = (_e266 + 1u);
@@ -455,23 +508,23 @@ void main(uint zero_flat_index : SV_GroupIndex, uint3 group : SV_GroupID)
     uint _e310; InterlockedOr(data[2].atoms[18], 0, _e310);
     ok = (_e305 & (_e310 == 42u));
     bool _e314 = ok;
-    uint _e321 = dynamic[36u];
-    ok = (_e314 & (_e321 == 42u));
-    bool _e325 = ok;
-    float _e332 = floats[36u];
-    ok = (_e325 & (_e332 == 42.0));
+    uint _e318 = dynamic[36u];
+    ok = (_e314 & (_e318 == 42u));
+    bool _e322 = ok;
+    float _e326 = floats[36u];
+    ok = (_e322 & (_e326 == 42.0));
     uint index = (((group.x * width) * height) + zero_flat_index);
-    uint _e344 = asuint(output.Load(index*4));
-    bool _e347 = ok;
-    output.Store(index*4, asuint((_e344 | (_e347 ? 2u : 1u))));
+    uint _e338 = asuint(output.Load(index*4));
+    bool _e341 = ok;
+    output.Store(index*4, asuint((_e338 | (_e341 ? 2u : 1u))));
     return;
 }
 
 [numthreads(1, 1, 1)]
 void single(uint local_invocation_index : SV_GroupIndex)
 {
-    if (local_invocation_index == 0) {
-        scalar = (uint)0;
+    if ((local_invocation_index == 0u)) {
+        scalar = 0u;
     }
     GroupMemoryBarrierWithGroupSync();
     uint _e3 = scalar;

@@ -18,8 +18,9 @@ cbuffer u_sasm : register(b1, space3) { StructWithArrayOfStructOfMat u_sasm; }
 
 void access_m()
 {
-    int idx = int(1);
+    int idx;
 
+    idx = int(1);
     int _e3 = idx;
     idx = asint(asuint(_e3) - asuint(int(1)));
     float3x3 l_s_m = float3x3(asfloat(s_m.Load3(0)), asfloat(s_m.Load3(16)), asfloat(s_m.Load3(32)));
@@ -74,8 +75,9 @@ StructWithMat ConstructStructWithMat(float3x3 arg0) {
 
 void access_sm()
 {
-    int idx_1 = int(1);
+    int idx_1;
 
+    idx_1 = int(1);
     int _e3 = idx_1;
     idx_1 = asint(asuint(_e3) - asuint(int(1)));
     StructWithMat l_s_s = ConstructStructWithMat(float3x3(asfloat(s_sm.Load3(0+0)), asfloat(s_sm.Load3(0+16)), asfloat(s_sm.Load3(0+32))));
@@ -141,8 +143,9 @@ ret_Constructarray4_float3x3_ Constructarray4_float3x3_(float3x3 arg0, float3x3 
 
 void access_am()
 {
-    int idx_2 = int(1);
+    int idx_2;
 
+    idx_2 = int(1);
     int _e3 = idx_2;
     idx_2 = asint(asuint(_e3) - asuint(int(1)));
     float3x3 l_s_a[4] = Constructarray4_float3x3_(float3x3(asfloat(s_am.Load3(0+0)), asfloat(s_am.Load3(0+16)), asfloat(s_am.Load3(0+32))), float3x3(asfloat(s_am.Load3(48+0)), asfloat(s_am.Load3(48+16)), asfloat(s_am.Load3(48+32))), float3x3(asfloat(s_am.Load3(96+0)), asfloat(s_am.Load3(96+16)), asfloat(s_am.Load3(96+32))), float3x3(asfloat(s_am.Load3(144+0)), asfloat(s_am.Load3(144+16)), asfloat(s_am.Load3(144+32))));
@@ -294,8 +297,9 @@ StructWithArrayOfStructOfMat ConstructStructWithArrayOfStructOfMat(StructWithMat
 
 void access_sasm()
 {
-    int idx_3 = int(1);
+    int idx_3;
 
+    idx_3 = int(1);
     int _e3 = idx_3;
     idx_3 = asint(asuint(_e3) - asuint(int(1)));
     StructWithArrayOfStructOfMat l_s_s_1 = ConstructStructWithArrayOfStructOfMat(Constructarray4_StructWithMat_(ConstructStructWithMat(float3x3(asfloat(s_sasm.Load3(0+0+0+0)), asfloat(s_sasm.Load3(0+0+0+16)), asfloat(s_sasm.Load3(0+0+0+32)))), ConstructStructWithMat(float3x3(asfloat(s_sasm.Load3(0+48+0+0)), asfloat(s_sasm.Load3(0+48+0+16)), asfloat(s_sasm.Load3(0+48+0+32)))), ConstructStructWithMat(float3x3(asfloat(s_sasm.Load3(0+96+0+0)), asfloat(s_sasm.Load3(0+96+0+16)), asfloat(s_sasm.Load3(0+96+0+32)))), ConstructStructWithMat(float3x3(asfloat(s_sasm.Load3(0+144+0+0)), asfloat(s_sasm.Load3(0+144+0+16)), asfloat(s_sasm.Load3(0+144+0+32))))));

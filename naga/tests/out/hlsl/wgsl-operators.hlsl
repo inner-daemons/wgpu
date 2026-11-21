@@ -36,16 +36,17 @@ float4 splat(float m, int n)
 
 float2 splat_assignment()
 {
-    float2 a = (2.0).xx;
+    float2 a;
 
-    float2 _e3 = a;
-    a = (_e3 + (1.0).xx);
-    float2 _e7 = a;
-    a = (_e7 - (3.0).xx);
-    float2 _e11 = a;
-    a = (_e11 / (4.0).xx);
-    float2 _e15 = a;
-    return _e15;
+    a = (2.0).xx;
+    float2 _e1 = a;
+    a = (_e1 + (1.0).xx);
+    float2 _e5 = a;
+    a = (_e5 - (3.0).xx);
+    float2 _e9 = a;
+    a = (_e9 / (4.0).xx);
+    float2 _e13 = a;
+    return _e13;
 }
 
 float3 bool_cast(float3 x)
@@ -76,14 +77,21 @@ bool s()
 
 void logical()
 {
-    bool local = (bool)0;
-    bool local_1 = (bool)0;
-    bool local_2 = (bool)0;
-    bool local_3 = (bool)0;
-    bool local_4 = (bool)0;
-    bool local_5 = (bool)0;
-    bool local_6 = (bool)0;
+    bool local;
+    bool local_1;
+    bool local_2;
+    bool local_3;
+    bool local_4;
+    bool local_5;
+    bool local_6;
 
+    local = false;
+    local_1 = false;
+    local_2 = false;
+    local_3 = false;
+    local_4 = false;
+    local_5 = false;
+    local_6 = false;
     bool neg0_ = !(true);
     bool2 neg1_ = !((true).xx);
     if (!(true)) {
@@ -209,9 +217,11 @@ float4x3 ZeroValuefloat4x3() {
 
 void arithmetic()
 {
-    int prevent_const_eval = (int)0;
-    int wgpu_7437_ = (int)0;
+    int prevent_const_eval;
+    int wgpu_7437_;
 
+    prevent_const_eval = int(0);
+    wgpu_7437_ = int(0);
     float neg0_1 = -(1.0);
     int2 neg1_1 = naga_neg((int(1)).xx);
     float2 neg2_ = -((1.0).xx);
@@ -365,9 +375,11 @@ int3 ZeroValueint3() {
 
 void assignment()
 {
-    int a_1 = (int)0;
-    int3 vec0_ = ZeroValueint3();
+    int a_1;
+    int3 vec0_;
 
+    a_1 = int(0);
+    vec0_ = ZeroValueint3();
     a_1 = int(1);
     int _e5 = a_1;
     a_1 = asint(asuint(_e5) + asuint(int(1)));

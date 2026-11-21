@@ -36,6 +36,10 @@ float4 no_padding_vert(NoPadding input_1) : SV_Position
     return (0.0).xxxx;
 }
 
+NoPadding ZeroValueNoPadding() {
+    return (NoPadding)0;
+}
+
 NoPadding ConstructNoPadding(float3 arg0, float arg1) {
     NoPadding ret = (NoPadding)0;
     ret.v3_ = arg0;
@@ -46,8 +50,9 @@ NoPadding ConstructNoPadding(float3 arg0, float arg1) {
 [numthreads(16, 1, 1)]
 void no_padding_comp()
 {
-    NoPadding x = (NoPadding)0;
+    NoPadding x;
 
+    x = ZeroValueNoPadding();
     NoPadding _e2 = no_padding_uniform;
     x = _e2;
     NoPadding _e4 = ConstructNoPadding(asfloat(no_padding_storage.Load3(0)), asfloat(no_padding_storage.Load(12)));
@@ -66,6 +71,10 @@ float4 needs_padding_vert(NeedsPadding input_3) : SV_Position
     return (0.0).xxxx;
 }
 
+NeedsPadding ZeroValueNeedsPadding() {
+    return (NeedsPadding)0;
+}
+
 NeedsPadding ConstructNeedsPadding(float arg0, float3 arg1, float arg2) {
     NeedsPadding ret = (NeedsPadding)0;
     ret.f3_forces_padding = arg0;
@@ -77,8 +86,9 @@ NeedsPadding ConstructNeedsPadding(float arg0, float3 arg1, float arg2) {
 [numthreads(16, 1, 1)]
 void needs_padding_comp()
 {
-    NeedsPadding x_1 = (NeedsPadding)0;
+    NeedsPadding x_1;
 
+    x_1 = ZeroValueNeedsPadding();
     NeedsPadding _e2 = needs_padding_uniform;
     x_1 = _e2;
     NeedsPadding _e4 = ConstructNeedsPadding(asfloat(needs_padding_storage.Load(0)), asfloat(needs_padding_storage.Load3(16)), asfloat(needs_padding_storage.Load(28)));

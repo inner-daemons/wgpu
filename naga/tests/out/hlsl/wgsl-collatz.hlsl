@@ -10,9 +10,11 @@ uint naga_div(uint lhs, uint rhs) {
 
 uint collatz_iterations(uint n_base)
 {
-    uint n = (uint)0;
-    uint i = 0u;
+    uint n;
+    uint i;
 
+    n = 0u;
+    i = 0u;
     n = n_base;
     uint2 loop_bound = uint2(4294967295u, 4294967295u);
     while(true) {

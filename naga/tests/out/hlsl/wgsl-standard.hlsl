@@ -7,13 +7,20 @@ bool test_any_and_all_for_bool()
     return true;
 }
 
+float4 ZeroValuefloat4() {
+    return (float4)0;
+}
+
 float4 derivatives(FragmentInput_derivatives fragmentinput_derivatives) : SV_Target0
 {
     float4 foo = float4(fragmentinput_derivatives.foo_1.xyz, 1.0 / fragmentinput_derivatives.foo_1.w);
-    float4 x = (float4)0;
-    float4 y = (float4)0;
-    float4 z = (float4)0;
+    float4 x;
+    float4 y;
+    float4 z;
 
+    x = ZeroValuefloat4();
+    y = ZeroValuefloat4();
+    z = ZeroValuefloat4();
     float4 _e1 = ddx_coarse(foo);
     x = _e1;
     float4 _e3 = ddy_coarse(foo);

@@ -16,10 +16,15 @@ struct FragmentOutputVec2Scalar {
     uint scalaru : SV_Target5;
 };
 
+FragmentOutputVec4Vec3_ ZeroValueFragmentOutputVec4Vec3_() {
+    return (FragmentOutputVec4Vec3_)0;
+}
+
 FragmentOutputVec4Vec3_ main_vec4vec3_()
 {
-    FragmentOutputVec4Vec3_ output = (FragmentOutputVec4Vec3_)0;
+    FragmentOutputVec4Vec3_ output;
 
+    output = ZeroValueFragmentOutputVec4Vec3_();
     output.vec4f = (0.0).xxxx;
     output.vec4i = (int(0)).xxxx;
     output.vec4u = (0u).xxxx;
@@ -31,10 +36,15 @@ FragmentOutputVec4Vec3_ main_vec4vec3_()
     return fragmentoutputvec4vec3_;
 }
 
+FragmentOutputVec2Scalar ZeroValueFragmentOutputVec2Scalar() {
+    return (FragmentOutputVec2Scalar)0;
+}
+
 FragmentOutputVec2Scalar main_vec2scalar()
 {
-    FragmentOutputVec2Scalar output_1 = (FragmentOutputVec2Scalar)0;
+    FragmentOutputVec2Scalar output_1;
 
+    output_1 = ZeroValueFragmentOutputVec2Scalar();
     output_1.vec2f = (0.0).xx;
     output_1.vec2i = (int(0)).xx;
     output_1.vec2u = (0u).xx;

@@ -258,6 +258,10 @@ float4 levels_queries() : SV_Position
     return (float(sum_1)).xxxx;
 }
 
+float4 ZeroValuefloat4() {
+    return (float4)0;
+}
+
 float4 nagaTextureSampleBaseClampToEdge(Texture2D<float4> tex, SamplerState samp, float2 coords) {
     float2 size;
     tex.GetDimensions(size.x, size.y);
@@ -267,8 +271,9 @@ float4 nagaTextureSampleBaseClampToEdge(Texture2D<float4> tex, SamplerState samp
 
 float4 texture_sample() : SV_Target0
 {
-    float4 a = (float4)0;
+    float4 a;
 
+    a = ZeroValuefloat4();
     float2 _e1 = (0.5).xx;
     float3 _e3 = (0.5).xxx;
     int2 _e6 = int2(int(3), int(1));
@@ -362,8 +367,9 @@ float4 texture_sample() : SV_Target0
 
 float texture_sample_comparison() : SV_Target0
 {
-    float a_1 = (float)0;
+    float a_1;
 
+    a_1 = 0.0;
     float2 tc = (0.5).xx;
     float3 tc3_ = (0.5).xxx;
     float _e6 = a_1;

@@ -2,7 +2,7 @@ struct type_1 {
     uint member;
 };
 
-static uint global = (uint)0;
+static uint global;
 RWByteAddressBuffer global_1 : register(u0);
 
 struct ComputeInput_main {
@@ -30,6 +30,7 @@ void function()
 void main(ComputeInput_main computeinput_main)
 {
     uint param = WaveGetLaneIndex();
+    global = 0u;
     global = param;
     function();
 }

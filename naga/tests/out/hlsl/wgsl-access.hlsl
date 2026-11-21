@@ -85,15 +85,7 @@ struct Outer {
     uint thing;
 };
 
-GlobalConst ConstructGlobalConst(uint arg0, uint3 arg1, int arg2) {
-    GlobalConst ret = (GlobalConst)0;
-    ret.a = arg0;
-    ret.b = arg1;
-    ret.c = arg2;
-    return ret;
-}
-
-static GlobalConst msl_padding_global_const = ConstructGlobalConst(0u, uint3(0u, 0u, 0u), int(0));
+static GlobalConst msl_padding_global_const;
 RWByteAddressBuffer bar : register(u0);
 cbuffer baz : register(b1) { Baz baz; }
 RWByteAddressBuffer qux : register(u2);
@@ -135,9 +127,11 @@ void SetMatScalarmOnBaz(Baz obj, float scalar, uint mat_idx, uint vec_idx) {
 
 void test_matrix_within_struct_accesses()
 {
-    int idx = int(1);
-    Baz t = ConstructBaz(float3x2((1.0).xx, (2.0).xx, (3.0).xx));
+    int idx;
+    Baz t;
 
+    idx = int(1);
+    t = ConstructBaz(float3x2((1.0).xx, (2.0).xx, (3.0).xx));
     int _e3 = idx;
     idx = asint(asuint(_e3) - asuint(int(1)));
     float3x2 l0_ = GetMatmOnBaz(baz);
@@ -152,20 +146,20 @@ void test_matrix_within_struct_accesses()
     int _e36 = idx;
     int _e38 = idx;
     float l6_ = GetMatmOnBaz(baz)[_e36][_e38];
-    int _e51 = idx;
-    idx = asint(asuint(_e51) + asuint(int(1)));
+    int _e43 = idx;
+    idx = asint(asuint(_e43) + asuint(int(1)));
     SetMatmOnBaz(t, float3x2((6.0).xx, (5.0).xx, (4.0).xx));
     t.m_0 = (9.0).xx;
-    int _e66 = idx;
-    SetMatVecmOnBaz(t, (90.0).xx, _e66);
+    int _e58 = idx;
+    SetMatVecmOnBaz(t, (90.0).xx, _e58);
     t.m_0[1] = 10.0;
-    int _e76 = idx;
-    t.m_0[_e76] = 20.0;
-    int _e80 = idx;
-    SetMatScalarmOnBaz(t, 30.0, _e80, 1);
-    int _e85 = idx;
-    int _e87 = idx;
-    SetMatScalarmOnBaz(t, 40.0, _e85, _e87);
+    int _e68 = idx;
+    t.m_0[_e68] = 20.0;
+    int _e72 = idx;
+    SetMatScalarmOnBaz(t, 30.0, _e72, 1);
+    int _e77 = idx;
+    int _e79 = idx;
+    SetMatScalarmOnBaz(t, 40.0, _e77, _e79);
     return;
 }
 
@@ -182,9 +176,11 @@ ret_ZeroValuearray2_float4x2_ ZeroValuearray2_float4x2_() {
 
 void test_matrix_within_array_within_struct_accesses()
 {
-    int idx_1 = int(1);
-    MatCx2InArray t_1 = ConstructMatCx2InArray(ZeroValuearray2_float4x2_());
+    int idx_1;
+    MatCx2InArray t_1;
 
+    idx_1 = int(1);
+    t_1 = ConstructMatCx2InArray(ZeroValuearray2_float4x2_());
     int _e3 = idx_1;
     idx_1 = asint(asuint(_e3) - asuint(int(1)));
     float4x2 l0_1[2] = ((float4x2[2])nested_mat_cx2_.am);
@@ -200,21 +196,21 @@ void test_matrix_within_array_within_struct_accesses()
     int _e46 = idx_1;
     int _e48 = idx_1;
     float l7_ = __get_col_of_mat4x2_f32(nested_mat_cx2_.am[0], _e46)[_e48];
-    int _e55 = idx_1;
-    idx_1 = asint(asuint(_e55) + asuint(int(1)));
+    int _e53 = idx_1;
+    idx_1 = asint(asuint(_e53) + asuint(int(1)));
     t_1.am = (__mat4x2_f32[2])ZeroValuearray2_float4x2_();
     t_1.am[0] = (__mat4x2_f32)float4x2((8.0).xx, (7.0).xx, (6.0).xx, (5.0).xx);
     t_1.am[0]._0 = (9.0).xx;
-    int _e77 = idx_1;
-    __set_col_of_mat4x2_f32(t_1.am[0], _e77, (90.0).xx);
+    int _e75 = idx_1;
+    __set_col_of_mat4x2_f32(t_1.am[0], _e75, (90.0).xx);
     t_1.am[0]._0.y = 10.0;
-    int _e89 = idx_1;
-    t_1.am[0]._0[min(uint(_e89), 1u)] = 20.0;
-    int _e94 = idx_1;
-    __set_el_of_mat4x2_f32(t_1.am[0], _e94, 1, 30.0);
+    int _e87 = idx_1;
+    t_1.am[0]._0[min(uint(_e87), 1u)] = 20.0;
+    int _e92 = idx_1;
+    __set_el_of_mat4x2_f32(t_1.am[0], _e92, 1, 30.0);
+    int _e98 = idx_1;
     int _e100 = idx_1;
-    int _e102 = idx_1;
-    __set_el_of_mat4x2_f32(t_1.am[0], _e100, _e102, 40.0);
+    __set_el_of_mat4x2_f32(t_1.am[0], _e98, _e100, 40.0);
     return;
 }
 
@@ -249,9 +245,11 @@ void assign_array_through_ptr_fn(inout float4 foo_2[2])
 
 void assign_through_ptr()
 {
-    uint val = 33u;
-    float4 arr[2] = Constructarray2_float4_((6.0).xxxx, (7.0).xxxx);
+    uint val;
+    float4 arr[2];
 
+    val = 33u;
+    arr = Constructarray2_float4_((6.0).xxxx, (7.0).xxxx);
     assign_through_ptr_fn(val);
     assign_array_through_ptr_fn(arr);
     return;
@@ -281,11 +279,22 @@ void assign_to_arg_ptr_array_element(inout uint p_4[4])
     return;
 }
 
+AssignToMember ZeroValueAssignToMember() {
+    return (AssignToMember)0;
+}
+
+typedef uint ret_ZeroValuearray4_uint_[4];
+ret_ZeroValuearray4_uint_ ZeroValuearray4_uint_() {
+    return (uint[4])0;
+}
+
 void assign_to_ptr_components()
 {
-    AssignToMember s1_ = (AssignToMember)0;
-    uint a1_[4] = (uint[4])0;
+    AssignToMember s1_;
+    uint a1_[4];
 
+    s1_ = ZeroValueAssignToMember();
+    a1_ = ZeroValuearray4_uint_();
     assign_to_arg_ptr_member(s1_);
     const uint _e1 = fetch_arg_ptr_member(s1_);
     assign_to_arg_ptr_array_element(a1_);
@@ -299,10 +308,16 @@ ret_Constructarray1_bool_ Constructarray1_bool_(bool arg0) {
     return ret;
 }
 
+typedef bool ret_ZeroValuearray1_bool_[1];
+ret_ZeroValuearray1_bool_ ZeroValuearray1_bool_() {
+    return (bool[1])0;
+}
+
 bool index_ptr(bool value)
 {
-    bool a_1[1] = (bool[1])0;
+    bool a_1[1];
 
+    a_1 = ZeroValuearray1_bool_();
     a_1 = Constructarray1_bool_(value);
     bool _e4 = a_1[0];
     return _e4;
@@ -316,10 +331,11 @@ S ConstructS(int arg0) {
 
 int member_ptr()
 {
-    S s = ConstructS(int(42));
+    S s;
 
-    int _e4 = s.m;
-    return _e4;
+    s = ConstructS(int(42));
+    int _e2 = s.m;
+    return _e2;
 }
 
 Outer ZeroValueOuter() {
@@ -335,12 +351,19 @@ int let_members_of_members()
     return ZeroValueOuter().om_nom_nom.delicious;
 }
 
+Inner ZeroValueInner() {
+    return (Inner)0;
+}
+
 int var_members_of_members()
 {
-    Outer thing = ZeroValueOuter();
-    Inner inner = (Inner)0;
-    int delishus = (int)0;
+    Outer thing;
+    Inner inner;
+    int delishus;
 
+    thing = ZeroValueOuter();
+    inner = ZeroValueInner();
+    delishus = int(0);
     Inner _e3 = thing.om_nom_nom;
     inner = _e3;
     int _e6 = inner.delicious;
@@ -359,9 +382,22 @@ ret_Constructarray5_int_ Constructarray5_int_(int arg0, int arg1, int arg2, int 
     return ret;
 }
 
+GlobalConst ConstructGlobalConst(uint arg0, uint3 arg1, int arg2) {
+    GlobalConst ret = (GlobalConst)0;
+    ret.a = arg0;
+    ret.b = arg1;
+    ret.c = arg2;
+    return ret;
+}
+
 typedef float ret_ZeroValuearray5_array10_float__[5][10];
 ret_ZeroValuearray5_array10_float__ ZeroValuearray5_array10_float__() {
     return (float[5][10])0;
+}
+
+typedef int ret_ZeroValuearray5_int_[5];
+ret_ZeroValuearray5_int_ ZeroValuearray5_int_() {
+    return (int[5])0;
 }
 
 int naga_f2i32(float value) {
@@ -383,9 +419,12 @@ uint NagaBufferLengthRW(RWByteAddressBuffer buffer)
 
 float4 foo_vert(uint vi : SV_VertexID) : SV_Position
 {
-    float foo = 0.0;
-    int c2_[5] = (int[5])0;
+    float foo;
+    int c2_[5];
 
+    foo = 0.0;
+    c2_ = ZeroValuearray5_int_();
+    msl_padding_global_const = ConstructGlobalConst(0u, uint3(0u, 0u, 0u), int(0));
     float baz_1 = foo;
     foo = 1.0;
     GlobalConst phony = msl_padding_global_const;

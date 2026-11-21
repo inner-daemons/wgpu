@@ -46,7 +46,7 @@ struct StorageCompatible {
 
 static const uint64_t constant_variable = 20ULL;
 
-static int64_t private_variable = 1LL;
+static int64_t private_variable;
 cbuffer input_uniform : register(b0) { UniformCompatible input_uniform; }
 ByteAddressBuffer input_storage : register(t1);
 ByteAddressBuffer input_arrays : register(t2);
@@ -65,8 +65,9 @@ ret_Constructarray2_int64_t_ Constructarray2_int64_t_(int64_t arg0, int64_t arg1
 
 int64_t int64_function(int64_t x)
 {
-    int64_t val = 20LL;
+    int64_t val;
 
+    val = 20LL;
     int64_t phony = private_variable;
     int64_t _e5 = val;
     val = (_e5 + ((31LL - 1002003004005006LL) + -9223372036854775807LL));
@@ -159,8 +160,9 @@ ret_Constructarray2_uint64_t_ Constructarray2_uint64_t_(uint64_t arg0, uint64_t 
 
 uint64_t uint64_function(uint64_t x_1)
 {
-    uint64_t val_1 = 20ULL;
+    uint64_t val_1;
 
+    val_1 = 20ULL;
     uint64_t _e3 = val_1;
     val_1 = (_e3 + ((31ULL + 18446744073709551615ULL) - 18446744073709551615ULL));
     uint64_t _e10 = val_1;
@@ -238,6 +240,7 @@ uint64_t uint64_function(uint64_t x_1)
 [numthreads(1, 1, 1)]
 void main()
 {
+    private_variable = 1LL;
     const uint64_t _e3 = uint64_function(67ULL);
     const int64_t _e5 = int64_function(60LL);
     output.Store(224, (_e3 + uint64_t(_e5)));

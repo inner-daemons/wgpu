@@ -1,7 +1,8 @@
 void control_flow()
 {
-    int pos = (int)0;
+    int pos;
 
+    pos = int(0);
     DeviceMemoryBarrierWithGroupSync();
     GroupMemoryBarrierWithGroupSync();
     DeviceMemoryBarrierWithGroupSync();
@@ -261,8 +262,9 @@ void loop_switch_continue_nesting(int x_1, int y, int z)
 
 void loop_switch_omit_continue_variable_checks(int x_2, int y_1, int z_1, int w)
 {
-    int pos_1 = int(0);
+    int pos_1;
 
+    pos_1 = int(0);
     uint2 loop_bound_4 = uint2(4294967295u, 4294967295u);
     while(true) {
         if (all(loop_bound_4 == uint2(0u, 0u))) { break; }

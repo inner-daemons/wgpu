@@ -84,8 +84,9 @@ FooStruct ConstructFooStruct(float3 arg0, float arg1) {
 
 void test_msl_packed_vec3_()
 {
-    int idx = int(1);
+    int idx;
 
+    idx = int(1);
     alignment.Store3(0, asuint((1.0).xxx));
     alignment.Store(0+0, asuint(1.0));
     alignment.Store(0+0, asuint(2.0));
@@ -112,18 +113,28 @@ uint NagaBufferLength(ByteAddressBuffer buffer)
 [numthreads(1, 1, 1)]
 void main(uint local_invocation_index : SV_GroupIndex)
 {
-    [loop]
-    for (uint zero_flat_index = local_invocation_index; zero_flat_index < 10u; zero_flat_index += 1u) {
-        uint zero_index = zero_flat_index;
-        wg[zero_index] = (float)0;
+    float Foo;
+    bool at;
+    uint zero_init_index;
+
+    Foo = 1.0;
+    at = true;
+    zero_init_index = local_invocation_index;
+    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    while(true) {
+        if (all(loop_bound == uint2(0u, 0u))) { break; }
+        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        uint _e62 = zero_init_index;
+        if ((_e62 >= 10u)) {
+            break;
+        }
+        wg[min(uint(_e62), 9u)] = 0.0;
+        zero_init_index = (_e62 + 1u);
     }
-    if (local_invocation_index == 0) {
-        at_1 = (uint)0;
+    if ((local_invocation_index == 0u)) {
+        { uint dummy_1 = 0; InterlockedExchange(at_1, 0u, dummy_1); }
     }
     GroupMemoryBarrierWithGroupSync();
-    float Foo = 1.0;
-    bool at = true;
-
     test_msl_packed_vec3_();
     float4x2 _e5 = ((float4x2)global_nested_arrays_of_matrices_4x2_[0][0]);
     float4 _e10 = global_nested_arrays_of_matrices_2x4_[0][0][0];
@@ -141,6 +152,6 @@ void main(uint local_invocation_index : SV_GroupIndex)
     wg[2] = _e43;
     alignment.Store(12, asuint(4.0));
     wg[1] = float(((NagaBufferLength(dummy) - 0) / 8));
-    { uint dummy_1 = 0; InterlockedExchange(at_1, 2u, dummy_1); }
+    { uint dummy_2 = 0; InterlockedExchange(at_1, 2u, dummy_2); }
     return;
 }

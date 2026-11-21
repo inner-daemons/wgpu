@@ -8,10 +8,15 @@ struct VertexOutput_vs {
     float4 position : SV_Position;
 };
 
+OurVertexShaderOutput ZeroValueOurVertexShaderOutput() {
+    return (OurVertexShaderOutput)0;
+}
+
 VertexOutput_vs vs(float2 xy : LOC0)
 {
-    OurVertexShaderOutput vsOutput = (OurVertexShaderOutput)0;
+    OurVertexShaderOutput vsOutput;
 
+    vsOutput = ZeroValueOurVertexShaderOutput();
     vsOutput.position = float4(xy, 0.0, 1.0);
     OurVertexShaderOutput _e6 = vsOutput;
     const OurVertexShaderOutput ourvertexshaderoutput = _e6;

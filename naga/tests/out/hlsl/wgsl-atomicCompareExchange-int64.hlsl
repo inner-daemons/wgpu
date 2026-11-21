@@ -25,10 +25,13 @@ RWByteAddressBuffer arr_u64_ : register(u1);
 [numthreads(1, 1, 1)]
 void test_atomic_compare_exchange_i64_()
 {
-    uint i = 0u;
-    int64_t old = (int64_t)0;
-    bool exchanged = (bool)0;
+    uint i;
+    int64_t old;
+    bool exchanged;
 
+    i = 0u;
+    old = 0LL;
+    exchanged = false;
     uint2 loop_bound = uint2(4294967295u, 4294967295u);
     bool loop_init = true;
     while(true) {
@@ -77,10 +80,13 @@ void test_atomic_compare_exchange_i64_()
 [numthreads(1, 1, 1)]
 void test_atomic_compare_exchange_u64_()
 {
-    uint i_1 = 0u;
-    uint64_t old_1 = (uint64_t)0;
-    bool exchanged_1 = (bool)0;
+    uint i_1;
+    uint64_t old_1;
+    bool exchanged_1;
 
+    i_1 = 0u;
+    old_1 = 0ULL;
+    exchanged_1 = false;
     uint2 loop_bound_2 = uint2(4294967295u, 4294967295u);
     bool loop_init_1 = true;
     while(true) {

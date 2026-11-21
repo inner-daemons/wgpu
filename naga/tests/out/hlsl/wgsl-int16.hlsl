@@ -30,7 +30,7 @@ struct StorageCompatible {
 static const uint16_t constant_variable = uint16_t(20);
 static const int16_t f16_to_i16_clamped = int16_t(32767);
 
-static int16_t private_variable = int16_t(1);
+static int16_t private_variable;
 cbuffer input_uniform : register(b0) { UniformCompatible input_uniform; }
 ByteAddressBuffer input_storage : register(t1);
 ByteAddressBuffer input_arrays : register(t2);
@@ -39,6 +39,7 @@ RWByteAddressBuffer output_arrays : register(u4);
 groupshared uint16_t shared_val;
 
 struct ComputeInput_main {
+    uint local_invocation_index_1 : SV_GroupIndex;
 };
 
 int16_t naga_div(int16_t lhs, int16_t rhs) {
@@ -64,9 +65,11 @@ ret_Constructarray2_int16_t_ Constructarray2_int16_t_(int16_t arg0, int16_t arg1
 
 int16_t int16_function(int16_t x)
 {
-    int16_t val = int16_t(20);
-    int16_t arr[4] = Constructarray4_int16_t_(int16_t(1), int16_t(2), int16_t(3), int16_t(4));
+    int16_t val;
+    int16_t arr[4];
 
+    val = int16_t(20);
+    arr = Constructarray4_int16_t_(int16_t(1), int16_t(2), int16_t(3), int16_t(4));
     int16_t phony = private_variable;
     int16_t _e5 = val;
     val = (_e5 + int16_t(5));
@@ -144,30 +147,30 @@ int16_t int16_function(int16_t x)
     int16_t _e126 = val;
     bool cmp_ne = (_e126 != int16_t(0));
     val = (cmp_lt ? int16_t(2) : int16_t(1));
-    int16_t _e139 = val;
-    arr[0] = _e139;
-    int16_t _e141 = arr[1];
-    val = _e141;
-    int16_t _e144 = arr[uint16_t(1)];
-    val = _e144;
-    int16_t _e147 = val;
-    output.Store(0, asuint(uint(_e147)));
-    int16_t _e151 = val;
-    output.Store(4, asuint(int(_e151)));
-    int16_t _e155 = val;
-    output.Store(8, asuint(float(_e155)));
-    uint _e159 = asuint(output.Load(0));
-    val = int16_t(_e159);
-    int16_t _e161 = val;
-    uint16_t as_unsigned = uint16_t(_e161);
+    int16_t _e134 = val;
+    arr[0] = _e134;
+    int16_t _e136 = arr[1];
+    val = _e136;
+    int16_t _e139 = arr[uint16_t(1)];
+    val = _e139;
+    int16_t _e142 = val;
+    output.Store(0, asuint(uint(_e142)));
+    int16_t _e146 = val;
+    output.Store(4, asuint(int(_e146)));
+    int16_t _e150 = val;
+    output.Store(8, asuint(float(_e150)));
+    uint _e154 = asuint(output.Load(0));
+    val = int16_t(_e154);
+    int16_t _e156 = val;
+    uint16_t as_unsigned = uint16_t(_e156);
     val = int16_t(as_unsigned);
-    int16_t2 _e166 = input_uniform.val_i16_2_;
-    int16_t2 _e169 = input_uniform.val_i16_2_;
-    int16_t2 v = (_e166 + _e169);
+    int16_t2 _e161 = input_uniform.val_i16_2_;
+    int16_t2 _e164 = input_uniform.val_i16_2_;
+    int16_t2 v = (_e161 + _e164);
     int16_t2 v2_ = (v * (int16_t(2)).xx);
     output.Store(44, v2_);
-    int16_t _e176 = val;
-    return _e176;
+    int16_t _e171 = val;
+    return _e171;
 }
 
 uint16_t naga_div(uint16_t lhs, uint16_t rhs) {
@@ -186,8 +189,9 @@ ret_Constructarray2_uint16_t_ Constructarray2_uint16_t_(uint16_t arg0, uint16_t 
 
 uint16_t uint16_function(uint16_t x_1)
 {
-    uint16_t val_1 = uint16_t(20);
+    uint16_t val_1;
 
+    val_1 = uint16_t(20);
     uint16_t _e3 = val_1;
     val_1 = (_e3 + uint16_t(5));
     uint16_t _e6 = val_1;
@@ -256,16 +260,20 @@ uint16_t uint16_function(uint16_t x_1)
 }
 
 [numthreads(64, 1, 1)]
-void main(ComputeInput_main computeinput_main, uint local_invocation_index : SV_GroupIndex)
+void main(ComputeInput_main computeinput_main)
 {
-    if (local_invocation_index == 0) {
-        shared_val = (uint16_t)0;
+    uint subgroup_invocation_id = WaveGetLaneIndex();
+    uint local_invocation_index = computeinput_main.local_invocation_index_1;
+    int16_t sg_val;
+    uint16_t sg_uval;
+
+    sg_val = int16_t(0);
+    sg_uval = uint16_t(0);
+    private_variable = int16_t(1);
+    if ((local_invocation_index == 0u)) {
+        shared_val = uint16_t(0);
     }
     GroupMemoryBarrierWithGroupSync();
-    uint subgroup_invocation_id = WaveGetLaneIndex();
-    int16_t sg_val = (int16_t)0;
-    uint16_t sg_uval = (uint16_t)0;
-
     shared_val = uint16_t(0);
     const uint16_t _e6 = uint16_function(uint16_t(67));
     const int16_t _e8 = int16_function(int16_t(60));

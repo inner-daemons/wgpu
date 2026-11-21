@@ -40,10 +40,15 @@ struct FragmentInput_frag_main {
     float4 position_1 : SV_Position;
 };
 
+FragmentInput ZeroValueFragmentInput() {
+    return (FragmentInput)0;
+}
+
 VertexOutput_vert_main vert_main()
 {
-    FragmentInput out_ = (FragmentInput)0;
+    FragmentInput out_;
 
+    out_ = ZeroValueFragmentInput();
     out_.position = float4(2.0, 4.0, 5.0, 6.0);
     out_._flat = 8u;
     out_.flat_either = 10u;
