@@ -24,7 +24,8 @@ smooth sample out float _vs2fs_location10;
 smooth out float _vs2fs_location11;
 
 void main() {
-    FragmentInput out_ = FragmentInput(vec4(0.0), 0u, 0u, 0.0, vec2(0.0), vec3(0.0), vec3(0.0), vec4(0.0), 0.0, 0.0, 0.0);
+    FragmentInput out_;
+    out_ = FragmentInput(vec4(0.0), 0u, 0u, 0.0, vec2(0.0), vec3(0.0), vec3(0.0), vec4(0.0), 0.0, 0.0, 0.0);
     out_.position = vec4(2.0, 4.0, 5.0, 6.0);
     out_._flat = 8u;
     out_.flat_either = 10u;

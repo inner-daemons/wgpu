@@ -19,9 +19,12 @@ layout(std430) buffer type_3_block_0Compute { int _group_0_binding_0_cs[128]; };
 
 
 void main() {
-    uint i = 0u;
-    int old = 0;
-    bool exchanged = false;
+    uint i;
+    int old;
+    bool exchanged;
+    i = 0u;
+    old = 0;
+    exchanged = false;
     bool loop_init = true;
     while(true) {
         if (!loop_init) {

@@ -9,13 +9,13 @@
 #extension GL_KHR_shader_subgroup_quad : require
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-uint global = 0u;
+uint global;
 
-uint global_1 = 0u;
+uint global_1;
 
-uint global_2 = 0u;
+uint global_2;
 
-uint global_3 = 0u;
+uint global_3;
 
 
 void function() {
@@ -51,6 +51,10 @@ void main() {
     uint param_1 = gl_SubgroupID;
     uint param_2 = gl_SubgroupSize;
     uint param_3 = gl_SubgroupInvocationID;
+    global = 0u;
+    global_1 = 0u;
+    global_2 = 0u;
+    global_3 = 0u;
     global = param;
     global_1 = param_1;
     global_2 = param_2;

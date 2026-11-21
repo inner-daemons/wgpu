@@ -6,7 +6,8 @@ struct VertexOutput {
 out float gl_ClipDistance[1];
 
 void main() {
-    VertexOutput out_ = VertexOutput(vec4(0.0), float[1](0.0));
+    VertexOutput out_;
+    out_ = VertexOutput(vec4(0.0), float[1](0.0));
     out_.clip_distances[0] = 0.5;
     VertexOutput _e4 = out_;
     gl_Position = _e4.position;

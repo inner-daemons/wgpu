@@ -9,10 +9,14 @@ layout(std430) buffer type_2_block_1Compute { float _group_0_binding_1_cs[8]; };
 
 
 void main() {
-    uint t = 0u;
-    vec4 acc_noinit = vec4(0.0);
-    vec4 acc_init = vec4(0.0);
-    uint d = 0u;
+    uint t;
+    vec4 acc_noinit;
+    vec4 acc_init;
+    uint d;
+    t = 0u;
+    acc_noinit = vec4(0.0);
+    acc_init = vec4(0.0);
+    d = 0u;
     bool loop_init = true;
     while(true) {
         if (!loop_init) {

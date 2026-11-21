@@ -14,18 +14,23 @@ const float height = 4.6;
 const float inferred_f32_ = 2.718;
 const uint auto_conversion = 0u;
 
-float gain_x_10_ = 11.0;
+float gain_x_10_;
 
-float store_override = 0.0;
+float store_override;
 
 
 void main() {
-    float t = 23.0;
-    bool x = false;
-    float gain_x_100_ = 0.0;
+    float t;
+    bool x;
+    float gain_x_100_;
+    t = 23.0;
+    x = false;
+    gain_x_100_ = 0.0;
+    gain_x_10_ = 11.0;
+    store_override = 0.0;
     x = true;
-    float _e9 = gain_x_10_;
-    gain_x_100_ = (_e9 * 10.0);
+    float _e4 = gain_x_10_;
+    gain_x_100_ = (_e4 * 10.0);
     store_override = gain;
     return;
 }

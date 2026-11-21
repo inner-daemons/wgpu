@@ -20,8 +20,10 @@ void breakIfEmpty() {
 }
 
 void breakIfEmptyBody(bool a) {
-    bool b = false;
-    bool c = false;
+    bool b;
+    bool c;
+    b = false;
+    c = false;
     bool loop_init_1 = true;
     while(true) {
         if (!loop_init_1) {
@@ -39,8 +41,10 @@ void breakIfEmptyBody(bool a) {
 }
 
 void breakIf(bool a_1) {
-    bool d = false;
-    bool e = false;
+    bool d;
+    bool e;
+    d = false;
+    e = false;
     bool loop_init_2 = true;
     while(true) {
         if (!loop_init_2) {
@@ -58,7 +62,8 @@ void breakIf(bool a_1) {
 }
 
 void breakIfSeparateVariable() {
-    uint counter = 0u;
+    uint counter;
+    counter = 0u;
     bool loop_init_3 = true;
     while(true) {
         if (!loop_init_3) {

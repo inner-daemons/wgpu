@@ -20,7 +20,8 @@ layout(std430) buffer NeedsPadding_block_1Compute { NeedsPadding _group_0_bindin
 
 
 void main() {
-    NeedsPadding x_1 = NeedsPadding(0.0, vec3(0.0), 0.0);
+    NeedsPadding x_1;
+    x_1 = NeedsPadding(0.0, vec3(0.0), 0.0);
     NeedsPadding _e2 = _group_0_binding_2_cs;
     x_1 = _e2;
     NeedsPadding _e4 = _group_0_binding_3_cs;

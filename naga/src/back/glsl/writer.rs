@@ -41,10 +41,16 @@ impl<'a, W: Write> Writer<'a, W> {
         module: &crate::Module,
         info: &valid::ModuleInfo,
     ) -> Result<ReflectionInfo, Error> {
+        let passes = back::passes::Passes {
+            zero_init: back::passes::zero_init::Options {
+                workgroup: self.options.zero_initialize_workgroup_memory,
+            },
+        };
+        let (module, info) = back::passes::run(module, info, &passes)?;
         ModuleWriter::new(
             &mut self.out,
-            module,
-            info,
+            &module,
+            &info,
             self.options,
             self.pipeline_options,
             self.policies,
@@ -809,13 +815,10 @@ impl<'a, W: Write> ModuleWriter<'a, W> {
             self.write_array_size(base, size)?;
         }
 
-        if global.space.initializable() && is_value_init_supported(self.module, global.ty) {
-            write!(self.out, " = ")?;
-            if let Some(init) = global.init {
-                self.write_const_expr(init, &self.module.global_expressions)?;
-            } else {
-                self.write_zero_init_value(global.ty)?;
-            }
+        if global.init.is_some() {
+            return Err(Error::Custom(
+                "global variable initializers must be lowered".into(),
+            ));
         }
 
         writeln!(self.out, ";")?;
@@ -1395,12 +1398,6 @@ impl<'a, W: Write> ModuleWriter<'a, W> {
         // Close the parentheses and open braces to start the function body
         writeln!(self.out, ") {{")?;
 
-        if self.options.zero_initialize_workgroup_memory
-            && ctx.ty.is_compute_like_entry_point(self.module)
-        {
-            self.write_workgroup_variables_initialization(&ctx)?;
-        }
-
         // Compose the function arguments from globals, in case of an entry point.
         if let back::FunctionType::EntryPoint(ep_index) = ctx.ty {
             let stage = self.module.entry_points[ep_index as usize].stage;
@@ -1440,7 +1437,6 @@ impl<'a, W: Write> ModuleWriter<'a, W> {
         }
 
         // Write all function locals
-        // Locals are `type name (= init)?;` where the init part (including the =) are optional
         //
         // Always adds a newline
         for (handle, local) in func.local_variables.iter() {
@@ -1456,18 +1452,10 @@ impl<'a, W: Write> ModuleWriter<'a, W> {
             if let TypeInner::Array { base, size, .. } = self.module.types[local.ty].inner {
                 self.write_array_size(base, size)?;
             }
-            // Write the local initializer if needed
-            if let Some(init) = local.init {
-                // Put the equal signal only if there's a initializer
-                // The leading and trailing spaces aren't needed but help with readability
-                write!(self.out, " = ")?;
-
-                // Write the constant
-                // `write_constant` adds no trailing or leading space/newline
-                self.write_expr(init, &ctx)?;
-            } else if is_value_init_supported(self.module, local.ty) {
-                write!(self.out, " = ")?;
-                self.write_zero_init_value(local.ty)?;
+            if local.init.is_some() {
+                return Err(Error::Custom(
+                    "local variable initializers must be lowered".into(),
+                ));
             }
 
             // Finish the local with `;` and add a newline (only for readability)
@@ -1483,38 +1471,6 @@ impl<'a, W: Write> ModuleWriter<'a, W> {
 
         // Close braces and add a newline
         writeln!(self.out, "}}")?;
-
-        Ok(())
-    }
-
-    fn write_workgroup_variables_initialization(
-        &mut self,
-        ctx: &back::FunctionCtx,
-    ) -> BackendResult {
-        let mut vars = self
-            .module
-            .global_variables
-            .iter()
-            .filter(|&(handle, var)| {
-                !ctx.info[handle].is_empty() && var.space == crate::AddressSpace::WorkGroup
-            })
-            .peekable();
-
-        if vars.peek().is_some() {
-            let level = back::Level(1);
-
-            writeln!(self.out, "{level}if (gl_LocalInvocationID == uvec3(0u)) {{")?;
-
-            for (handle, var) in vars {
-                let name = &self.names[&NameKey::GlobalVariable(handle)];
-                write!(self.out, "{}{} = ", level.next(), name)?;
-                self.write_zero_init_value(var.ty)?;
-                writeln!(self.out, ";")?;
-            }
-
-            writeln!(self.out, "{level}}}")?;
-            self.write_control_barrier(crate::Barrier::WORK_GROUP, level)?;
-        }
 
         Ok(())
     }

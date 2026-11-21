@@ -9,9 +9,9 @@ struct type_4 {
     float member_2[1];
     float member_3[1];
 };
-type_4 global = type_4(vec4(0.0, 0.0, 0.0, 1.0), 1.0, float[1](0.0), float[1](0.0));
+type_4 global;
 
-int global_1 = 0;
+int global_1;
 
 
 void function() {
@@ -22,6 +22,8 @@ void function() {
 
 void main() {
     uint param = uint(gl_VertexID);
+    global = type_4(vec4(0.0, 0.0, 0.0, 1.0), 1.0, float[1](0.0), float[1](0.0));
+    global_1 = 0;
     global_1 = int(param);
     function();
     float _e6 = global.member.y;

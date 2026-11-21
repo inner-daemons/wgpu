@@ -23,7 +23,8 @@ void takes_mat_ptr(inout mat2x2 p_3) {
 }
 
 void local_var(uint i) {
-    int arr[4] = int[4](1, 2, 3, 4);
+    int arr[4];
+    arr = int[4](1, 2, 3, 4);
     takes_ptr(arr[i]);
     takes_array_ptr(arr);
     return;
@@ -62,7 +63,8 @@ void index_from_self(inout int v_3[4], uint i_5) {
 }
 
 void local_var_from_arg(int a[4], uint i_6) {
-    int b[4] = int[4](0, 0, 0, 0);
+    int b[4];
+    b = int[4](0, 0, 0, 0);
     b = a;
     takes_ptr(b[i_6]);
     return;
@@ -75,11 +77,16 @@ void let_binding(inout int a_1[4], uint i_7) {
 }
 
 void main() {
-    ivec2 vec[4] = ivec2[4](ivec2(0), ivec2(0), ivec2(0), ivec2(0));
-    mat2x2 mat[4] = mat2x2[4](mat2x2(0.0), mat2x2(0.0), mat2x2(0.0), mat2x2(0.0));
-    int arr1d[4] = int[4](0, 0, 0, 0);
-    int arr2d[4][4] = int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0));
-    int arr3d[4][4][4] = int[4][4][4](int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)));
+    ivec2 vec[4];
+    mat2x2 mat[4];
+    int arr1d[4];
+    int arr2d[4][4];
+    int arr3d[4][4][4];
+    vec = ivec2[4](ivec2(0), ivec2(0), ivec2(0), ivec2(0));
+    mat = mat2x2[4](mat2x2(0.0), mat2x2(0.0), mat2x2(0.0), mat2x2(0.0));
+    arr1d = int[4](0, 0, 0, 0);
+    arr2d = int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0));
+    arr3d = int[4][4][4](int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)), int[4][4](int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0), int[4](0, 0, 0, 0)));
     local_var(1u);
     mat_vec_ptrs(vec, mat, 1u);
     argument(arr1d, 1u);

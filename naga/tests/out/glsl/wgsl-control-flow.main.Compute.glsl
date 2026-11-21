@@ -7,7 +7,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 
 void control_flow() {
-    int pos = 0;
+    int pos;
+    pos = 0;
     memoryBarrierBuffer();
     barrier();
     memoryBarrierShared();
@@ -232,7 +233,8 @@ void loop_switch_continue_nesting(int x_1, int y, int z) {
 }
 
 void loop_switch_omit_continue_variable_checks(int x_2, int y_1, int z_1, int w) {
-    int pos_1 = 0;
+    int pos_1;
+    pos_1 = 0;
     while(true) {
         switch(x_2) {
             case 1: {

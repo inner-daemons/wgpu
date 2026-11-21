@@ -49,8 +49,10 @@ float fetch_shadow(uint light_id, vec4 homogeneous_coords) {
 
 void main() {
     VertexOutput in_1 = VertexOutput(gl_FragCoord, _vs2fs_location0, _vs2fs_location1);
-    vec3 color_1 = c_ambient;
-    uint i_1 = 0u;
+    vec3 color_1;
+    uint i_1;
+    color_1 = c_ambient;
+    i_1 = 0u;
     vec3 normal_1 = normalize(in_1.world_normal);
     bool loop_init = true;
     while(true) {

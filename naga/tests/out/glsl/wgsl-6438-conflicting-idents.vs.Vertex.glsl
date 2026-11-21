@@ -12,7 +12,8 @@ layout(location = 0) smooth out vec2 _vs2fs_location0;
 
 void main() {
     vec2 xy = _p2vs_location0;
-    OurVertexShaderOutput vsOutput = OurVertexShaderOutput(vec4(0.0), vec2(0.0));
+    OurVertexShaderOutput vsOutput;
+    vsOutput = OurVertexShaderOutput(vec4(0.0), vec2(0.0));
     vsOutput.position = vec4(xy, 0.0, 1.0);
     OurVertexShaderOutput _e6 = vsOutput;
     gl_Position = _e6.position;

@@ -13,13 +13,13 @@ struct VertexOutput {
     vec2 member;
     vec4 gen_gl_Position;
 };
-vec2 v_uv = vec2(0.0);
+vec2 v_uv;
 
-vec2 a_uv_1 = vec2(0.0);
+vec2 a_uv_1;
 
-gen_gl_PerVertex unnamed = gen_gl_PerVertex(vec4(0.0, 0.0, 0.0, 1.0), 1.0, float[1](0.0), float[1](0.0));
+gen_gl_PerVertex unnamed;
 
-vec2 a_pos_1 = vec2(0.0);
+vec2 a_pos_1;
 
 layout(location = 1) in vec2 _p2vs_location1;
 layout(location = 0) in vec2 _p2vs_location0;
@@ -36,6 +36,10 @@ void main_1() {
 void main() {
     vec2 a_uv = _p2vs_location1;
     vec2 a_pos = _p2vs_location0;
+    v_uv = vec2(0.0);
+    a_uv_1 = vec2(0.0);
+    unnamed = gen_gl_PerVertex(vec4(0.0, 0.0, 0.0, 1.0), 1.0, float[1](0.0), float[1](0.0));
+    a_pos_1 = vec2(0.0);
     a_uv_1 = a_uv;
     a_pos_1 = a_pos;
     main_1();

@@ -20,7 +20,8 @@ void f_u0028_b1_u003b(inout bool cond) {
 }
 
 void main_1() {
-    bool param = false;
+    bool param;
+    param = false;
     param = false;
     f_u0028_b1_u003b(param);
     return;

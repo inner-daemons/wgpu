@@ -5,111 +5,111 @@ precision highp int;
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
-ivec2 xvipaiai_1 = ivec2(42, 43);
+ivec2 xvipaiai_1;
 
-uvec2 xvupaiai_1 = uvec2(44u, 45u);
+uvec2 xvupaiai_1;
 
-vec2 xvfpaiai_1 = vec2(46.0, 47.0);
+vec2 xvfpaiai_1;
 
-vec2 xvfpafaf_1 = vec2(48.0, 49.0);
+vec2 xvfpafaf_1;
 
-vec2 xvfpaiaf_1 = vec2(48.0, 49.0);
+vec2 xvfpaiaf_1;
 
-uvec2 xvupuai_2 = uvec2(42u, 43u);
+uvec2 xvupuai_2;
 
-uvec2 xvupaiu_2 = uvec2(42u, 43u);
+uvec2 xvupaiu_2;
 
-uvec2 xvuuai_2 = uvec2(42u, 43u);
+uvec2 xvuuai_2;
 
-uvec2 xvuaiu_2 = uvec2(42u, 43u);
+uvec2 xvuaiu_2;
 
-ivec2 xvip_1 = ivec2(0, 0);
+ivec2 xvip_1;
 
-uvec2 xvup_1 = uvec2(0u, 0u);
+uvec2 xvup_1;
 
-vec2 xvfp_1 = vec2(0.0, 0.0);
+vec2 xvfp_1;
 
-mat2x2 xmfp_1 = mat2x2(vec2(0.0, 0.0), vec2(0.0, 0.0));
+mat2x2 xmfp_1;
 
-mat2x2 xmfpaiaiaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+mat2x2 xmfpaiaiaiai_1;
 
-mat2x2 xmfpafaiaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+mat2x2 xmfpafaiaiai_1;
 
-mat2x2 xmfpaiafaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+mat2x2 xmfpaiafaiai_1;
 
-mat2x2 xmfpaiaiafai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+mat2x2 xmfpaiaiafai_1;
 
-mat2x2 xmfpaiaiaiaf_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+mat2x2 xmfpaiaiaiaf_1;
 
-ivec2 xvispai_1 = ivec2(1);
+ivec2 xvispai_1;
 
-vec2 xvfspaf_1 = vec2(1.0);
+vec2 xvfspaf_1;
 
-ivec2 xvis_ai_1 = ivec2(1);
+ivec2 xvis_ai_1;
 
-uvec2 xvus_ai_1 = uvec2(1u);
+uvec2 xvus_ai_1;
 
-vec2 xvfs_ai_1 = vec2(1.0);
+vec2 xvfs_ai_1;
 
-vec2 xvfs_af_1 = vec2(1.0);
+vec2 xvfs_af_1;
 
-float xafafaf_1[2] = float[2](1.0, 2.0);
+float xafafaf_1[2];
 
-float xafaiai_1[2] = float[2](1.0, 2.0);
+float xafaiai_1[2];
 
-int xaipaiai_1[2] = int[2](1, 2);
+int xaipaiai_1[2];
 
-uint xaupaiai[2] = uint[2](1u, 2u);
+uint xaupaiai[2];
 
-float xafpaiaf_1[2] = float[2](1.0, 2.0);
+float xafpaiaf_1[2];
 
-float xafpafai_1[2] = float[2](1.0, 2.0);
+float xafpafai_1[2];
 
-float xafpafaf_1[2] = float[2](1.0, 2.0);
+float xafpafaf_1[2];
 
-ivec3 xavipai_1[1] = ivec3[1](ivec3(1));
+ivec3 xavipai_1[1];
 
-vec3 xavfpai_1[1] = vec3[1](vec3(1.0));
+vec3 xavfpai_1[1];
 
-vec3 xavfpaf_1[1] = vec3[1](vec3(1.0));
+vec3 xavfpaf_1[1];
 
-ivec2 xvisai_1 = ivec2(1);
+ivec2 xvisai_1;
 
-uvec2 xvusai_1 = uvec2(1u);
+uvec2 xvusai_1;
 
-vec2 xvfsai_1 = vec2(1.0);
+vec2 xvfsai_1;
 
-vec2 xvfsaf_1 = vec2(1.0);
+vec2 xvfsaf_1;
 
-ivec2 ivispai = ivec2(1);
+ivec2 ivispai;
 
-vec2 ivfspaf = vec2(1.0);
+vec2 ivfspaf;
 
-ivec2 ivis_ai = ivec2(1);
+ivec2 ivis_ai;
 
-uvec2 ivus_ai = uvec2(1u);
+uvec2 ivus_ai;
 
-vec2 ivfs_ai = vec2(1.0);
+vec2 ivfs_ai;
 
-vec2 ivfs_af = vec2(1.0);
+vec2 ivfs_af;
 
-float iafafaf[2] = float[2](1.0, 2.0);
+float iafafaf[2];
 
-float iafaiai[2] = float[2](1.0, 2.0);
+float iafaiai[2];
 
-int iaipaiai_1[2] = int[2](1, 2);
+int iaipaiai_1[2];
 
-float iafpafaf_1[2] = float[2](1.0, 2.0);
+float iafpafaf_1[2];
 
-float iafpaiaf_1[2] = float[2](1.0, 2.0);
+float iafpaiaf_1[2];
 
-float iafpafai_1[2] = float[2](1.0, 2.0);
+float iafpafai_1[2];
 
-ivec3 iavipai[1] = ivec3[1](ivec3(1));
+ivec3 iavipai[1];
 
-ivec3 iavfpai[1] = ivec3[1](ivec3(1));
+ivec3 iavfpai[1];
 
-vec3 iavfpaf[1] = vec3[1](vec3(1.0));
+vec3 iavfpaf[1];
 
 
 void globals() {
@@ -170,56 +170,106 @@ void globals() {
 }
 
 void all_constant_arguments() {
-    ivec2 xvipaiai = ivec2(42, 43);
-    uvec2 xvupaiai = uvec2(44u, 45u);
-    vec2 xvfpaiai = vec2(46.0, 47.0);
-    vec2 xvfpafaf = vec2(48.0, 49.0);
-    vec2 xvfpaiaf = vec2(48.0, 49.0);
-    uvec2 xvupuai = uvec2(42u, 43u);
-    uvec2 xvupaiu = uvec2(42u, 43u);
-    uvec2 xvuuai = uvec2(42u, 43u);
-    uvec2 xvuaiu = uvec2(42u, 43u);
-    ivec2 xvip = ivec2(0, 0);
-    uvec2 xvup = uvec2(0u, 0u);
-    vec2 xvfp = vec2(0.0, 0.0);
-    mat2x2 xmfp = mat2x2(vec2(0.0, 0.0), vec2(0.0, 0.0));
-    mat2x2 xmfpaiaiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpafaiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpaiafaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpaiaiafai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpaiaiaiaf = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfp_faiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpai_faiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpaiai_fai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    mat2x2 xmfpaiaiai_f = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
-    ivec2 xvispai = ivec2(1);
-    vec2 xvfspaf = vec2(1.0);
-    ivec2 xvis_ai = ivec2(1);
-    uvec2 xvus_ai = uvec2(1u);
-    vec2 xvfs_ai = vec2(1.0);
-    vec2 xvfs_af = vec2(1.0);
-    float xafafaf[2] = float[2](1.0, 2.0);
-    float xaf_faf[2] = float[2](1.0, 2.0);
-    float xafaf_f[2] = float[2](1.0, 2.0);
-    float xafaiai[2] = float[2](1.0, 2.0);
-    int xai_iai[2] = int[2](1, 2);
-    int xaiai_i[2] = int[2](1, 2);
-    int xaipaiai[2] = int[2](1, 2);
-    float xafpaiai[2] = float[2](1.0, 2.0);
-    float xafpaiaf[2] = float[2](1.0, 2.0);
-    float xafpafai[2] = float[2](1.0, 2.0);
-    float xafpafaf[2] = float[2](1.0, 2.0);
-    ivec3 xavipai[1] = ivec3[1](ivec3(1));
-    vec3 xavfpai[1] = vec3[1](vec3(1.0));
-    vec3 xavfpaf[1] = vec3[1](vec3(1.0));
-    ivec2 xvisai = ivec2(1);
-    uvec2 xvusai = uvec2(1u);
-    vec2 xvfsai = vec2(1.0);
-    vec2 xvfsaf = vec2(1.0);
-    int iaipaiai[2] = int[2](1, 2);
-    float iafpaiaf[2] = float[2](1.0, 2.0);
-    float iafpafai[2] = float[2](1.0, 2.0);
-    float iafpafaf[2] = float[2](1.0, 2.0);
+    ivec2 xvipaiai;
+    uvec2 xvupaiai;
+    vec2 xvfpaiai;
+    vec2 xvfpafaf;
+    vec2 xvfpaiaf;
+    uvec2 xvupuai;
+    uvec2 xvupaiu;
+    uvec2 xvuuai;
+    uvec2 xvuaiu;
+    ivec2 xvip;
+    uvec2 xvup;
+    vec2 xvfp;
+    mat2x2 xmfp;
+    mat2x2 xmfpaiaiaiai;
+    mat2x2 xmfpafaiaiai;
+    mat2x2 xmfpaiafaiai;
+    mat2x2 xmfpaiaiafai;
+    mat2x2 xmfpaiaiaiaf;
+    mat2x2 xmfp_faiaiai;
+    mat2x2 xmfpai_faiai;
+    mat2x2 xmfpaiai_fai;
+    mat2x2 xmfpaiaiai_f;
+    ivec2 xvispai;
+    vec2 xvfspaf;
+    ivec2 xvis_ai;
+    uvec2 xvus_ai;
+    vec2 xvfs_ai;
+    vec2 xvfs_af;
+    float xafafaf[2];
+    float xaf_faf[2];
+    float xafaf_f[2];
+    float xafaiai[2];
+    int xai_iai[2];
+    int xaiai_i[2];
+    int xaipaiai[2];
+    float xafpaiai[2];
+    float xafpaiaf[2];
+    float xafpafai[2];
+    float xafpafaf[2];
+    ivec3 xavipai[1];
+    vec3 xavfpai[1];
+    vec3 xavfpaf[1];
+    ivec2 xvisai;
+    uvec2 xvusai;
+    vec2 xvfsai;
+    vec2 xvfsaf;
+    int iaipaiai[2];
+    float iafpaiaf[2];
+    float iafpafai[2];
+    float iafpafaf[2];
+    xvipaiai = ivec2(42, 43);
+    xvupaiai = uvec2(44u, 45u);
+    xvfpaiai = vec2(46.0, 47.0);
+    xvfpafaf = vec2(48.0, 49.0);
+    xvfpaiaf = vec2(48.0, 49.0);
+    xvupuai = uvec2(42u, 43u);
+    xvupaiu = uvec2(42u, 43u);
+    xvuuai = uvec2(42u, 43u);
+    xvuaiu = uvec2(42u, 43u);
+    xvip = ivec2(0, 0);
+    xvup = uvec2(0u, 0u);
+    xvfp = vec2(0.0, 0.0);
+    xmfp = mat2x2(vec2(0.0, 0.0), vec2(0.0, 0.0));
+    xmfpaiaiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpafaiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiafaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiaiafai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiaiaiaf = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfp_faiaiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpai_faiai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiai_fai = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiaiai_f = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xvispai = ivec2(1);
+    xvfspaf = vec2(1.0);
+    xvis_ai = ivec2(1);
+    xvus_ai = uvec2(1u);
+    xvfs_ai = vec2(1.0);
+    xvfs_af = vec2(1.0);
+    xafafaf = float[2](1.0, 2.0);
+    xaf_faf = float[2](1.0, 2.0);
+    xafaf_f = float[2](1.0, 2.0);
+    xafaiai = float[2](1.0, 2.0);
+    xai_iai = int[2](1, 2);
+    xaiai_i = int[2](1, 2);
+    xaipaiai = int[2](1, 2);
+    xafpaiai = float[2](1.0, 2.0);
+    xafpaiaf = float[2](1.0, 2.0);
+    xafpafai = float[2](1.0, 2.0);
+    xafpafaf = float[2](1.0, 2.0);
+    xavipai = ivec3[1](ivec3(1));
+    xavfpai = vec3[1](vec3(1.0));
+    xavfpaf = vec3[1](vec3(1.0));
+    xvisai = ivec2(1);
+    xvusai = uvec2(1u);
+    xvfsai = vec2(1.0);
+    xvfsaf = vec2(1.0);
+    iaipaiai = int[2](1, 2);
+    iafpaiaf = float[2](1.0, 2.0);
+    iafpafai = float[2](1.0, 2.0);
+    iafpafaf = float[2](1.0, 2.0);
     xvipaiai = ivec2(42, 43);
     xvupaiai = uvec2(44u, 45u);
     xvfpaiai = vec2(46.0, 47.0);
@@ -274,34 +324,62 @@ void all_constant_arguments() {
 }
 
 void mixed_constant_and_runtime_arguments() {
-    uint u = 0u;
-    int i = 0;
-    float f = 0.0;
-    uvec2 xvupuai_1 = uvec2(0u);
-    uvec2 xvupaiu_1 = uvec2(0u);
-    vec2 xvfpfai = vec2(0.0);
-    vec2 xvfpfaf = vec2(0.0);
-    uvec2 xvuuai_1 = uvec2(0u);
-    uvec2 xvuaiu_1 = uvec2(0u);
-    mat2x2 xmfp_faiaiai_1 = mat2x2(0.0);
-    mat2x2 xmfpai_faiai_1 = mat2x2(0.0);
-    mat2x2 xmfpaiai_fai_1 = mat2x2(0.0);
-    mat2x2 xmfpaiaiai_f_1 = mat2x2(0.0);
-    float xaf_faf_1[2] = float[2](0.0, 0.0);
-    float xafaf_f_1[2] = float[2](0.0, 0.0);
-    float xaf_fai[2] = float[2](0.0, 0.0);
-    float xafai_f[2] = float[2](0.0, 0.0);
-    int xai_iai_1[2] = int[2](0, 0);
-    int xaiai_i_1[2] = int[2](0, 0);
-    float xafp_faf[2] = float[2](0.0, 0.0);
-    float xafpaf_f[2] = float[2](0.0, 0.0);
-    float xafp_fai[2] = float[2](0.0, 0.0);
-    float xafpai_f[2] = float[2](0.0, 0.0);
-    int xaip_iai[2] = int[2](0, 0);
-    int xaipai_i[2] = int[2](0, 0);
-    ivec2 xvisi = ivec2(0);
-    uvec2 xvusu = uvec2(0u);
-    vec2 xvfsf = vec2(0.0);
+    uint u;
+    int i;
+    float f;
+    uvec2 xvupuai_1;
+    uvec2 xvupaiu_1;
+    vec2 xvfpfai;
+    vec2 xvfpfaf;
+    uvec2 xvuuai_1;
+    uvec2 xvuaiu_1;
+    mat2x2 xmfp_faiaiai_1;
+    mat2x2 xmfpai_faiai_1;
+    mat2x2 xmfpaiai_fai_1;
+    mat2x2 xmfpaiaiai_f_1;
+    float xaf_faf_1[2];
+    float xafaf_f_1[2];
+    float xaf_fai[2];
+    float xafai_f[2];
+    int xai_iai_1[2];
+    int xaiai_i_1[2];
+    float xafp_faf[2];
+    float xafpaf_f[2];
+    float xafp_fai[2];
+    float xafpai_f[2];
+    int xaip_iai[2];
+    int xaipai_i[2];
+    ivec2 xvisi;
+    uvec2 xvusu;
+    vec2 xvfsf;
+    u = 0u;
+    i = 0;
+    f = 0.0;
+    xvupuai_1 = uvec2(0u);
+    xvupaiu_1 = uvec2(0u);
+    xvfpfai = vec2(0.0);
+    xvfpfaf = vec2(0.0);
+    xvuuai_1 = uvec2(0u);
+    xvuaiu_1 = uvec2(0u);
+    xmfp_faiaiai_1 = mat2x2(0.0);
+    xmfpai_faiai_1 = mat2x2(0.0);
+    xmfpaiai_fai_1 = mat2x2(0.0);
+    xmfpaiaiai_f_1 = mat2x2(0.0);
+    xaf_faf_1 = float[2](0.0, 0.0);
+    xafaf_f_1 = float[2](0.0, 0.0);
+    xaf_fai = float[2](0.0, 0.0);
+    xafai_f = float[2](0.0, 0.0);
+    xai_iai_1 = int[2](0, 0);
+    xaiai_i_1 = int[2](0, 0);
+    xafp_faf = float[2](0.0, 0.0);
+    xafpaf_f = float[2](0.0, 0.0);
+    xafp_fai = float[2](0.0, 0.0);
+    xafpai_f = float[2](0.0, 0.0);
+    xaip_iai = int[2](0, 0);
+    xaipai_i = int[2](0, 0);
+    xvisi = ivec2(0);
+    xvusu = uvec2(0u);
+    xvfsf = vec2(0.0);
     uint _e3 = u;
     xvupuai_1 = uvec2(_e3, 43u);
     uint _e7 = u;
@@ -402,6 +480,59 @@ void mixed_constant_and_runtime_arguments() {
 }
 
 void main() {
+    xvipaiai_1 = ivec2(42, 43);
+    xvupaiai_1 = uvec2(44u, 45u);
+    xvfpaiai_1 = vec2(46.0, 47.0);
+    xvfpafaf_1 = vec2(48.0, 49.0);
+    xvfpaiaf_1 = vec2(48.0, 49.0);
+    xvupuai_2 = uvec2(42u, 43u);
+    xvupaiu_2 = uvec2(42u, 43u);
+    xvuuai_2 = uvec2(42u, 43u);
+    xvuaiu_2 = uvec2(42u, 43u);
+    xvip_1 = ivec2(0, 0);
+    xvup_1 = uvec2(0u, 0u);
+    xvfp_1 = vec2(0.0, 0.0);
+    xmfp_1 = mat2x2(vec2(0.0, 0.0), vec2(0.0, 0.0));
+    xmfpaiaiaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpafaiaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiafaiai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiaiafai_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xmfpaiaiaiaf_1 = mat2x2(vec2(1.0, 2.0), vec2(3.0, 4.0));
+    xvispai_1 = ivec2(1);
+    xvfspaf_1 = vec2(1.0);
+    xvis_ai_1 = ivec2(1);
+    xvus_ai_1 = uvec2(1u);
+    xvfs_ai_1 = vec2(1.0);
+    xvfs_af_1 = vec2(1.0);
+    xafafaf_1 = float[2](1.0, 2.0);
+    xafaiai_1 = float[2](1.0, 2.0);
+    xaipaiai_1 = int[2](1, 2);
+    xaupaiai = uint[2](1u, 2u);
+    xafpaiaf_1 = float[2](1.0, 2.0);
+    xafpafai_1 = float[2](1.0, 2.0);
+    xafpafaf_1 = float[2](1.0, 2.0);
+    xavipai_1 = ivec3[1](ivec3(1));
+    xavfpai_1 = vec3[1](vec3(1.0));
+    xavfpaf_1 = vec3[1](vec3(1.0));
+    xvisai_1 = ivec2(1);
+    xvusai_1 = uvec2(1u);
+    xvfsai_1 = vec2(1.0);
+    xvfsaf_1 = vec2(1.0);
+    ivispai = ivec2(1);
+    ivfspaf = vec2(1.0);
+    ivis_ai = ivec2(1);
+    ivus_ai = uvec2(1u);
+    ivfs_ai = vec2(1.0);
+    ivfs_af = vec2(1.0);
+    iafafaf = float[2](1.0, 2.0);
+    iafaiai = float[2](1.0, 2.0);
+    iaipaiai_1 = int[2](1, 2);
+    iafpafaf_1 = float[2](1.0, 2.0);
+    iafpaiaf_1 = float[2](1.0, 2.0);
+    iafpafai_1 = float[2](1.0, 2.0);
+    iavipai = ivec3[1](ivec3(1));
+    iavfpai = ivec3[1](ivec3(1));
+    iavfpaf = vec3[1](vec3(1.0));
     globals();
     all_constant_arguments();
     mixed_constant_and_runtime_arguments();

@@ -40,28 +40,50 @@ shared uint a[64];
 
 
 void runtime_values() {
-    float f = 42.0;
-    int i = 43;
-    uint u = 44u;
-    float plus_fafaf = 3.0;
-    float plus_fafai = 3.0;
-    float plus_faf_f = 0.0;
-    float plus_faiaf = 3.0;
-    float plus_faiai = 3.0;
-    float plus_fai_f = 0.0;
-    float plus_f_faf = 0.0;
-    float plus_f_fai = 0.0;
-    float plus_f_f_f = 0.0;
-    int plus_iaiai = 3;
-    int plus_iai_i = 0;
-    int plus_i_iai = 0;
-    int plus_i_i_i = 0;
-    uint plus_uaiai = 3u;
-    uint plus_uai_u = 0u;
-    uint plus_u_uai = 0u;
-    uint plus_u_u_u = 0u;
-    int shl_iai_u = 0;
-    int shr_iai_u = 0;
+    float f;
+    int i;
+    uint u;
+    float plus_fafaf;
+    float plus_fafai;
+    float plus_faf_f;
+    float plus_faiaf;
+    float plus_faiai;
+    float plus_fai_f;
+    float plus_f_faf;
+    float plus_f_fai;
+    float plus_f_f_f;
+    int plus_iaiai;
+    int plus_iai_i;
+    int plus_i_iai;
+    int plus_i_i_i;
+    uint plus_uaiai;
+    uint plus_uai_u;
+    uint plus_u_uai;
+    uint plus_u_u_u;
+    int shl_iai_u;
+    int shr_iai_u;
+    f = 42.0;
+    i = 43;
+    u = 44u;
+    plus_fafaf = 3.0;
+    plus_fafai = 3.0;
+    plus_faf_f = 0.0;
+    plus_faiaf = 3.0;
+    plus_faiai = 3.0;
+    plus_fai_f = 0.0;
+    plus_f_faf = 0.0;
+    plus_f_fai = 0.0;
+    plus_f_f_f = 0.0;
+    plus_iaiai = 3;
+    plus_iai_i = 0;
+    plus_i_iai = 0;
+    plus_i_i_i = 0;
+    plus_uaiai = 3u;
+    plus_uai_u = 0u;
+    plus_u_uai = 0u;
+    plus_u_u_u = 0u;
+    shl_iai_u = 0;
+    shr_iai_u = 0;
     float _e8 = f;
     plus_faf_f = (1.0 + _e8);
     float _e14 = f;
@@ -104,8 +126,16 @@ void wgpu_4435_() {
 }
 
 void main() {
-    if (gl_LocalInvocationID == uvec3(0u)) {
-        a = uint[64](0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u);
+    uint local_invocation_index = gl_LocalInvocationIndex;
+    uint zero_init_index;
+    zero_init_index = local_invocation_index;
+    while(true) {
+        uint _e4 = zero_init_index;
+        if ((_e4 >= 64u)) {
+            break;
+        }
+        a[_e4] = 0u;
+        zero_init_index = (_e4 + 1u);
     }
     memoryBarrierShared();
     barrier();

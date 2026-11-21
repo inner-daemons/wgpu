@@ -13,7 +13,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 struct type_1 {
     uint member;
 };
-uint global = 0u;
+uint global;
 
 layout(std430) buffer type_1_block_0Compute { type_1 _group_0_binding_0_cs; };
 
@@ -29,6 +29,7 @@ void function() {
 
 void main() {
     uint param = gl_SubgroupInvocationID;
+    global = 0u;
     global = param;
     function();
 }

@@ -33,16 +33,26 @@ layout(std430) buffer Particles_block_2Compute {
 
 void main() {
     uvec3 global_invocation_id = gl_GlobalInvocationID;
-    vec2 vPos = vec2(0.0);
-    vec2 vVel = vec2(0.0);
-    vec2 cMass = vec2(0.0, 0.0);
-    vec2 cVel = vec2(0.0, 0.0);
-    vec2 colVel = vec2(0.0, 0.0);
-    int cMassCount = 0;
-    int cVelCount = 0;
-    vec2 pos = vec2(0.0);
-    vec2 vel = vec2(0.0);
-    uint i = 0u;
+    vec2 vPos;
+    vec2 vVel;
+    vec2 cMass;
+    vec2 cVel;
+    vec2 colVel;
+    int cMassCount;
+    int cVelCount;
+    vec2 pos;
+    vec2 vel;
+    uint i;
+    vPos = vec2(0.0);
+    vVel = vec2(0.0);
+    cMass = vec2(0.0, 0.0);
+    cVel = vec2(0.0, 0.0);
+    colVel = vec2(0.0, 0.0);
+    cMassCount = 0;
+    cVelCount = 0;
+    pos = vec2(0.0);
+    vel = vec2(0.0);
+    i = 0u;
     uint index = global_invocation_id.x;
     if ((index >= NUM_PARTICLES)) {
         return;
@@ -54,102 +64,102 @@ void main() {
     bool loop_init = true;
     while(true) {
         if (!loop_init) {
-            uint _e91 = i;
-            i = (_e91 + 1u);
+            uint _e82 = i;
+            i = (_e82 + 1u);
         }
         loop_init = false;
-        uint _e36 = i;
-        if ((_e36 >= NUM_PARTICLES)) {
+        uint _e27 = i;
+        if ((_e27 >= NUM_PARTICLES)) {
             break;
         }
-        uint _e39 = i;
-        if ((_e39 == index)) {
+        uint _e30 = i;
+        if ((_e30 == index)) {
             continue;
         }
-        uint _e43 = i;
-        vec2 _e46 = _group_0_binding_1_cs.particles[_e43].pos;
-        pos = _e46;
-        uint _e49 = i;
-        vec2 _e52 = _group_0_binding_1_cs.particles[_e49].vel;
-        vel = _e52;
-        vec2 _e53 = pos;
-        vec2 _e54 = vPos;
-        float _e58 = _group_0_binding_0_cs.rule1Distance;
-        if ((distance(_e53, _e54) < _e58)) {
-            vec2 _e60 = cMass;
-            vec2 _e61 = pos;
-            cMass = (_e60 + _e61);
-            int _e63 = cMassCount;
-            cMassCount = (_e63 + 1);
+        uint _e34 = i;
+        vec2 _e37 = _group_0_binding_1_cs.particles[_e34].pos;
+        pos = _e37;
+        uint _e40 = i;
+        vec2 _e43 = _group_0_binding_1_cs.particles[_e40].vel;
+        vel = _e43;
+        vec2 _e44 = pos;
+        vec2 _e45 = vPos;
+        float _e49 = _group_0_binding_0_cs.rule1Distance;
+        if ((distance(_e44, _e45) < _e49)) {
+            vec2 _e51 = cMass;
+            vec2 _e52 = pos;
+            cMass = (_e51 + _e52);
+            int _e54 = cMassCount;
+            cMassCount = (_e54 + 1);
         }
-        vec2 _e66 = pos;
-        vec2 _e67 = vPos;
-        float _e71 = _group_0_binding_0_cs.rule2Distance;
-        if ((distance(_e66, _e67) < _e71)) {
-            vec2 _e73 = colVel;
-            vec2 _e74 = pos;
-            vec2 _e75 = vPos;
-            colVel = (_e73 - (_e74 - _e75));
+        vec2 _e57 = pos;
+        vec2 _e58 = vPos;
+        float _e62 = _group_0_binding_0_cs.rule2Distance;
+        if ((distance(_e57, _e58) < _e62)) {
+            vec2 _e64 = colVel;
+            vec2 _e65 = pos;
+            vec2 _e66 = vPos;
+            colVel = (_e64 - (_e65 - _e66));
         }
-        vec2 _e78 = pos;
-        vec2 _e79 = vPos;
-        float _e83 = _group_0_binding_0_cs.rule3Distance;
-        if ((distance(_e78, _e79) < _e83)) {
-            vec2 _e85 = cVel;
-            vec2 _e86 = vel;
-            cVel = (_e85 + _e86);
-            int _e88 = cVelCount;
-            cVelCount = (_e88 + 1);
+        vec2 _e69 = pos;
+        vec2 _e70 = vPos;
+        float _e74 = _group_0_binding_0_cs.rule3Distance;
+        if ((distance(_e69, _e70) < _e74)) {
+            vec2 _e76 = cVel;
+            vec2 _e77 = vel;
+            cVel = (_e76 + _e77);
+            int _e79 = cVelCount;
+            cVelCount = (_e79 + 1);
         }
     }
-    int _e94 = cMassCount;
-    if ((_e94 > 0)) {
-        vec2 _e97 = cMass;
-        int _e98 = cMassCount;
-        vec2 _e102 = vPos;
-        cMass = ((_e97 / vec2(float(_e98))) - _e102);
+    int _e85 = cMassCount;
+    if ((_e85 > 0)) {
+        vec2 _e88 = cMass;
+        int _e89 = cMassCount;
+        vec2 _e93 = vPos;
+        cMass = ((_e88 / vec2(float(_e89))) - _e93);
     }
-    int _e104 = cVelCount;
-    if ((_e104 > 0)) {
-        vec2 _e107 = cVel;
-        int _e108 = cVelCount;
-        cVel = (_e107 / vec2(float(_e108)));
+    int _e95 = cVelCount;
+    if ((_e95 > 0)) {
+        vec2 _e98 = cVel;
+        int _e99 = cVelCount;
+        cVel = (_e98 / vec2(float(_e99)));
     }
-    vec2 _e112 = vVel;
-    vec2 _e113 = cMass;
-    float _e116 = _group_0_binding_0_cs.rule1Scale;
-    vec2 _e119 = colVel;
-    float _e122 = _group_0_binding_0_cs.rule2Scale;
-    vec2 _e125 = cVel;
-    float _e128 = _group_0_binding_0_cs.rule3Scale;
-    vVel = (((_e112 + (_e113 * _e116)) + (_e119 * _e122)) + (_e125 * _e128));
+    vec2 _e103 = vVel;
+    vec2 _e104 = cMass;
+    float _e107 = _group_0_binding_0_cs.rule1Scale;
+    vec2 _e110 = colVel;
+    float _e113 = _group_0_binding_0_cs.rule2Scale;
+    vec2 _e116 = cVel;
+    float _e119 = _group_0_binding_0_cs.rule3Scale;
+    vVel = (((_e103 + (_e104 * _e107)) + (_e110 * _e113)) + (_e116 * _e119));
+    vec2 _e122 = vVel;
+    vec2 _e124 = vVel;
+    vVel = (normalize(_e122) * clamp(length(_e124), 0.0, 0.1));
+    vec2 _e130 = vPos;
     vec2 _e131 = vVel;
-    vec2 _e133 = vVel;
-    vVel = (normalize(_e131) * clamp(length(_e133), 0.0, 0.1));
-    vec2 _e139 = vPos;
-    vec2 _e140 = vVel;
-    float _e143 = _group_0_binding_0_cs.deltaT;
-    vPos = (_e139 + (_e140 * _e143));
-    float _e147 = vPos.x;
-    if ((_e147 < -1.0)) {
+    float _e134 = _group_0_binding_0_cs.deltaT;
+    vPos = (_e130 + (_e131 * _e134));
+    float _e138 = vPos.x;
+    if ((_e138 < -1.0)) {
         vPos.x = 1.0;
     }
-    float _e153 = vPos.x;
-    if ((_e153 > 1.0)) {
+    float _e144 = vPos.x;
+    if ((_e144 > 1.0)) {
         vPos.x = -1.0;
     }
-    float _e159 = vPos.y;
-    if ((_e159 < -1.0)) {
+    float _e150 = vPos.y;
+    if ((_e150 < -1.0)) {
         vPos.y = 1.0;
     }
-    float _e165 = vPos.y;
-    if ((_e165 > 1.0)) {
+    float _e156 = vPos.y;
+    if ((_e156 > 1.0)) {
         vPos.y = -1.0;
     }
-    vec2 _e174 = vPos;
-    _group_0_binding_2_cs.particles[index].pos = _e174;
-    vec2 _e179 = vVel;
-    _group_0_binding_2_cs.particles[index].vel = _e179;
+    vec2 _e165 = vPos;
+    _group_0_binding_2_cs.particles[index].pos = _e165;
+    vec2 _e170 = vVel;
+    _group_0_binding_2_cs.particles[index].vel = _e170;
     return;
 }
 

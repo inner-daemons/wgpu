@@ -20,7 +20,8 @@ layout(std430) buffer NoPadding_block_1Compute { NoPadding _group_0_binding_1_cs
 
 
 void main() {
-    NoPadding x = NoPadding(vec3(0.0), 0.0);
+    NoPadding x;
+    x = NoPadding(vec3(0.0), 0.0);
     NoPadding _e2 = _group_0_binding_0_cs;
     x = _e2;
     NoPadding _e4 = _group_0_binding_1_cs;

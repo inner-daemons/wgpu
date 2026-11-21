@@ -38,15 +38,16 @@ vec4 splat(float m, int n) {
 }
 
 vec2 splat_assignment() {
-    vec2 a = vec2(2.0);
-    vec2 _e3 = a;
-    a = (_e3 + vec2(1.0));
-    vec2 _e7 = a;
-    a = (_e7 - vec2(3.0));
-    vec2 _e11 = a;
-    a = (_e11 / vec2(4.0));
-    vec2 _e15 = a;
-    return _e15;
+    vec2 a;
+    a = vec2(2.0);
+    vec2 _e1 = a;
+    a = (_e1 + vec2(1.0));
+    vec2 _e5 = a;
+    a = (_e5 - vec2(3.0));
+    vec2 _e9 = a;
+    a = (_e9 / vec2(4.0));
+    vec2 _e13 = a;
+    return _e13;
 }
 
 vec3 bool_cast(vec3 x) {
@@ -71,13 +72,20 @@ bool s() {
 }
 
 void logical() {
-    bool local = false;
-    bool local_1 = false;
-    bool local_2 = false;
-    bool local_3 = false;
-    bool local_4 = false;
-    bool local_5 = false;
-    bool local_6 = false;
+    bool local;
+    bool local_1;
+    bool local_2;
+    bool local_3;
+    bool local_4;
+    bool local_5;
+    bool local_6;
+    local = false;
+    local_1 = false;
+    local_2 = false;
+    local_3 = false;
+    local_4 = false;
+    local_5 = false;
+    local_6 = false;
     bool neg0_ = !(true);
     bvec2 neg1_ = not(bvec2(true));
     if (!(true)) {
@@ -136,8 +144,10 @@ void logical() {
 }
 
 void arithmetic() {
-    int prevent_const_eval = 0;
-    int wgpu_7437_ = 0;
+    int prevent_const_eval;
+    int wgpu_7437_;
+    prevent_const_eval = 0;
+    wgpu_7437_ = 0;
     float neg0_1 = -(1.0);
     ivec2 neg1_1 = -(ivec2(1));
     vec2 neg2_ = -(vec2(1.0));
@@ -296,8 +306,10 @@ void comparison() {
 }
 
 void assignment() {
-    int a_1 = 0;
-    ivec3 vec0_ = ivec3(0);
+    int a_1;
+    ivec3 vec0_;
+    a_1 = 0;
+    vec0_ = ivec3(0);
     a_1 = 1;
     int _e5 = a_1;
     a_1 = (_e5 + 1);

@@ -35,7 +35,8 @@ void test_msl_packed_vec3_as_arg(vec3 arg) {
 }
 
 void test_msl_packed_vec3_() {
-    int idx = 1;
+    int idx;
+    idx = 1;
     _group_0_binding_1_cs.v3_ = vec3(1.0);
     _group_0_binding_1_cs.v3_.x = 1.0;
     _group_0_binding_1_cs.v3_.x = 2.0;
@@ -53,14 +54,26 @@ void test_msl_packed_vec3_() {
 }
 
 void main() {
-    if (gl_LocalInvocationID == uvec3(0u)) {
-        wg = float[10](0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-        at_1 = 0u;
+    uint local_invocation_index = gl_LocalInvocationIndex;
+    float Foo;
+    bool at;
+    uint zero_init_index;
+    Foo = 1.0;
+    at = true;
+    zero_init_index = local_invocation_index;
+    while(true) {
+        uint _e62 = zero_init_index;
+        if ((_e62 >= 10u)) {
+            break;
+        }
+        wg[_e62] = 0.0;
+        zero_init_index = (_e62 + 1u);
+    }
+    if ((local_invocation_index == 0u)) {
+        atomicExchange(at_1, 0u);
     }
     memoryBarrierShared();
     barrier();
-    float Foo = 1.0;
-    bool at = true;
     test_msl_packed_vec3_();
     mat4x2 _e5 = _group_0_binding_7_cs[0][0];
     vec4 _e10 = _group_0_binding_6_cs[0][0][0];

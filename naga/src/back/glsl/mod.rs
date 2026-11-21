@@ -125,25 +125,6 @@ impl crate::AtomicFunction {
     }
 }
 
-impl crate::AddressSpace {
-    /// Whether a variable with this address space can be initialized
-    const fn initializable(&self) -> bool {
-        match *self {
-            crate::AddressSpace::Function | crate::AddressSpace::Private => true,
-            crate::AddressSpace::WorkGroup
-            | crate::AddressSpace::Uniform
-            | crate::AddressSpace::Storage { .. }
-            | crate::AddressSpace::Handle
-            | crate::AddressSpace::Immediate
-            | crate::AddressSpace::TaskPayload => false,
-
-            crate::AddressSpace::RayPayload | crate::AddressSpace::IncomingRayPayload => {
-                unreachable!()
-            }
-        }
-    }
-}
-
 bitflags::bitflags! {
     /// Configuration flags for the [`Writer`].
     #[cfg_attr(feature = "serialize", derive(serde::Serialize))]
@@ -411,6 +392,8 @@ type BackendResult<T = ()> = Result<T, Error>;
 /// A GLSL compilation error.
 #[derive(Debug, Error)]
 pub enum Error {
+    #[error(transparent)]
+    Pass(#[from] back::passes::PassError),
     /// A error occurred while writing to the output.
     #[error("Format error")]
     FmtError(#[from] FmtError),
@@ -463,19 +446,6 @@ enum BinaryOperation {
     ModuloInt,
     /// Any plain operation. No additional logic required.
     Other,
-}
-
-fn is_value_init_supported(module: &crate::Module, ty: Handle<crate::Type>) -> bool {
-    match module.types[ty].inner {
-        TypeInner::Scalar { .. } | TypeInner::Vector { .. } | TypeInner::Matrix { .. } => true,
-        TypeInner::Array { base, size, .. } => {
-            size != crate::ArraySize::Dynamic && is_value_init_supported(module, base)
-        }
-        TypeInner::Struct { ref members, .. } => members
-            .iter()
-            .all(|member| is_value_init_supported(module, member.ty)),
-        _ => false,
-    }
 }
 
 pub fn supported_capabilities() -> valid::Capabilities {

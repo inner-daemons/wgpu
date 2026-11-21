@@ -27,7 +27,8 @@ layout(location = 4) out int _fs2p_location4;
 layout(location = 5) out uint _fs2p_location5;
 
 void main() {
-    FragmentOutputVec2Scalar output_1 = FragmentOutputVec2Scalar(vec2(0.0), ivec2(0), uvec2(0u), 0.0, 0, 0u);
+    FragmentOutputVec2Scalar output_1;
+    output_1 = FragmentOutputVec2Scalar(vec2(0.0), ivec2(0), uvec2(0u), 0.0, 0, 0u);
     output_1.vec2f = vec2(0.0);
     output_1.vec2i = ivec2(0);
     output_1.vec2u = uvec2(0u);

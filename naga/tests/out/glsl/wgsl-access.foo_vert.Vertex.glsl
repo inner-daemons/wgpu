@@ -30,7 +30,7 @@ struct Outer {
     Inner om_nom_nom;
     uint thing;
 };
-GlobalConst msl_padding_global_const = GlobalConst(0u, uvec3(0u, 0u, 0u), 0);
+GlobalConst msl_padding_global_const;
 
 layout(std430) buffer Bar_block_0Vertex {
     mat4x3 _matrix;
@@ -49,8 +49,10 @@ layout(std140) uniform MatCx2InArray_block_3Vertex { MatCx2InArray _group_0_bind
 
 
 void test_matrix_within_struct_accesses() {
-    int idx = 1;
-    Baz t = Baz(mat3x2(vec2(1.0), vec2(2.0), vec2(3.0)));
+    int idx;
+    Baz t;
+    idx = 1;
+    t = Baz(mat3x2(vec2(1.0), vec2(2.0), vec2(3.0)));
     int _e3 = idx;
     idx = (_e3 - 1);
     mat3x2 l0_ = _group_0_binding_1_vs.m;
@@ -65,26 +67,28 @@ void test_matrix_within_struct_accesses() {
     int _e36 = idx;
     int _e38 = idx;
     float l6_ = _group_0_binding_1_vs.m[_e36][_e38];
-    int _e51 = idx;
-    idx = (_e51 + 1);
+    int _e43 = idx;
+    idx = (_e43 + 1);
     t.m = mat3x2(vec2(6.0), vec2(5.0), vec2(4.0));
     t.m[0] = vec2(9.0);
-    int _e66 = idx;
-    t.m[_e66] = vec2(90.0);
+    int _e58 = idx;
+    t.m[_e58] = vec2(90.0);
     t.m[0][1] = 10.0;
-    int _e76 = idx;
-    t.m[0][_e76] = 20.0;
-    int _e80 = idx;
-    t.m[_e80][1] = 30.0;
-    int _e85 = idx;
-    int _e87 = idx;
-    t.m[_e85][_e87] = 40.0;
+    int _e68 = idx;
+    t.m[0][_e68] = 20.0;
+    int _e72 = idx;
+    t.m[_e72][1] = 30.0;
+    int _e77 = idx;
+    int _e79 = idx;
+    t.m[_e77][_e79] = 40.0;
     return;
 }
 
 void test_matrix_within_array_within_struct_accesses() {
-    int idx_1 = 1;
-    MatCx2InArray t_1 = MatCx2InArray(mat4x2[2](mat4x2(0.0), mat4x2(0.0)));
+    int idx_1;
+    MatCx2InArray t_1;
+    idx_1 = 1;
+    t_1 = MatCx2InArray(mat4x2[2](mat4x2(0.0), mat4x2(0.0)));
     int _e3 = idx_1;
     idx_1 = (_e3 - 1);
     mat4x2 l0_1[2] = _group_0_binding_3_vs.am;
@@ -100,21 +104,21 @@ void test_matrix_within_array_within_struct_accesses() {
     int _e46 = idx_1;
     int _e48 = idx_1;
     float l7_ = _group_0_binding_3_vs.am[0][_e46][_e48];
-    int _e55 = idx_1;
-    idx_1 = (_e55 + 1);
+    int _e53 = idx_1;
+    idx_1 = (_e53 + 1);
     t_1.am = mat4x2[2](mat4x2(0.0), mat4x2(0.0));
     t_1.am[0] = mat4x2(vec2(8.0), vec2(7.0), vec2(6.0), vec2(5.0));
     t_1.am[0][0] = vec2(9.0);
-    int _e77 = idx_1;
-    t_1.am[0][_e77] = vec2(90.0);
+    int _e75 = idx_1;
+    t_1.am[0][_e75] = vec2(90.0);
     t_1.am[0][0][1] = 10.0;
-    int _e89 = idx_1;
-    t_1.am[0][0][_e89] = 20.0;
-    int _e94 = idx_1;
-    t_1.am[0][_e94][1] = 30.0;
+    int _e87 = idx_1;
+    t_1.am[0][0][_e87] = 20.0;
+    int _e92 = idx_1;
+    t_1.am[0][_e92][1] = 30.0;
+    int _e98 = idx_1;
     int _e100 = idx_1;
-    int _e102 = idx_1;
-    t_1.am[0][_e100][_e102] = 40.0;
+    t_1.am[0][_e98][_e100] = 40.0;
     return;
 }
 
@@ -138,8 +142,10 @@ void assign_array_through_ptr_fn(inout vec4 foo_2[2]) {
 }
 
 void assign_through_ptr() {
-    uint val = 33u;
-    vec4 arr[2] = vec4[2](vec4(6.0), vec4(7.0));
+    uint val;
+    vec4 arr[2];
+    val = 33u;
+    arr = vec4[2](vec4(6.0), vec4(7.0));
     assign_through_ptr_fn(val);
     assign_array_through_ptr_fn(arr);
     return;
@@ -166,8 +172,10 @@ void assign_to_arg_ptr_array_element(inout uint p_4[4]) {
 }
 
 void assign_to_ptr_components() {
-    AssignToMember s1_ = AssignToMember(0u);
-    uint a1_[4] = uint[4](0u, 0u, 0u, 0u);
+    AssignToMember s1_;
+    uint a1_[4];
+    s1_ = AssignToMember(0u);
+    a1_ = uint[4](0u, 0u, 0u, 0u);
     assign_to_arg_ptr_member(s1_);
     uint _e1 = fetch_arg_ptr_member(s1_);
     assign_to_arg_ptr_array_element(a1_);
@@ -176,16 +184,18 @@ void assign_to_ptr_components() {
 }
 
 bool index_ptr(bool value) {
-    bool a_1[1] = bool[1](false);
+    bool a_1[1];
+    a_1 = bool[1](false);
     a_1 = bool[1](value);
     bool _e4 = a_1[0];
     return _e4;
 }
 
 int member_ptr() {
-    S s = S(42);
-    int _e4 = s.m;
-    return _e4;
+    S s;
+    s = S(42);
+    int _e2 = s.m;
+    return _e2;
 }
 
 int let_members_of_members() {
@@ -197,9 +207,12 @@ int let_members_of_members() {
 }
 
 int var_members_of_members() {
-    Outer thing = Outer(Inner(0), 0u);
-    Inner inner = Inner(0);
-    int delishus = 0;
+    Outer thing;
+    Inner inner;
+    int delishus;
+    thing = Outer(Inner(0), 0u);
+    inner = Inner(0);
+    delishus = 0;
     Inner _e3 = thing.om_nom_nom;
     inner = _e3;
     int _e6 = inner.delicious;
@@ -214,8 +227,11 @@ int var_members_of_members() {
 
 void main() {
     uint vi = uint(gl_VertexID);
-    float foo = 0.0;
-    int c2_[5] = int[5](0, 0, 0, 0, 0);
+    float foo;
+    int c2_[5];
+    foo = 0.0;
+    c2_ = int[5](0, 0, 0, 0, 0);
+    msl_padding_global_const = GlobalConst(0u, uvec3(0u, 0u, 0u), 0);
     float baz_1 = foo;
     foo = 1.0;
     GlobalConst phony = msl_padding_global_const;

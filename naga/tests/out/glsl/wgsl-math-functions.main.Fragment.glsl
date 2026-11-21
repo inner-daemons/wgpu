@@ -55,8 +55,10 @@ _frexp_result_vec4_f32_ naga_frexp(vec4 arg) {
 }
 
 void main() {
-    float runtime_f32_ = 1.0;
-    int runtime_i32_ = 1;
+    float runtime_f32_;
+    int runtime_i32_;
+    runtime_f32_ = 1.0;
+    runtime_i32_ = 1;
     vec4 v = vec4(0.0);
     float a = degrees(1.0);
     float b = radians(1.0);

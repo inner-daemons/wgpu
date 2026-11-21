@@ -14,7 +14,8 @@ uniform sampler3D _group_0_binding_7_fs;
 layout(location = 0) out vec4 _fs2p_location0;
 
 void main() {
-    vec4 a = vec4(0.0);
+    vec4 a;
+    a = vec4(0.0);
     vec2 _e1 = vec2(0.5);
     vec3 _e3 = vec3(0.5);
     ivec2 _e6 = ivec2(3, 1);

@@ -61,9 +61,12 @@ void all_constant_arguments() {
 }
 
 void mixed_constant_and_runtime_arguments() {
-    uint u = 0u;
-    int i = 0;
-    float f = 0.0;
+    uint u;
+    int i;
+    float f;
+    u = 0u;
+    i = 0;
+    f = 0.0;
     uint _e3 = u;
     uvec2 xvupuai_1 = uvec2(_e3, 43u);
     uint _e6 = u;

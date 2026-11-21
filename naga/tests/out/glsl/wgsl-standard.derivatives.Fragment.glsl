@@ -11,9 +11,12 @@ bool test_any_and_all_for_bool() {
 
 void main() {
     vec4 foo = gl_FragCoord;
-    vec4 x = vec4(0.0);
-    vec4 y = vec4(0.0);
-    vec4 z = vec4(0.0);
+    vec4 x;
+    vec4 y;
+    vec4 z;
+    x = vec4(0.0);
+    y = vec4(0.0);
+    z = vec4(0.0);
     vec4 _e1 = dFdx(foo);
     x = _e1;
     vec4 _e3 = dFdy(foo);

@@ -53,8 +53,10 @@ void assign_array_through_ptr_fn(inout vec4 foo_2[2]) {
 }
 
 void assign_through_ptr() {
-    uint val = 33u;
-    vec4 arr[2] = vec4[2](vec4(6.0), vec4(7.0));
+    uint val;
+    vec4 arr[2];
+    val = 33u;
+    arr = vec4[2](vec4(6.0), vec4(7.0));
     assign_through_ptr_fn(val);
     assign_array_through_ptr_fn(arr);
     return;
@@ -81,8 +83,10 @@ void assign_to_arg_ptr_array_element(inout uint p_4[4]) {
 }
 
 void assign_to_ptr_components() {
-    AssignToMember s1_ = AssignToMember(0u);
-    uint a1_[4] = uint[4](0u, 0u, 0u, 0u);
+    AssignToMember s1_;
+    uint a1_[4];
+    s1_ = AssignToMember(0u);
+    a1_ = uint[4](0u, 0u, 0u, 0u);
     assign_to_arg_ptr_member(s1_);
     uint _e1 = fetch_arg_ptr_member(s1_);
     assign_to_arg_ptr_array_element(a1_);
@@ -91,16 +95,18 @@ void assign_to_ptr_components() {
 }
 
 bool index_ptr(bool value) {
-    bool a_1[1] = bool[1](false);
+    bool a_1[1];
+    a_1 = bool[1](false);
     a_1 = bool[1](value);
     bool _e4 = a_1[0];
     return _e4;
 }
 
 int member_ptr() {
-    S s = S(42);
-    int _e4 = s.m;
-    return _e4;
+    S s;
+    s = S(42);
+    int _e2 = s.m;
+    return _e2;
 }
 
 int let_members_of_members() {
@@ -112,9 +118,12 @@ int let_members_of_members() {
 }
 
 int var_members_of_members() {
-    Outer thing = Outer(Inner(0), 0u);
-    Inner inner = Inner(0);
-    int delishus = 0;
+    Outer thing;
+    Inner inner;
+    int delishus;
+    thing = Outer(Inner(0), 0u);
+    inner = Inner(0);
+    delishus = 0;
     Inner _e3 = thing.om_nom_nom;
     inner = _e3;
     int _e6 = inner.delicious;

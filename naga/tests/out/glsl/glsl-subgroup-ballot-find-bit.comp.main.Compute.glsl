@@ -15,15 +15,18 @@ struct Output {
 };
 layout(std430) buffer Output_block_0Compute { Output _group_0_binding_0_cs; };
 
-uint gen_gl_SubgroupInvocationID_1 = 0u;
+uint gen_gl_SubgroupInvocationID_1;
 
-uint gen_gl_SubgroupSize_1 = 0u;
+uint gen_gl_SubgroupSize_1;
 
 
 void main_1() {
-    uvec4 mask = uvec4(0u);
-    uint lsb = 0u;
-    uint msb = 0u;
+    uvec4 mask;
+    uint lsb;
+    uint msb;
+    mask = uvec4(0u);
+    lsb = 0u;
+    msb = 0u;
     uint _e4 = gen_gl_SubgroupInvocationID_1;
     uint _e5 = gen_gl_SubgroupSize_1;
     mask = uvec4(_e4, _e5, 3u, 4u);
@@ -42,6 +45,8 @@ void main_1() {
 void main() {
     uint gen_gl_SubgroupInvocationID = gl_SubgroupInvocationID;
     uint gen_gl_SubgroupSize = gl_SubgroupSize;
+    gen_gl_SubgroupInvocationID_1 = 0u;
+    gen_gl_SubgroupSize_1 = 0u;
     gen_gl_SubgroupInvocationID_1 = gen_gl_SubgroupInvocationID;
     gen_gl_SubgroupSize_1 = gen_gl_SubgroupSize;
     main_1();

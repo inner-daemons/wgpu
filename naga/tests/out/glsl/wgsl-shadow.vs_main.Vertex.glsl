@@ -36,7 +36,8 @@ layout(location = 1) smooth out vec4 _vs2fs_location1;
 void main() {
     ivec4 position = _p2vs_location0;
     ivec4 normal = _p2vs_location1;
-    VertexOutput out_ = VertexOutput(vec4(0.0), vec3(0.0), vec4(0.0));
+    VertexOutput out_;
+    out_ = VertexOutput(vec4(0.0), vec3(0.0), vec4(0.0));
     mat4x4 w = _group_1_binding_0_vs.world;
     mat4x4 _e7 = _group_1_binding_0_vs.world;
     vec4 world_pos = (_e7 * vec4(position));

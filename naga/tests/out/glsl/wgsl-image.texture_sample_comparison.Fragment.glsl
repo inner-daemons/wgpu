@@ -8,7 +8,8 @@ uniform samplerCubeShadow _group_1_binding_4_fs;
 layout(location = 0) out float _fs2p_location0;
 
 void main() {
-    float a_1 = 0.0;
+    float a_1;
+    a_1 = 0.0;
     vec2 tc = vec2(0.5);
     vec3 tc3_ = vec3(0.5);
     float _e6 = a_1;

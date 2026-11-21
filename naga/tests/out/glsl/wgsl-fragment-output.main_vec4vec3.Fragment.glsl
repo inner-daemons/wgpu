@@ -27,7 +27,8 @@ layout(location = 4) out ivec3 _fs2p_location4;
 layout(location = 5) out uvec3 _fs2p_location5;
 
 void main() {
-    FragmentOutputVec4Vec3_ output_ = FragmentOutputVec4Vec3_(vec4(0.0), ivec4(0), uvec4(0u), vec3(0.0), ivec3(0), uvec3(0u));
+    FragmentOutputVec4Vec3_ output_;
+    output_ = FragmentOutputVec4Vec3_(vec4(0.0), ivec4(0), uvec4(0u), vec3(0.0), ivec3(0), uvec3(0u));
     output_.vec4f = vec4(0.0);
     output_.vec4i = ivec4(0);
     output_.vec4u = uvec4(0u);

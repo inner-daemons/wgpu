@@ -3,14 +3,15 @@
 precision highp float;
 precision highp int;
 
-uint global_2 = 0u;
+uint global_2;
 
-vec4 global_3 = vec4(0.0, 0.0, 0.0, 1.0);
+vec4 global_3;
 
 invariant gl_Position;
 
 void function_1() {
-    vec4 local[6] = vec4[6](vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
+    vec4 local[6];
+    local = vec4[6](vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0), vec4(0.0));
     uint _e5 = global_2;
     local = vec4[6](vec4(-1.0, -1.0, 0.0, 1.0), vec4(1.0, -1.0, 0.0, 1.0), vec4(1.0, 1.0, 0.0, 1.0), vec4(1.0, 1.0, 0.0, 1.0), vec4(-1.0, 1.0, 0.0, 1.0), vec4(-1.0, -1.0, 0.0, 1.0));
     if ((_e5 < 6u)) {
@@ -22,6 +23,8 @@ void function_1() {
 
 void main() {
     uint param_1 = uint(gl_VertexID);
+    global_2 = 0u;
+    global_3 = vec4(0.0, 0.0, 0.0, 1.0);
     global_2 = param_1;
     function_1();
     float _e4 = global_3.y;

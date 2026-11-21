@@ -1,28 +1,38 @@
 #version 330 core
 
 void main() {
-    int i = 0;
-    ivec2 i2_ = ivec2(0);
-    ivec3 i3_ = ivec3(0);
-    ivec4 i4_ = ivec4(0);
-    uint u = 0u;
-    uvec2 u2_ = uvec2(0u);
-    uvec3 u3_ = uvec3(0u);
-    uvec4 u4_ = uvec4(0u);
-    vec2 f2_ = vec2(0.0);
-    vec4 f4_ = vec4(0.0);
-    ivec4 _e23 = i4_;
-    u = uint((_e23[0] & 0xFF) | ((_e23[1] & 0xFF) << 8) | ((_e23[2] & 0xFF) << 16) | ((_e23[3] & 0xFF) << 24));
-    uvec4 _e25 = u4_;
-    u = (_e25[0] & 0xFFu) | ((_e25[1] & 0xFFu) << 8) | ((_e25[2] & 0xFFu) << 16) | ((_e25[3] & 0xFFu) << 24);
-    uint _e27 = u;
-    f4_ = (vec4(ivec4(_e27 << 24, _e27 << 16, _e27 << 8, _e27) >> 24) / 127.0);
-    uint _e29 = u;
-    f4_ = (vec4(_e29 & 0xFFu, _e29 >> 8 & 0xFFu, _e29 >> 16 & 0xFFu, _e29 >> 24) / 255.0);
-    uint _e31 = u;
-    f2_ = (vec2(ivec2(_e31 << 16, _e31) >> 16) / 32767.0);
-    uint _e33 = u;
-    f2_ = (vec2(_e33 & 0xFFFFu, _e33 >> 16) / 65535.0);
+    int i;
+    ivec2 i2_;
+    ivec3 i3_;
+    ivec4 i4_;
+    uint u;
+    uvec2 u2_;
+    uvec3 u3_;
+    uvec4 u4_;
+    vec2 f2_;
+    vec4 f4_;
+    i = 0;
+    i2_ = ivec2(0);
+    i3_ = ivec3(0);
+    i4_ = ivec4(0);
+    u = 0u;
+    u2_ = uvec2(0u);
+    u3_ = uvec3(0u);
+    u4_ = uvec4(0u);
+    f2_ = vec2(0.0);
+    f4_ = vec4(0.0);
+    ivec4 _e7 = i4_;
+    u = uint((_e7[0] & 0xFF) | ((_e7[1] & 0xFF) << 8) | ((_e7[2] & 0xFF) << 16) | ((_e7[3] & 0xFF) << 24));
+    uvec4 _e9 = u4_;
+    u = (_e9[0] & 0xFFu) | ((_e9[1] & 0xFFu) << 8) | ((_e9[2] & 0xFFu) << 16) | ((_e9[3] & 0xFFu) << 24);
+    uint _e11 = u;
+    f4_ = (vec4(ivec4(_e11 << 24, _e11 << 16, _e11 << 8, _e11) >> 24) / 127.0);
+    uint _e13 = u;
+    f4_ = (vec4(_e13 & 0xFFu, _e13 >> 8 & 0xFFu, _e13 >> 16 & 0xFFu, _e13 >> 24) / 255.0);
+    uint _e15 = u;
+    f2_ = (vec2(ivec2(_e15 << 16, _e15) >> 16) / 32767.0);
+    uint _e17 = u;
+    f2_ = (vec2(_e17 & 0xFFFFu, _e17 >> 16) / 65535.0);
     return;
 }
 
