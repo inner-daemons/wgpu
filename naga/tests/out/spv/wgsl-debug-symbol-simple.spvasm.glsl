@@ -21,8 +21,8 @@ layout(location = 0) out vec3 color_1;
 
 void main()
 {
-    VertexOutput _out = VertexOutput(vec4(0.0), vec3(0.0));
     VertexInput _11 = VertexInput(position, color);
+    VertexOutput _out = VertexOutput(vec4(0.0), vec3(0.0));
     _out.color = _11.color;
     _out.clip_position = vec4(_11.position, 1.0);
     gl_Position = _out.clip_position;
@@ -52,11 +52,11 @@ layout(location = 0) out vec4 _48;
 
 void main()
 {
-    vec3 color_1 = vec3(0.0);
-    int i = 0;
-    float ii = 0.0;
     uvec2 loop_bound = uvec2(4294967295u);
+    vec3 color_1 = vec3(0.0);
+    float ii = 0.0;
     color_1 = VertexOutput(gl_FragCoord, color).color;
+    int i = 0;
     for (;;)
     {
         if (all(equal(uvec2(0u), loop_bound)))

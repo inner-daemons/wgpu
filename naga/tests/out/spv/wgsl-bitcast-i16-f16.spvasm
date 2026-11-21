@@ -38,13 +38,18 @@ OpExecutionMode %9 LocalSize 1 1 1
 %31 = OpTypePointer Function %7
 %9 = OpFunction  %2  None %10
 %8 = OpLabel
-%30 = OpVariable  %31  Function %21
-%24 = OpVariable  %25  Function %12
-%28 = OpVariable  %29  Function %17
-%22 = OpVariable  %23  Function %11
-%26 = OpVariable  %27  Function %13
+%30 = OpVariable  %31  Function
+%24 = OpVariable  %25  Function
+%28 = OpVariable  %29  Function
+%22 = OpVariable  %23  Function
+%26 = OpVariable  %27  Function
 OpBranch %32
 %32 = OpLabel
+OpStore %22 %11
+OpStore %24 %12
+OpStore %26 %13
+OpStore %28 %17
+OpStore %30 %21
 %33 = OpLoad  %3  %22
 %34 = OpBitcast  %4  %33
 OpStore %24 %34

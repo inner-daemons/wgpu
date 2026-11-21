@@ -31,10 +31,10 @@ layout(location = 0) out vec4 _50;
 
 void main()
 {
-    uvec2 _68 = uvec2(0u);
-    vec4 _72 = vec4(0.0);
     uint _66 = 0u;
+    uvec2 _68 = uvec2(0u);
     float _70 = 0.0;
+    vec4 _72 = vec4(0.0);
     uint _78 = _21(_47)._m0;
     _68 += uvec2(textureSize(_24[0u], int(0u)));
     _68 += uvec2(textureSize(_24[_42._m0._m0], int(0u)));

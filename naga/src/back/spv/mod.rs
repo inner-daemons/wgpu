@@ -179,6 +179,8 @@ pub enum Error {
     SpirvVersionTooLow(u8, u8),
     #[error("mapping of {0:?} is missing")]
     MissingBinding(crate::ResourceBinding),
+    #[error(transparent)]
+    Pass(#[from] crate::back::passes::PassError),
 }
 
 #[derive(Default)]

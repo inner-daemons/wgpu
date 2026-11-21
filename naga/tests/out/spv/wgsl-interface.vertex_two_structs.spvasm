@@ -45,7 +45,7 @@ OpDecorate %24 BuiltIn PointSize
 %32 = OpTypePointer Function %6
 %27 = OpFunction  %2  None %28
 %14 = OpLabel
-%31 = OpVariable  %32  Function %29
+%31 = OpVariable  %32  Function
 %18 = OpLoad  %6  %16
 %15 = OpCompositeConstruct  %12  %18
 %21 = OpLoad  %6  %20
@@ -53,6 +53,7 @@ OpDecorate %24 BuiltIn PointSize
 OpStore %24 %26
 OpBranch %33
 %33 = OpLabel
+OpStore %31 %29
 %34 = OpCompositeExtract  %6  %15 0
 %35 = OpConvertUToF  %3  %34
 %36 = OpCompositeExtract  %6  %19 0

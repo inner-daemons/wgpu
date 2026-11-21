@@ -85,8 +85,8 @@ OpDecorate %77 BuiltIn Position
 %48 = OpTypeInt 32 0
 %47 = OpConstant  %48  0
 %50 = OpTypePointer StorageBuffer %5
-%53 = OpTypePointer Function %5
-%54 = OpConstantNull  %5
+%52 = OpConstantNull  %5
+%54 = OpTypePointer Function %5
 %60 = OpVariable  %26  Input
 %62 = OpVariable  %23  Input
 %64 = OpVariable  %26  Input
@@ -97,8 +97,8 @@ OpDecorate %77 BuiltIn Position
 %77 = OpVariable  %29  Output
 %82 = OpTypePointer Uniform %7
 %84 = OpTypePointer StorageBuffer %7
-%87 = OpTypePointer Function %7
-%88 = OpConstantNull  %7
+%86 = OpConstantNull  %7
+%88 = OpTypePointer Function %7
 %30 = OpFunction  %2  None %31
 %20 = OpLabel
 %24 = OpLoad  %3  %22
@@ -121,15 +121,16 @@ OpReturn
 OpFunctionEnd
 %45 = OpFunction  %2  None %31
 %44 = OpLabel
-%52 = OpVariable  %53  Function %54
+%53 = OpVariable  %54  Function
 %49 = OpAccessChain  %46  %8 %47
 %51 = OpAccessChain  %50  %11 %47
 OpBranch %55
 %55 = OpLabel
+OpStore %53 %52
 %56 = OpLoad  %5  %49
-OpStore %52 %56
+OpStore %53 %56
 %57 = OpLoad  %5  %51
-OpStore %52 %57
+OpStore %53 %57
 OpReturn
 OpFunctionEnd
 %67 = OpFunction  %2  None %31
@@ -156,14 +157,15 @@ OpReturn
 OpFunctionEnd
 %81 = OpFunction  %2  None %31
 %80 = OpLabel
-%86 = OpVariable  %87  Function %88
+%87 = OpVariable  %88  Function
 %83 = OpAccessChain  %82  %14 %47
 %85 = OpAccessChain  %84  %17 %47
 OpBranch %89
 %89 = OpLabel
+OpStore %87 %86
 %90 = OpLoad  %7  %83
-OpStore %86 %90
+OpStore %87 %90
 %91 = OpLoad  %7  %85
-OpStore %86 %91
+OpStore %87 %91
 OpReturn
 OpFunctionEnd

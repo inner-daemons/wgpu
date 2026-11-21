@@ -48,11 +48,11 @@ bool _149(rayQueryEXT _150, inout uint _151)
 
 void main()
 {
-    uint _24 = 0u;
     uint _28 = 0u;
     float _30 = 0.0;
     uvec2 _43 = uvec2(4294967295u);
     rayQueryEXT _26;
+    uint _24 = 0u;
     for (;;)
     {
         if (all(equal(uvec2(0u), _43)))

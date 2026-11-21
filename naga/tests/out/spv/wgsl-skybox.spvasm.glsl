@@ -33,13 +33,13 @@ int _21(int _23, int _24)
 void main()
 {
     int _55 = 0;
-    int _58 = 0;
+    int _57 = 0;
     _55 = _21(int(uint(gl_VertexIndex)), 2);
-    _58 = int(uint(gl_VertexIndex)) & 1;
-    vec4 _73 = vec4((float(_55) * 4.0) - 1.0, (float(_58) * 4.0) - 1.0, 0.0, 1.0);
-    _6 _94 = _6(_73, transpose(mat3(_14._m0._m1[0u].xyz, _14._m0._m1[1u].xyz, _14._m0._m1[2u].xyz)) * (_14._m0._m0 * _73).xyz);
-    gl_Position = _94._m0;
-    _44 = _94._m1;
+    _57 = int(uint(gl_VertexIndex)) & 1;
+    vec4 _71 = vec4((float(_55) * 4.0) - 1.0, (float(_57) * 4.0) - 1.0, 0.0, 1.0);
+    _6 _92 = _6(_71, transpose(mat3(_14._m0._m1[0u].xyz, _14._m0._m1[1u].xyz, _14._m0._m1[2u].xyz)) * (_14._m0._m0 * _71).xyz);
+    gl_Position = _92._m0;
+    _44 = _92._m1;
 }
 
 
@@ -68,12 +68,12 @@ layout(set = 0, binding = 0, std140) uniform _15_14
 layout(set = 0, binding = 1) uniform textureCube _17;
 layout(set = 0, binding = 2) uniform sampler _19;
 
-layout(location = 0) in vec3 _102;
-layout(location = 0) out vec4 _105;
+layout(location = 0) in vec3 _100;
+layout(location = 0) out vec4 _103;
 
 void main()
 {
-    vec3 _110 = _6(gl_FragCoord, _102)._m1;
-    _105 = texture(samplerCube(_17, _19), mix(_110, vec3(0.0), isnan(_110)));
+    vec3 _108 = _6(gl_FragCoord, _100)._m1;
+    _103 = texture(samplerCube(_17, _19), mix(_108, vec3(0.0), isnan(_108)));
 }
 

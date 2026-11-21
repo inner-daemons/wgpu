@@ -71,10 +71,12 @@ OpMemberDecorate %15 1 Offset 16
 %63 = OpConstantComposite  %5  %20 %20 %20 %20
 %18 = OpFunction  %2  None %19
 %17 = OpLabel
-%53 = OpVariable  %54  Function %20
-%55 = OpVariable  %56  Function %21
+%53 = OpVariable  %54  Function
+%55 = OpVariable  %56  Function
 OpBranch %57
 %57 = OpLabel
+OpStore %53 %20
+OpStore %55 %21
 %58 = OpExtInst  %3  %1 Degrees %20
 %59 = OpExtInst  %3  %1 Radians %20
 %60 = OpExtInst  %5  %1 Degrees %23

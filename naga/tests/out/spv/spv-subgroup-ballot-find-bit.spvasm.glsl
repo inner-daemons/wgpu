@@ -8,22 +8,23 @@ struct _4
     uint _m0;
 };
 
-layout(set = 0, binding = 0, std430) buffer _10_9
+layout(set = 0, binding = 0, std430) buffer _9_8
 {
     _4 _m0;
-} _9;
+} _8;
 
-uint _6 = 0u;
+uint _6;
 
-void _13()
+void _12()
 {
-    uvec4 _23 = subgroupBallot(_6 != 0u);
-    _9._m0._m0 = subgroupBallotFindLSB(_23) + subgroupBallotFindMSB(_23);
+    uvec4 _22 = subgroupBallot(_6 != 0u);
+    _8._m0._m0 = subgroupBallotFindLSB(_22) + subgroupBallotFindMSB(_22);
 }
 
 void main()
 {
+    _6 = 0u;
     _6 = gl_SubgroupInvocationID;
-    _13();
+    _12();
 }
 

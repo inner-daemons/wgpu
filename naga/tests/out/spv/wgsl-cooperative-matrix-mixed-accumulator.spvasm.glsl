@@ -23,15 +23,15 @@ layout(set = 0, binding = 1, std430) buffer _16_15
 
 void main()
 {
-    coopmat<float, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseAccumulator> _26 = coopmat<float, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseAccumulator>(0.0);
+    coopmat<float, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseAccumulator> _27 = coopmat<float, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseAccumulator>(0.0);
     coopmat<float16_t, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseA> _34;
     coopMatLoad(_34, _12._m0, 0u, 8u, gl_CooperativeMatrixLayoutColumnMajor);
     coopmat<float16_t, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseB> _37;
     coopMatLoad(_37, _12._m0, 0u, 8u, gl_CooperativeMatrixLayoutColumnMajor);
     coopmat<float, gl_ScopeSubgroup, 8u, 8u, gl_MatrixUseAccumulator> _40;
     coopMatLoad(_40, _15._m0, 0u, 8u, gl_CooperativeMatrixLayoutColumnMajor);
-    _26 = _40;
-    _26 = coopMatMulAdd(_34, _37, _26, 0);
-    coopMatStore(_26, _15._m0, 0u, 8u, gl_CooperativeMatrixLayoutColumnMajor);
+    _27 = _40;
+    _27 = coopMatMulAdd(_34, _37, _27, 0);
+    coopMatStore(_27, _15._m0, 0u, 8u, gl_CooperativeMatrixLayoutColumnMajor);
 }
 

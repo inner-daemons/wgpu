@@ -46,8 +46,8 @@ OpMemberDecorate %16 0 Offset 0
 %21 = OpTypePointer StorageBuffer %4
 %22 = OpConstant  %9  0
 %24 = OpTypePointer StorageBuffer %6
-%27 = OpTypePointer Function %7
-%28 = OpConstantNull  %7
+%26 = OpConstantNull  %7
+%28 = OpTypePointer Function %7
 %30 = OpTypePointer StorageBuffer %3
 %31 = OpTypeCooperativeMatrixKHR %3 %8 %10 %10 %22
 %32 = OpConstant  %9  1
@@ -55,22 +55,23 @@ OpMemberDecorate %16 0 Offset 0
 %38 = OpTypePointer StorageBuffer %5
 %19 = OpFunction  %2  None %20
 %18 = OpLabel
-%26 = OpVariable  %27  Function %28
+%27 = OpVariable  %28  Function
 %23 = OpAccessChain  %21  %12 %22
 %25 = OpAccessChain  %24  %15 %22
 OpBranch %29
 %29 = OpLabel
+OpStore %27 %26
 %33 = OpAccessChain  %30  %23 %22
 %34 = OpCooperativeMatrixLoadKHR  %31  %33 %32 %10
 %36 = OpAccessChain  %30  %23 %22
 %37 = OpCooperativeMatrixLoadKHR  %35  %36 %32 %10
 %39 = OpAccessChain  %38  %25 %22
 %40 = OpCooperativeMatrixLoadKHR  %7  %39 %32 %10
-OpStore %26 %40
-%41 = OpLoad  %7  %26
+OpStore %27 %40
+%41 = OpLoad  %7  %27
 %42 = OpCooperativeMatrixMulAddKHR  %7  %34 %37 %41
-OpStore %26 %42
-%43 = OpLoad  %7  %26
+OpStore %27 %42
+%43 = OpLoad  %7  %27
 %44 = OpAccessChain  %38  %25 %22
 OpCooperativeMatrixStoreKHR %44 %43 %32 %10
 OpReturn

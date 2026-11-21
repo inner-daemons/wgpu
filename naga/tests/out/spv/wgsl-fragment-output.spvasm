@@ -70,8 +70,8 @@ OpDecorate %80 Location 5
 %38 = OpConstantComposite  %9  %32 %32 %32
 %39 = OpConstantComposite  %10  %34 %34 %34
 %40 = OpConstantComposite  %11  %36 %36 %36
-%42 = OpTypePointer Function %12
-%43 = OpConstantNull  %12
+%41 = OpConstantNull  %12
+%43 = OpTypePointer Function %12
 %45 = OpTypePointer Function %4
 %47 = OpTypePointer Function %6
 %48 = OpConstant  %7  1
@@ -98,8 +98,8 @@ OpDecorate %80 Location 5
 %83 = OpConstantComposite  %13  %32 %32
 %84 = OpConstantComposite  %14  %34 %34
 %85 = OpConstantComposite  %15  %36 %36
-%87 = OpTypePointer Function %16
-%88 = OpConstantNull  %16
+%86 = OpConstantNull  %16
+%88 = OpTypePointer Function %16
 %90 = OpTypePointer Function %13
 %92 = OpTypePointer Function %14
 %94 = OpTypePointer Function %15
@@ -108,22 +108,23 @@ OpDecorate %80 Location 5
 %100 = OpTypePointer Function %7
 %30 = OpFunction  %2  None %31
 %17 = OpLabel
-%41 = OpVariable  %42  Function %43
+%42 = OpVariable  %43  Function
 OpBranch %44
 %44 = OpLabel
-%46 = OpAccessChain  %45  %41 %36
+OpStore %42 %41
+%46 = OpAccessChain  %45  %42 %36
 OpStore %46 %33
-%49 = OpAccessChain  %47  %41 %48
+%49 = OpAccessChain  %47  %42 %48
 OpStore %49 %35
-%52 = OpAccessChain  %50  %41 %51
+%52 = OpAccessChain  %50  %42 %51
 OpStore %52 %37
-%55 = OpAccessChain  %53  %41 %54
+%55 = OpAccessChain  %53  %42 %54
 OpStore %55 %38
-%58 = OpAccessChain  %56  %41 %57
+%58 = OpAccessChain  %56  %42 %57
 OpStore %58 %39
-%61 = OpAccessChain  %59  %41 %60
+%61 = OpAccessChain  %59  %42 %60
 OpStore %61 %40
-%62 = OpLoad  %12  %41
+%62 = OpLoad  %12  %42
 %63 = OpCompositeExtract  %4  %62 0
 OpStore %18 %63
 %64 = OpCompositeExtract  %6  %62 1
@@ -140,22 +141,23 @@ OpReturn
 OpFunctionEnd
 %82 = OpFunction  %2  None %31
 %69 = OpLabel
-%86 = OpVariable  %87  Function %88
+%87 = OpVariable  %88  Function
 OpBranch %89
 %89 = OpLabel
-%91 = OpAccessChain  %90  %86 %36
+OpStore %87 %86
+%91 = OpAccessChain  %90  %87 %36
 OpStore %91 %83
-%93 = OpAccessChain  %92  %86 %48
+%93 = OpAccessChain  %92  %87 %48
 OpStore %93 %84
-%95 = OpAccessChain  %94  %86 %51
+%95 = OpAccessChain  %94  %87 %51
 OpStore %95 %85
-%97 = OpAccessChain  %96  %86 %54
+%97 = OpAccessChain  %96  %87 %54
 OpStore %97 %32
-%99 = OpAccessChain  %98  %86 %57
+%99 = OpAccessChain  %98  %87 %57
 OpStore %99 %34
-%101 = OpAccessChain  %100  %86 %60
+%101 = OpAccessChain  %100  %87 %60
 OpStore %101 %36
-%102 = OpLoad  %16  %86
+%102 = OpLoad  %16  %87
 %103 = OpCompositeExtract  %13  %102 0
 OpStore %70 %103
 %104 = OpCompositeExtract  %14  %102 1

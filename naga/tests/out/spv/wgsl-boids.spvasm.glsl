@@ -35,17 +35,17 @@ layout(set = 0, binding = 2, std430) buffer particlesDst
 
 void main()
 {
-    uint i = 0u;
-    int cVelCount = 0;
-    vec2 cVel = vec2(0.0);
-    vec2 vPos = vec2(0.0);
-    vec2 pos = vec2(0.0);
-    vec2 colVel = vec2(0.0);
-    vec2 vVel = vec2(0.0);
-    vec2 vel = vec2(0.0);
-    int cMassCount = 0;
-    vec2 cMass = vec2(0.0);
     uvec2 loop_bound = uvec2(4294967295u);
+    vec2 vPos = vec2(0.0);
+    vec2 vVel = vec2(0.0);
+    vec2 cMass = vec2(0.0);
+    vec2 cVel = vec2(0.0);
+    vec2 colVel = vec2(0.0);
+    int cMassCount = 0;
+    int cVelCount = 0;
+    vec2 pos = vec2(0.0);
+    vec2 vel = vec2(0.0);
+    uint i = 0u;
     if (gl_GlobalInvocationID.x >= 1500u)
     {
         return;
@@ -65,8 +65,8 @@ void main()
         }
         if (i == gl_GlobalInvocationID.x)
         {
-            uint _144 = i;
-            i = _144 + 1u;
+            uint _141 = i;
+            i = _141 + 1u;
             continue;
         }
         pos = particlesSrc.particles[i].pos;
@@ -85,8 +85,8 @@ void main()
             cVel += vel;
             cVelCount++;
         }
-        uint _144 = i;
-        i = _144 + 1u;
+        uint _141 = i;
+        i = _141 + 1u;
         continue;
     }
     if (cMassCount > 0)

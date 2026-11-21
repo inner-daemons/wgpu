@@ -27,10 +27,10 @@ struct _13
 
 void main()
 {
-    uint _31 = 2u;
     _12 _15 = _12(uint(gl_VertexIndex));
     _13 _19 = _13(uint(gl_InstanceIndex));
     gl_PointSize = 1.0;
+    uint _31 = 2u;
     uint _34 = _15._m0;
     float _35 = float(_34);
     uint _36 = _19._m0;

@@ -31,8 +31,8 @@ layout(location = 11) out float perspective_center;
 
 void main()
 {
-    FragmentInput _out = FragmentInput(vec4(0.0), 0u, 0u, 0.0, vec2(0.0), vec3(0.0), vec3(0.0), vec4(0.0), 0.0, 0.0, 0.0);
     gl_PointSize = 1.0;
+    FragmentInput _out = FragmentInput(vec4(0.0), 0u, 0u, 0.0, vec2(0.0), vec3(0.0), vec3(0.0), vec4(0.0), 0.0, 0.0, 0.0);
     _out.position = vec4(2.0, 4.0, 5.0, 6.0);
     _out._flat = 8u;
     _out.flat_either = 10u;

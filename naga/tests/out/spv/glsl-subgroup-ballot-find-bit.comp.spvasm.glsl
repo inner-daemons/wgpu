@@ -13,24 +13,26 @@ layout(set = 0, binding = 0, std430) buffer _7_6
     _4 _m0;
 } _6;
 
-uint _9 = 0u;
-uint _12 = 0u;
+uint _9;
+uint _11;
 
-void _14()
+void _13()
 {
     uvec4 _21 = uvec4(0u);
-    uint _24 = 0u;
-    uint _27 = 0u;
-    _21 = uvec4(_9, _12, 3u, 4u);
-    _24 = subgroupBallotFindLSB(_21);
-    _27 = subgroupBallotFindMSB(_21);
-    _6._m0._m0 = _24 + _27;
+    uint _23 = 0u;
+    uint _25 = 0u;
+    _21 = uvec4(_9, _11, 3u, 4u);
+    _23 = subgroupBallotFindLSB(_21);
+    _25 = subgroupBallotFindMSB(_21);
+    _6._m0._m0 = _23 + _25;
 }
 
 void main()
 {
+    _9 = 0u;
+    _11 = 0u;
     _9 = gl_SubgroupInvocationID;
-    _12 = gl_SubgroupSize;
-    _14();
+    _11 = gl_SubgroupSize;
+    _13();
 }
 

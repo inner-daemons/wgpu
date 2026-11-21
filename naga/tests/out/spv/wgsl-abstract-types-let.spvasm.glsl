@@ -8,8 +8,8 @@ void _19()
 void _63()
 {
     uint _64 = 0u;
-    int _67 = 0;
-    float _70 = 0.0;
+    int _66 = 0;
+    float _68 = 0.0;
 }
 
 void main()

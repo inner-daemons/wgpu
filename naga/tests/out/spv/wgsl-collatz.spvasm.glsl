@@ -18,9 +18,9 @@ uint naga_div(uint lhs, uint rhs)
 
 uint collatz_iterations(uint n_base)
 {
+    uvec2 loop_bound = uvec2(4294967295u);
     uint n = 0u;
     uint i = 0u;
-    uvec2 loop_bound = uvec2(4294967295u);
     n = n_base;
     for (;;)
     {

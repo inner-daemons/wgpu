@@ -161,7 +161,7 @@ OpName %80 "proj_position"
 OpName %82 "world_normal"
 OpName %84 "world_position"
 OpName %85 "vs_main"
-OpName %92 "out"
+OpName %93 "out"
 OpName %134 "proj_position"
 OpName %137 "world_normal"
 OpName %140 "world_position"
@@ -287,8 +287,8 @@ OpDecorate %227 Location 0
 %87 = OpTypePointer Uniform %9
 %88 = OpConstant  %7  0
 %90 = OpTypePointer Uniform %10
-%93 = OpTypePointer Function %12
-%94 = OpConstantNull  %12
+%92 = OpConstantNull  %12
+%94 = OpTypePointer Function %12
 %96 = OpTypePointer Uniform %5
 %103 = OpTypePointer Function %11
 %111 = OpTypeVector %14 3
@@ -361,13 +361,15 @@ OpReturnValue %73
 OpFunctionEnd
 %85 = OpFunction  %2  None %86
 %74 = OpLabel
-%92 = OpVariable  %93  Function %94
+%93 = OpVariable  %94  Function
 %77 = OpLoad  %13  %75
 %79 = OpLoad  %13  %78
 %89 = OpAccessChain  %87  %25 %88
 %91 = OpAccessChain  %90  %28 %88
 OpBranch %95
 %95 = OpLabel
+OpLine %3 39 5
+OpStore %93 %92
 OpLine %3 37 13
 %97 = OpAccessChain  %96  %91 %88
 %98 = OpLoad  %5  %97
@@ -391,11 +393,11 @@ OpLine %3 40 24
 %113 = OpConvertSToF  %11  %112
 %114 = OpMatrixTimesVector  %11  %110 %113
 OpLine %3 40 5
-%116 = OpAccessChain  %103  %92 %115
+%116 = OpAccessChain  %103  %93 %115
 OpStore %116 %114
 OpLine %3 41 5
 OpLine %3 41 5
-%119 = OpAccessChain  %117  %92 %118
+%119 = OpAccessChain  %117  %93 %118
 OpStore %119 %102
 OpLine %3 42 5
 OpLine %3 42 25
@@ -403,10 +405,10 @@ OpLine %3 42 25
 %121 = OpLoad  %5  %120
 %122 = OpMatrixTimesVector  %6  %121 %102
 OpLine %3 42 5
-%123 = OpAccessChain  %117  %92 %88
+%123 = OpAccessChain  %117  %93 %88
 OpStore %123 %122
 OpLine %3 1 1
-%124 = OpLoad  %12  %92
+%124 = OpLoad  %12  %93
 %125 = OpCompositeExtract  %6  %124 0
 OpStore %80 %125
 %127 = OpAccessChain  %126  %80 %115
@@ -421,8 +423,8 @@ OpReturn
 OpFunctionEnd
 %143 = OpFunction  %2  None %86
 %132 = OpLabel
-%150 = OpVariable  %103  Function %24
-%151 = OpVariable  %152  Function %88
+%150 = OpVariable  %103  Function
+%151 = OpVariable  %152  Function
 %166 = OpVariable  %161  Function %165
 %136 = OpLoad  %6  %134
 %139 = OpLoad  %11  %137
@@ -435,6 +437,10 @@ OpFunctionEnd
 %149 = OpLoad  %21  %39
 OpBranch %153
 %153 = OpLabel
+OpLine %3 87 5
+OpStore %150 %24
+OpLine %3 88 9
+OpStore %151 %88
 OpLine %3 85 18
 %154 = OpCompositeExtract  %11  %133 1
 %155 = OpExtInst  %11  %1 Normalize %154
@@ -529,8 +535,8 @@ OpReturn
 OpFunctionEnd
 %228 = OpFunction  %2  None %86
 %219 = OpLabel
-%235 = OpVariable  %103  Function %24
-%236 = OpVariable  %152  Function %88
+%235 = OpVariable  %103  Function
+%236 = OpVariable  %152  Function
 %244 = OpVariable  %161  Function %165
 %222 = OpLoad  %6  %221
 %224 = OpLoad  %11  %223
@@ -543,6 +549,10 @@ OpFunctionEnd
 %234 = OpLoad  %21  %39
 OpBranch %237
 %237 = OpLabel
+OpLine %3 106 5
+OpStore %235 %24
+OpLine %3 107 9
+OpStore %236 %88
 OpLine %3 105 18
 %238 = OpCompositeExtract  %11  %220 1
 %239 = OpExtInst  %11  %1 Normalize %238

@@ -26,10 +26,11 @@ OpExecutionMode %47 LocalSize 1 1 1
 %26 = OpConstantComposite  %18  %25 %25
 %5 = OpFunction  %2  None %6
 %4 = OpLabel
-%10 = OpVariable  %11  Function %7
+%10 = OpVariable  %11  Function
 %27 = OpVariable  %19  Function %26
 OpBranch %12
 %12 = OpLabel
+OpStore %10 %7
 OpBranch %13
 %13 = OpLabel
 OpLoopMerge %14 %16 None

@@ -16,8 +16,9 @@ OpExecutionMode %8 LocalSize 1 1 1
 %11 = OpTypePointer Function %3
 %8 = OpFunction  %2  None %9
 %7 = OpLabel
-%10 = OpVariable  %11  Function %6
+%10 = OpVariable  %11  Function
 OpBranch %12
 %12 = OpLabel
+OpStore %10 %6
 OpReturn
 OpFunctionEnd

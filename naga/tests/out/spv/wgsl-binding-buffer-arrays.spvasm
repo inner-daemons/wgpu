@@ -81,12 +81,13 @@ OpDecorate %133 NonUniform
 %146 = OpTypePointer StorageBuffer %9
 %29 = OpFunction  %2  None %30
 %22 = OpLabel
-%35 = OpVariable  %36  Function %32
+%35 = OpVariable  %36  Function
 %26 = OpLoad  %3  %24
 %23 = OpCompositeConstruct  %12  %26
 %33 = OpAccessChain  %31  %19 %32
 OpBranch %37
 %37 = OpLabel
+OpStore %35 %32
 %39 = OpAccessChain  %38  %33 %32
 %40 = OpLoad  %3  %39
 %41 = OpCompositeExtract  %3  %23 0

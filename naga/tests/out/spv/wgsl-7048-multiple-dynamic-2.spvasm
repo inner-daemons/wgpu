@@ -29,10 +29,11 @@ OpDecorate %11 Location 0
 %25 = OpTypePointer Function %5
 %13 = OpFunction  %2  None %14
 %10 = OpLabel
-%19 = OpVariable  %20  Function %18
+%19 = OpVariable  %20  Function
 %24 = OpVariable  %23  Function
 OpBranch %21
 %21 = OpLabel
+OpStore %19 %18
 %22 = OpLoad  %9  %19
 OpStore %24 %17
 %26 = OpAccessChain  %25  %24 %22

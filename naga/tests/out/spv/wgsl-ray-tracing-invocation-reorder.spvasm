@@ -255,7 +255,7 @@ OpFunctionEnd
 %33 = OpFunction  %2  None %34
 %27 = OpLabel
 %50 = OpVariable  %51  Function
-%52 = OpVariable  %53  Function %37
+%52 = OpVariable  %53  Function
 %54 = OpVariable  %51  Function
 %219 = OpVariable  %214  Function %218
 %30 = OpLoad  %12  %28
@@ -266,6 +266,7 @@ OpHitObjectRecordEmptyEXT %50
 OpHitObjectRecordEmptyEXT %54
 OpBranch %55
 %55 = OpLabel
+OpStore %52 %37
 %56 = OpConvertUToF  %7  %30
 %57 = OpConvertUToF  %7  %32
 %58 = OpFDiv  %7  %56 %57

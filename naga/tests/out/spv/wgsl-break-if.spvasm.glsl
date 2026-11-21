@@ -16,18 +16,18 @@ void _6()
 
 void _35(bool _34)
 {
-    bool _37 = false;
+    uvec2 _46 = uvec2(4294967295u);
+    bool _38 = false;
     bool _40 = false;
-    uvec2 _47 = uvec2(4294967295u);
     for (;;)
     {
-        if (all(equal(uvec2(0u), _47)))
+        if (all(equal(uvec2(0u), _46)))
         {
             break;
         }
-        _47 -= uvec2(uint(_47.y == 0u), 1u);
-        _37 = _34;
-        _40 = _34 != _37;
+        _46 -= uvec2(uint(_46.y == 0u), 1u);
+        _38 = _34;
+        _40 = _34 != _38;
         if (_34 == _40)
         {
             break;
@@ -39,43 +39,43 @@ void _35(bool _34)
     }
 }
 
-void _64(bool _63)
+void _63(bool _62)
 {
+    uvec2 _71 = uvec2(4294967295u);
+    bool _64 = false;
     bool _65 = false;
-    bool _67 = false;
-    uvec2 _74 = uvec2(4294967295u);
     do
     {
-        if (all(equal(uvec2(0u), _74)))
+        if (all(equal(uvec2(0u), _71)))
         {
             break;
         }
-        _74 -= uvec2(uint(_74.y == 0u), 1u);
-        _65 = _63;
-        _67 = _63 != _65;
-    } while (!(_63 == _67));
+        _71 -= uvec2(uint(_71.y == 0u), 1u);
+        _64 = _62;
+        _65 = _62 != _64;
+    } while (!(_62 == _65));
 }
 
-void _90()
+void _87()
 {
-    uint _92 = 0u;
-    uvec2 _99 = uvec2(4294967295u);
+    uvec2 _96 = uvec2(4294967295u);
+    uint _89 = 0u;
     do
     {
-        if (all(equal(uvec2(0u), _99)))
+        if (all(equal(uvec2(0u), _96)))
         {
             break;
         }
-        _99 -= uvec2(uint(_99.y == 0u), 1u);
-        _92++;
-    } while (!(_92 == 5u));
+        _96 -= uvec2(uint(_96.y == 0u), 1u);
+        _89++;
+    } while (!(_89 == 5u));
 }
 
 void main()
 {
     _6();
     _35(false);
-    _64(false);
-    _90();
+    _63(false);
+    _87();
 }
 

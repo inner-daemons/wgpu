@@ -167,7 +167,7 @@ OpReturnValue %168
 OpFunctionEnd
 %12 = OpFunction  %2  None %13
 %11 = OpLabel
-%24 = OpVariable  %25  Function %15
+%24 = OpVariable  %25  Function
 %26 = OpVariable  %27  Function
 %28 = OpVariable  %25  Function %15
 %30 = OpVariable  %29  Function %21
@@ -175,6 +175,7 @@ OpFunctionEnd
 %14 = OpLoad  %3  %9
 OpBranch %31
 %31 = OpLabel
+OpStore %24 %15
 OpBranch %32
 %32 = OpLabel
 OpLoopMerge %33 %35 None

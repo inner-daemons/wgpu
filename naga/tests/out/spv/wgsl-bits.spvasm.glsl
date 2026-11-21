@@ -5,16 +5,16 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void main()
 {
-    vec4 _48 = vec4(0.0);
-    uvec3 _42 = uvec3(0u);
-    ivec4 _36 = ivec4(0);
     int _30 = 0;
-    uvec4 _44 = uvec4(0u);
-    uint _38 = 0u;
     ivec2 _32 = ivec2(0);
-    vec2 _46 = vec2(0.0);
-    uvec2 _40 = uvec2(0u);
     ivec3 _34 = ivec3(0);
+    ivec4 _36 = ivec4(0);
+    uint _38 = 0u;
+    uvec2 _40 = uvec2(0u);
+    uvec3 _42 = uvec3(0u);
+    uvec4 _44 = uvec4(0u);
+    vec2 _46 = vec2(0.0);
+    vec4 _48 = vec4(0.0);
     _38 = packSnorm4x8(_48);
     _38 = packUnorm4x8(_48);
     _38 = packSnorm2x16(_46);

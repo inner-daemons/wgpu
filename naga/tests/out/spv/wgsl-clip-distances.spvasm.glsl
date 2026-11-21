@@ -10,9 +10,9 @@ struct _8
 
 void main()
 {
-    _8 _17 = _8(vec4(0.0), float[](0.0));
-    _17._m1[0u] = 0.5;
-    gl_Position = _17._m0;
-    gl_ClipDistance = _17._m1;
+    _8 _18 = _8(vec4(0.0), float[](0.0));
+    _18._m1[0u] = 0.5;
+    gl_Position = _18._m0;
+    gl_ClipDistance = _18._m1;
 }
 

@@ -17,62 +17,117 @@ OpExecutionMode %6 LocalSize 1 1 1
 %13 = OpTypePointer Function %4
 %6 = OpFunction  %2  None %7
 %5 = OpLabel
-%66 = OpVariable  %13  Function %9
-%63 = OpVariable  %13  Function %9
-%60 = OpVariable  %13  Function %9
-%57 = OpVariable  %13  Function %9
-%54 = OpVariable  %11  Function %8
-%51 = OpVariable  %13  Function %9
-%48 = OpVariable  %11  Function %8
-%45 = OpVariable  %13  Function %9
-%42 = OpVariable  %13  Function %9
-%39 = OpVariable  %13  Function %9
-%36 = OpVariable  %11  Function %8
-%33 = OpVariable  %11  Function %8
-%30 = OpVariable  %13  Function %9
-%27 = OpVariable  %13  Function %9
-%24 = OpVariable  %13  Function %9
-%21 = OpVariable  %13  Function %9
-%18 = OpVariable  %13  Function %9
-%15 = OpVariable  %13  Function %9
-%10 = OpVariable  %11  Function %8
-%64 = OpVariable  %13  Function %9
-%61 = OpVariable  %13  Function %9
-%58 = OpVariable  %13  Function %9
-%55 = OpVariable  %13  Function %9
-%52 = OpVariable  %13  Function %9
-%49 = OpVariable  %13  Function %9
-%46 = OpVariable  %11  Function %8
-%43 = OpVariable  %13  Function %9
-%40 = OpVariable  %13  Function %9
-%37 = OpVariable  %13  Function %9
-%34 = OpVariable  %11  Function %8
-%31 = OpVariable  %13  Function %9
-%28 = OpVariable  %13  Function %9
-%25 = OpVariable  %13  Function %9
-%22 = OpVariable  %13  Function %9
-%19 = OpVariable  %11  Function %8
-%16 = OpVariable  %13  Function %9
-%12 = OpVariable  %13  Function %9
-%65 = OpVariable  %13  Function %9
-%62 = OpVariable  %13  Function %9
-%59 = OpVariable  %13  Function %9
-%56 = OpVariable  %13  Function %9
-%53 = OpVariable  %11  Function %8
-%50 = OpVariable  %13  Function %9
-%47 = OpVariable  %13  Function %9
-%44 = OpVariable  %13  Function %9
-%41 = OpVariable  %13  Function %9
-%38 = OpVariable  %13  Function %9
-%35 = OpVariable  %11  Function %8
-%32 = OpVariable  %13  Function %9
-%29 = OpVariable  %13  Function %9
-%26 = OpVariable  %13  Function %9
-%23 = OpVariable  %13  Function %9
-%20 = OpVariable  %11  Function %8
-%17 = OpVariable  %13  Function %9
-%14 = OpVariable  %11  Function %8
+%66 = OpVariable  %13  Function
+%63 = OpVariable  %13  Function
+%60 = OpVariable  %13  Function
+%57 = OpVariable  %13  Function
+%54 = OpVariable  %11  Function
+%51 = OpVariable  %13  Function
+%48 = OpVariable  %11  Function
+%45 = OpVariable  %13  Function
+%42 = OpVariable  %13  Function
+%39 = OpVariable  %13  Function
+%36 = OpVariable  %11  Function
+%33 = OpVariable  %11  Function
+%30 = OpVariable  %13  Function
+%27 = OpVariable  %13  Function
+%24 = OpVariable  %13  Function
+%21 = OpVariable  %13  Function
+%18 = OpVariable  %13  Function
+%15 = OpVariable  %13  Function
+%10 = OpVariable  %11  Function
+%64 = OpVariable  %13  Function
+%61 = OpVariable  %13  Function
+%58 = OpVariable  %13  Function
+%55 = OpVariable  %13  Function
+%52 = OpVariable  %13  Function
+%49 = OpVariable  %13  Function
+%46 = OpVariable  %11  Function
+%43 = OpVariable  %13  Function
+%40 = OpVariable  %13  Function
+%37 = OpVariable  %13  Function
+%34 = OpVariable  %11  Function
+%31 = OpVariable  %13  Function
+%28 = OpVariable  %13  Function
+%25 = OpVariable  %13  Function
+%22 = OpVariable  %13  Function
+%19 = OpVariable  %11  Function
+%16 = OpVariable  %13  Function
+%12 = OpVariable  %13  Function
+%65 = OpVariable  %13  Function
+%62 = OpVariable  %13  Function
+%59 = OpVariable  %13  Function
+%56 = OpVariable  %13  Function
+%53 = OpVariable  %11  Function
+%50 = OpVariable  %13  Function
+%47 = OpVariable  %13  Function
+%44 = OpVariable  %13  Function
+%41 = OpVariable  %13  Function
+%38 = OpVariable  %13  Function
+%35 = OpVariable  %11  Function
+%32 = OpVariable  %13  Function
+%29 = OpVariable  %13  Function
+%26 = OpVariable  %13  Function
+%23 = OpVariable  %13  Function
+%20 = OpVariable  %11  Function
+%17 = OpVariable  %13  Function
+%14 = OpVariable  %11  Function
 OpBranch %67
 %67 = OpLabel
+OpStore %10 %8
+OpStore %12 %9
+OpStore %14 %8
+OpStore %15 %9
+OpStore %16 %9
+OpStore %17 %9
+OpStore %18 %9
+OpStore %19 %8
+OpStore %20 %8
+OpStore %21 %9
+OpStore %22 %9
+OpStore %23 %9
+OpStore %24 %9
+OpStore %25 %9
+OpStore %26 %9
+OpStore %27 %9
+OpStore %28 %9
+OpStore %29 %9
+OpStore %30 %9
+OpStore %31 %9
+OpStore %32 %9
+OpStore %33 %8
+OpStore %34 %8
+OpStore %35 %8
+OpStore %36 %8
+OpStore %37 %9
+OpStore %38 %9
+OpStore %39 %9
+OpStore %40 %9
+OpStore %41 %9
+OpStore %42 %9
+OpStore %43 %9
+OpStore %44 %9
+OpStore %45 %9
+OpStore %46 %8
+OpStore %47 %9
+OpStore %48 %8
+OpStore %49 %9
+OpStore %50 %9
+OpStore %51 %9
+OpStore %52 %9
+OpStore %53 %8
+OpStore %54 %8
+OpStore %55 %9
+OpStore %56 %9
+OpStore %57 %9
+OpStore %58 %9
+OpStore %59 %9
+OpStore %60 %9
+OpStore %61 %9
+OpStore %62 %9
+OpStore %63 %9
+OpStore %64 %9
+OpStore %65 %9
+OpStore %66 %9
 OpReturn
 OpFunctionEnd

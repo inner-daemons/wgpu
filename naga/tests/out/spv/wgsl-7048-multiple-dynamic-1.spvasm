@@ -18,9 +18,9 @@ OpDecorate %5 ArrayStride 16
 %9 = OpTypeInt 32 1
 %12 = OpTypeFunction %2
 %13 = OpConstantNull  %5
-%14 = OpConstant  %4  0
-%15 = OpConstantComposite  %8  %14 %14 %14 %14
-%16 = OpConstant  %9  0
+%14 = OpConstant  %9  0
+%15 = OpConstant  %4  0
+%16 = OpConstantComposite  %8  %15 %15 %15 %15
 %18 = OpTypePointer Function %8
 %20 = OpTypePointer Function %9
 %23 = OpTypePointer Function %4
@@ -29,12 +29,15 @@ OpDecorate %5 ArrayStride 16
 %30 = OpConstant  %7  1
 %11 = OpFunction  %2  None %12
 %10 = OpLabel
-%17 = OpVariable  %18  Function %15
-%19 = OpVariable  %20  Function %16
-%21 = OpVariable  %20  Function %16
+%17 = OpVariable  %18  Function
+%19 = OpVariable  %20  Function
+%21 = OpVariable  %20  Function
 %29 = OpVariable  %28  Function
 OpBranch %22
 %22 = OpLabel
+OpStore %17 %16
+OpStore %19 %14
+OpStore %21 %14
 %25 = OpAccessChain  %23  %17 %24
 %26 = OpLoad  %4  %25
 %27 = OpLoad  %9  %21

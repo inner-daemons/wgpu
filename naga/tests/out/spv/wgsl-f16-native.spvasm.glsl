@@ -106,8 +106,8 @@ layout(location = 7) out vec4 vec4_f32_1;
 
 void main()
 {
-    F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     F16IO _111 = F16IO(scalar_f16, scalar_f32, vec2_f16, vec2_f32, vec3_f16, vec3_f32, vec4_f16, vec4_f32);
+    F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     _output.scalar_f16 = _111.scalar_f16 + float16_t(1.0);
     _output.scalar_f32 = _111.scalar_f32 + 1.0;
     _output.vec2_f16 = _111.vec2_f16 + f16vec2(float16_t(1.0));
@@ -226,14 +226,14 @@ layout(location = 4) in f16vec3 vec3_f16;
 layout(location = 5) in vec3 vec3_f32;
 layout(location = 6) in f16vec4 vec4_f16;
 layout(location = 7) in vec4 vec4_f32;
-layout(location = 0) out float16_t _264;
+layout(location = 0) out float16_t _261;
 
 void main()
 {
     F16IO _input = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     _input = F16IO(scalar_f16, scalar_f32, vec2_f16, vec2_f32, vec3_f16, vec3_f32, vec4_f16, vec4_f32);
     _input.scalar_f16 = float16_t(0.0);
-    _264 = _input.scalar_f16;
+    _261 = _input.scalar_f16;
 }
 
 
@@ -281,10 +281,10 @@ layout(location = 7) out vec4 vec4_f32_1;
 
 void main()
 {
+    F16IO _270 = F16IO(scalar_f16, scalar_f32, vec2_f16, vec2_f32, vec3_f16, vec3_f32, vec4_f16, vec4_f32);
     F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
-    F16IO _274 = F16IO(scalar_f16, scalar_f32, vec2_f16, vec2_f32, vec3_f16, vec3_f32, vec4_f16, vec4_f32);
-    _output.vec2_f16.x = _274.vec2_f16.y;
-    _output.vec2_f16.y = _274.vec2_f16.x;
+    _output.vec2_f16.x = _270.vec2_f16.y;
+    _output.vec2_f16.y = _270.vec2_f16.x;
     scalar_f16_1 = _output.scalar_f16;
     scalar_f32_1 = _output.scalar_f32;
     vec2_f16_1 = _output.vec2_f16;

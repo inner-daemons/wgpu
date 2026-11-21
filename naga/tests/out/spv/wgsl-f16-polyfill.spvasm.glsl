@@ -106,8 +106,8 @@ layout(location = 7) out vec4 vec4_f32_1;
 
 void main()
 {
-    F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     F16IO _111 = F16IO(float16_t(scalar_f16), scalar_f32, f16vec2(vec2_f16), vec2_f32, f16vec3(vec3_f16), vec3_f32, f16vec4(vec4_f16), vec4_f32);
+    F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     _output.scalar_f16 = _111.scalar_f16 + float16_t(1.0);
     _output.scalar_f32 = _111.scalar_f32 + 1.0;
     _output.vec2_f16 = _111.vec2_f16 + f16vec2(float16_t(1.0));
@@ -226,14 +226,14 @@ layout(location = 4) in vec3 vec3_f16;
 layout(location = 5) in vec3 vec3_f32;
 layout(location = 6) in vec4 vec4_f16;
 layout(location = 7) in vec4 vec4_f32;
-layout(location = 0) out float _284;
+layout(location = 0) out float _281;
 
 void main()
 {
     F16IO _input = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
     _input = F16IO(float16_t(scalar_f16), scalar_f32, f16vec2(vec2_f16), vec2_f32, f16vec3(vec3_f16), vec3_f32, f16vec4(vec4_f16), vec4_f32);
     _input.scalar_f16 = float16_t(0.0);
-    _284 = float(_input.scalar_f16);
+    _281 = float(_input.scalar_f16);
 }
 
 
@@ -281,10 +281,10 @@ layout(location = 7) out vec4 vec4_f32_1;
 
 void main()
 {
+    F16IO _291 = F16IO(float16_t(scalar_f16), scalar_f32, f16vec2(vec2_f16), vec2_f32, f16vec3(vec3_f16), vec3_f32, f16vec4(vec4_f16), vec4_f32);
     F16IO _output = F16IO(float16_t(0.0), 0.0, f16vec2(float16_t(0.0)), vec2(0.0), f16vec3(float16_t(0.0)), vec3(0.0), f16vec4(float16_t(0.0)), vec4(0.0));
-    F16IO _295 = F16IO(float16_t(scalar_f16), scalar_f32, f16vec2(vec2_f16), vec2_f32, f16vec3(vec3_f16), vec3_f32, f16vec4(vec4_f16), vec4_f32);
-    _output.vec2_f16.x = _295.vec2_f16.y;
-    _output.vec2_f16.y = _295.vec2_f16.x;
+    _output.vec2_f16.x = _291.vec2_f16.y;
+    _output.vec2_f16.y = _291.vec2_f16.x;
     scalar_f16_1 = float(_output.scalar_f16);
     scalar_f32_1 = _output.scalar_f32;
     vec2_f16_1 = vec2(_output.vec2_f16);

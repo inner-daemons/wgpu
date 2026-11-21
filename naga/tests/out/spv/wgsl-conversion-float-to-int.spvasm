@@ -125,36 +125,64 @@ OpExecutionMode %278 LocalSize 1 1 1
 %287 = OpConstantComposite  %16  %281 %286
 %24 = OpFunction  %2  None %25
 %23 = OpLabel
-%73 = OpVariable  %51  Function %40
-%70 = OpVariable  %48  Function %28
-%67 = OpVariable  %54  Function %41
-%64 = OpVariable  %51  Function %37
-%61 = OpVariable  %51  Function %38
-%58 = OpVariable  %48  Function %28
-%55 = OpVariable  %54  Function %33
-%50 = OpVariable  %51  Function %30
-%46 = OpVariable  %45  Function %27
-%75 = OpVariable  %54  Function %41
-%72 = OpVariable  %51  Function %37
-%69 = OpVariable  %45  Function %42
-%66 = OpVariable  %54  Function %32
-%63 = OpVariable  %54  Function %39
-%60 = OpVariable  %51  Function %37
-%57 = OpVariable  %45  Function %35
-%53 = OpVariable  %54  Function %32
-%49 = OpVariable  %48  Function %29
-%44 = OpVariable  %45  Function %26
-%74 = OpVariable  %54  Function %32
-%71 = OpVariable  %48  Function %43
-%68 = OpVariable  %45  Function %34
-%65 = OpVariable  %51  Function %40
-%62 = OpVariable  %54  Function %32
-%59 = OpVariable  %48  Function %36
-%56 = OpVariable  %45  Function %34
-%52 = OpVariable  %51  Function %31
-%47 = OpVariable  %48  Function %28
+%73 = OpVariable  %51  Function
+%70 = OpVariable  %48  Function
+%67 = OpVariable  %54  Function
+%64 = OpVariable  %51  Function
+%61 = OpVariable  %51  Function
+%58 = OpVariable  %48  Function
+%55 = OpVariable  %54  Function
+%50 = OpVariable  %51  Function
+%46 = OpVariable  %45  Function
+%75 = OpVariable  %54  Function
+%72 = OpVariable  %51  Function
+%69 = OpVariable  %45  Function
+%66 = OpVariable  %54  Function
+%63 = OpVariable  %54  Function
+%60 = OpVariable  %51  Function
+%57 = OpVariable  %45  Function
+%53 = OpVariable  %54  Function
+%49 = OpVariable  %48  Function
+%44 = OpVariable  %45  Function
+%74 = OpVariable  %54  Function
+%71 = OpVariable  %48  Function
+%68 = OpVariable  %45  Function
+%65 = OpVariable  %51  Function
+%62 = OpVariable  %54  Function
+%59 = OpVariable  %48  Function
+%56 = OpVariable  %45  Function
+%52 = OpVariable  %51  Function
+%47 = OpVariable  %48  Function
 OpBranch %76
 %76 = OpLabel
+OpStore %44 %26
+OpStore %46 %27
+OpStore %47 %28
+OpStore %49 %29
+OpStore %50 %30
+OpStore %52 %31
+OpStore %53 %32
+OpStore %55 %33
+OpStore %56 %34
+OpStore %57 %35
+OpStore %58 %28
+OpStore %59 %36
+OpStore %60 %37
+OpStore %61 %38
+OpStore %62 %32
+OpStore %63 %39
+OpStore %64 %37
+OpStore %65 %40
+OpStore %66 %32
+OpStore %67 %41
+OpStore %68 %34
+OpStore %69 %42
+OpStore %70 %28
+OpStore %71 %43
+OpStore %72 %37
+OpStore %73 %40
+OpStore %74 %32
+OpStore %75 %41
 OpReturn
 OpFunctionEnd
 %79 = OpFunction  %6  None %80

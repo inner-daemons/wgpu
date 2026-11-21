@@ -460,11 +460,13 @@ OpReturnValue %67
 OpFunctionEnd
 %69 = OpFunction  %2  None %70
 %68 = OpLabel
-%78 = OpVariable  %79  Function %76
+%78 = OpVariable  %79  Function
 %73 = OpAccessChain  %71  %19 %72
 %75 = OpAccessChain  %74  %22 %72
 OpBranch %80
 %80 = OpLabel
+OpLine %3 29 5
+OpStore %78 %76
 OpLine %3 30 5
 %81 = OpLoad  %7  %78
 %82 = OpISub  %7  %81 %76
@@ -581,11 +583,13 @@ OpReturnValue %152
 OpFunctionEnd
 %154 = OpFunction  %2  None %70
 %153 = OpLabel
-%160 = OpVariable  %79  Function %76
+%160 = OpVariable  %79  Function
 %156 = OpAccessChain  %155  %25 %72
 %158 = OpAccessChain  %157  %28 %72
 OpBranch %161
 %161 = OpLabel
+OpLine %3 71 5
+OpStore %160 %76
 OpLine %3 72 5
 %162 = OpLoad  %7  %160
 %163 = OpISub  %7  %162 %76
@@ -752,11 +756,13 @@ OpReturnValue %268
 OpFunctionEnd
 %270 = OpFunction  %2  None %70
 %269 = OpLabel
-%276 = OpVariable  %79  Function %76
+%276 = OpVariable  %79  Function
 %272 = OpAccessChain  %271  %31 %72
 %274 = OpAccessChain  %273  %34 %72
 OpBranch %277
 %277 = OpLabel
+OpLine %3 112 5
+OpStore %276 %76
 OpLine %3 113 5
 %278 = OpLoad  %7  %276
 %279 = OpISub  %7  %278 %76
@@ -1040,11 +1046,13 @@ OpReturnValue %447
 OpFunctionEnd
 %449 = OpFunction  %2  None %70
 %448 = OpLabel
-%455 = OpVariable  %79  Function %76
+%455 = OpVariable  %79  Function
 %451 = OpAccessChain  %450  %37 %72
 %453 = OpAccessChain  %452  %40 %72
 OpBranch %456
 %456 = OpLabel
+OpLine %3 178 5
+OpStore %455 %76
 OpLine %3 179 5
 %457 = OpLoad  %7  %455
 %458 = OpISub  %7  %457 %76

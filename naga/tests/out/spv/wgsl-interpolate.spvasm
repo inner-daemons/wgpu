@@ -78,7 +78,7 @@ OpName %25 "perspective_centroid"
 OpName %26 "perspective_sample"
 OpName %27 "perspective_center"
 OpName %30 "vert_main"
-OpName %60 "out"
+OpName %61 "out"
 OpName %108 "position"
 OpName %111 "_flat"
 OpName %114 "flat_first"
@@ -206,8 +206,8 @@ OpDecorate %135 Location 11
 %57 = OpConstant  %4  2197
 %58 = OpConstant  %4  2744
 %59 = OpConstant  %4  2812
-%61 = OpTypePointer Function %9
-%62 = OpConstantNull  %9
+%60 = OpConstantNull  %9
+%62 = OpTypePointer Function %9
 %64 = OpTypePointer Function %5
 %65 = OpConstant  %6  0
 %67 = OpTypePointer Function %6
@@ -241,65 +241,67 @@ OpDecorate %135 Location 11
 %135 = OpVariable  %119  Input
 %30 = OpFunction  %2  None %31
 %10 = OpLabel
-%60 = OpVariable  %61  Function %62
+%61 = OpVariable  %62  Function
 OpStore %28 %29
 OpBranch %63
 %63 = OpLabel
+OpLine %3 22 4
+OpStore %61 %60
 OpLine %3 24 4
 OpLine %3 24 19
 OpLine %3 24 4
-%66 = OpAccessChain  %64  %60 %65
+%66 = OpAccessChain  %64  %61 %65
 OpStore %66 %36
 OpLine %3 25 4
 OpLine %3 25 4
-%69 = OpAccessChain  %67  %60 %68
+%69 = OpAccessChain  %67  %61 %68
 OpStore %69 %37
 OpLine %3 26 4
 OpLine %3 26 4
-%71 = OpAccessChain  %67  %60 %70
+%71 = OpAccessChain  %67  %61 %70
 OpStore %71 %38
 OpLine %3 27 4
 OpLine %3 27 4
-%73 = OpAccessChain  %67  %60 %72
+%73 = OpAccessChain  %67  %61 %72
 OpStore %73 %39
 OpLine %3 28 4
 OpLine %3 28 4
-%76 = OpAccessChain  %74  %60 %75
+%76 = OpAccessChain  %74  %61 %75
 OpStore %76 %40
 OpLine %3 29 4
 OpLine %3 29 26
 OpLine %3 29 4
-%79 = OpAccessChain  %77  %60 %78
+%79 = OpAccessChain  %77  %61 %78
 OpStore %79 %43
 OpLine %3 30 4
 OpLine %3 30 24
 OpLine %3 30 4
-%82 = OpAccessChain  %80  %60 %81
+%82 = OpAccessChain  %80  %61 %81
 OpStore %82 %47
 OpLine %3 31 4
 OpLine %3 31 24
 OpLine %3 31 4
-%84 = OpAccessChain  %80  %60 %83
+%84 = OpAccessChain  %80  %61 %83
 OpStore %84 %51
 OpLine %3 32 4
 OpLine %3 32 22
 OpLine %3 32 4
-%85 = OpAccessChain  %64  %60 %37
+%85 = OpAccessChain  %64  %61 %37
 OpStore %85 %56
 OpLine %3 33 4
 OpLine %3 33 4
-%86 = OpAccessChain  %74  %60 %38
+%86 = OpAccessChain  %74  %61 %38
 OpStore %86 %57
 OpLine %3 34 4
 OpLine %3 34 4
-%87 = OpAccessChain  %74  %60 %39
+%87 = OpAccessChain  %74  %61 %39
 OpStore %87 %58
 OpLine %3 35 4
 OpLine %3 35 4
-%89 = OpAccessChain  %74  %60 %88
+%89 = OpAccessChain  %74  %61 %88
 OpStore %89 %59
 OpLine %3 1 1
-%90 = OpLoad  %9  %60
+%90 = OpLoad  %9  %61
 %91 = OpCompositeExtract  %5  %90 0
 OpStore %11 %91
 %92 = OpAccessChain  %18  %11 %68

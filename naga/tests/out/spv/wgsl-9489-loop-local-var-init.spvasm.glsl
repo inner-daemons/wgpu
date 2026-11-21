@@ -13,44 +13,45 @@ layout(set = 0, binding = 1, std430) buffer _14_13
 
 void main()
 {
+    uvec2 _47 = uvec2(4294967295u);
+    uvec2 _68 = uvec2(4294967295u);
     vec4 _31 = vec4(0.0);
+    vec4 _33 = vec4(0.0);
+    uint _34 = 0u;
     uint _29 = 0u;
-    vec4 _34 = vec4(0.0);
-    uvec2 _50 = uvec2(4294967295u);
-    uvec2 _71 = uvec2(4294967295u);
     for (;;)
     {
-        if (all(equal(uvec2(0u), _50)))
+        if (all(equal(uvec2(0u), _47)))
         {
             break;
         }
-        _50 -= uvec2(uint(_50.y == 0u), 1u);
+        _47 -= uvec2(uint(_47.y == 0u), 1u);
         if (!(_29 < 4u))
         {
             break;
         }
         _31 = vec4(0.0);
-        _34 = vec4(0.0);
-        uint _36 = 0u;
+        _33 = vec4(0.0);
+        _34 = 0u;
         for (;;)
         {
-            if (all(equal(uvec2(0u), _71)))
+            if (all(equal(uvec2(0u), _68)))
             {
                 break;
             }
-            _71 -= uvec2(uint(_71.y == 0u), 1u);
-            if (!(_36 < 16u))
+            _68 -= uvec2(uint(_68.y == 0u), 1u);
+            if (!(_34 < 16u))
             {
                 break;
             }
-            vec4 _95 = vec4(_10._m0[(_29 * 16u) + _36]);
-            _31 += _95;
-            _34 += _95;
-            _36++;
+            vec4 _92 = vec4(_10._m0[(_29 * 16u) + _34]);
+            _31 += _92;
+            _33 += _92;
+            _34++;
             continue;
         }
         _13._m0[_29 * 2u] = _31.x;
-        _13._m0[(_29 * 2u) + 1u] = _34.x;
+        _13._m0[(_29 * 2u) + 1u] = _33.x;
         _29++;
         continue;
     }

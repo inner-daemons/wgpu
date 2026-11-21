@@ -23,25 +23,25 @@ OpExecutionMode %13 LocalSize 1 1 1
 %10 = OpTypeVector %7 2
 %11 = OpTypeVector %8 2
 %14 = OpTypeFunction %2
-%15 = OpConstant  %4  0.000000000000000000000000000000000000000021524
-%16 = OpConstant  %4  0.000000000000000000000000000000000000000022959
-%17 = OpConstantComposite  %3  %15 %16
-%18 = OpConstant  %4  0.000000000000000000000000000000000000000023676
-%19 = OpConstant  %4  0.000000000000000000000000000000000000000024394
-%20 = OpConstantComposite  %5  %15 %16 %18 %19
-%21 = OpConstant  %6  0
-%22 = OpConstant  %7  0
-%23 = OpConstant  %8  0
-%24 = OpConstantComposite  %9  %21 %21
-%25 = OpConstantComposite  %10  %22 %22
-%26 = OpConstantComposite  %11  %23 %23
-%27 = OpConstant  %7  4294967295
-%28 = OpConstant  %6  1
-%29 = OpConstant  %8  1
-%30 = OpConstant  %6  2
-%31 = OpConstantComposite  %9  %28 %30
-%32 = OpConstant  %7  1
-%33 = OpConstantComposite  %10  %27 %32
+%15 = OpConstant  %6  0
+%16 = OpConstant  %7  0
+%17 = OpConstant  %8  0
+%18 = OpConstant  %7  4294967295
+%19 = OpConstant  %6  1
+%20 = OpConstant  %8  1
+%21 = OpConstant  %4  0.000000000000000000000000000000000000000021524
+%22 = OpConstant  %4  0.000000000000000000000000000000000000000022959
+%23 = OpConstantComposite  %3  %21 %22
+%24 = OpConstant  %6  2
+%25 = OpConstantComposite  %9  %19 %24
+%26 = OpConstant  %7  1
+%27 = OpConstantComposite  %10  %18 %26
+%28 = OpConstant  %4  0.000000000000000000000000000000000000000023676
+%29 = OpConstant  %4  0.000000000000000000000000000000000000000024394
+%30 = OpConstantComposite  %5  %21 %22 %28 %29
+%31 = OpConstantComposite  %9  %15 %15
+%32 = OpConstantComposite  %10  %16 %16
+%33 = OpConstantComposite  %11  %17 %17
 %35 = OpTypePointer Function %3
 %37 = OpTypePointer Function %5
 %39 = OpTypePointer Function %6
@@ -52,16 +52,24 @@ OpExecutionMode %13 LocalSize 1 1 1
 %49 = OpTypePointer Function %11
 %13 = OpFunction  %2  None %14
 %12 = OpLabel
-%46 = OpVariable  %47  Function %25
-%40 = OpVariable  %41  Function %22
-%34 = OpVariable  %35  Function %17
-%48 = OpVariable  %49  Function %26
-%42 = OpVariable  %43  Function %23
-%36 = OpVariable  %37  Function %20
-%44 = OpVariable  %45  Function %24
-%38 = OpVariable  %39  Function %21
+%46 = OpVariable  %47  Function
+%40 = OpVariable  %41  Function
+%34 = OpVariable  %35  Function
+%48 = OpVariable  %49  Function
+%42 = OpVariable  %43  Function
+%36 = OpVariable  %37  Function
+%44 = OpVariable  %45  Function
+%38 = OpVariable  %39  Function
 OpBranch %50
 %50 = OpLabel
+OpStore %34 %23
+OpStore %36 %30
+OpStore %38 %15
+OpStore %40 %16
+OpStore %42 %17
+OpStore %44 %31
+OpStore %46 %32
+OpStore %48 %33
 %51 = OpLoad  %3  %34
 %52 = OpBitcast  %6  %51
 OpStore %38 %52
@@ -102,16 +110,16 @@ OpStore %36 %74
 OpStore %34 %75
 %76 = OpLoad  %7  %40
 OpStore %40 %76
-OpStore %40 %27
-%77 = OpBitcast  %8  %28
+OpStore %40 %18
+%77 = OpBitcast  %8  %19
 OpStore %42 %77
-%78 = OpBitcast  %6  %29
+%78 = OpBitcast  %6  %20
 OpStore %38 %78
-%79 = OpBitcast  %3  %28
+%79 = OpBitcast  %3  %19
 OpStore %34 %79
-OpStore %34 %17
-%80 = OpBitcast  %5  %31
+OpStore %34 %23
+%80 = OpBitcast  %5  %25
 OpStore %36 %80
-OpStore %46 %33
+OpStore %46 %27
 OpReturn
 OpFunctionEnd

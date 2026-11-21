@@ -141,11 +141,11 @@ float fetch_shadow(uint light_id, vec4 homogeneous_coords)
 
 void main()
 {
-    vec3 color = vec3(0.0500000007450580596923828125);
-    uint i = 0u;
     uvec2 loop_bound = uvec2(4294967295u);
     VertexOutput _133 = VertexOutput(gl_FragCoord, world_normal, world_position);
+    vec3 color = vec3(0.0500000007450580596923828125);
     vec3 _155 = normalize(_133.world_normal);
+    uint i = 0u;
     for (;;)
     {
         if (all(equal(uvec2(0u), loop_bound)))
@@ -235,11 +235,11 @@ float fetch_shadow(uint light_id, vec4 homogeneous_coords)
 
 void main()
 {
-    vec3 color = vec3(0.0500000007450580596923828125);
-    uint i = 0u;
     uvec2 loop_bound = uvec2(4294967295u);
     VertexOutput _220 = VertexOutput(gl_FragCoord, world_normal, world_position);
+    vec3 color = vec3(0.0500000007450580596923828125);
     vec3 _239 = normalize(_220.world_normal);
+    uint i = 0u;
     for (;;)
     {
         if (all(equal(uvec2(0u), loop_bound)))

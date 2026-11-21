@@ -113,7 +113,7 @@ void _5()
     }
 }
 
-void _51(int _50)
+void _50(int _49)
 {
     do
     {
@@ -121,7 +121,7 @@ void _51(int _50)
     } while(false);
 }
 
-void _57()
+void _56()
 {
     switch (0)
     {
@@ -136,7 +136,7 @@ void _57()
     }
 }
 
-void _63()
+void _62()
 {
     switch (0u)
     {
@@ -162,7 +162,7 @@ void _63()
     }
 }
 
-void _72()
+void _71()
 {
     switch (0)
     {
@@ -193,17 +193,17 @@ void _72()
     }
 }
 
-void _83(int _82)
+void _82(int _81)
 {
-    uvec2 _96 = uvec2(4294967295u);
+    uvec2 _95 = uvec2(4294967295u);
     for (;;)
     {
-        if (all(equal(uvec2(0u), _96)))
+        if (all(equal(uvec2(0u), _95)))
         {
             break;
         }
-        _96 -= uvec2(uint(_96.y == 0u), 1u);
-        switch (_82)
+        _95 -= uvec2(uint(_95.y == 0u), 1u);
+        switch (_81)
         {
             case 1:
             {
@@ -218,19 +218,19 @@ void _83(int _82)
     }
 }
 
-void _114(int _111, int _112, int _113)
+void _113(int _110, int _111, int _112)
 {
-    uvec2 _121 = uvec2(4294967295u);
-    uvec2 _143 = uvec2(4294967295u);
-    uvec2 _163 = uvec2(4294967295u);
+    uvec2 _120 = uvec2(4294967295u);
+    uvec2 _142 = uvec2(4294967295u);
+    uvec2 _162 = uvec2(4294967295u);
     for (;;)
     {
-        if (all(equal(uvec2(0u), _121)))
+        if (all(equal(uvec2(0u), _120)))
         {
             break;
         }
-        _121 -= uvec2(uint(_121.y == 0u), 1u);
-        switch (_111)
+        _120 -= uvec2(uint(_120.y == 0u), 1u);
+        switch (_110)
         {
             case 1:
             {
@@ -238,7 +238,7 @@ void _114(int _111, int _112, int _113)
             }
             case 2:
             {
-                switch (_112)
+                switch (_111)
                 {
                     case 1:
                     {
@@ -248,12 +248,12 @@ void _114(int _111, int _112, int _113)
                     {
                         for (;;)
                         {
-                            if (all(equal(uvec2(0u), _143)))
+                            if (all(equal(uvec2(0u), _142)))
                             {
                                 break;
                             }
-                            _143 -= uvec2(uint(_143.y == 0u), 1u);
-                            switch (_113)
+                            _142 -= uvec2(uint(_142.y == 0u), 1u);
+                            switch (_112)
                             {
                                 case 1:
                                 {
@@ -284,12 +284,12 @@ void _114(int _111, int _112, int _113)
     }
     for (;;)
     {
-        if (all(equal(uvec2(0u), _163)))
+        if (all(equal(uvec2(0u), _162)))
         {
             break;
         }
-        _163 -= uvec2(uint(_163.y == 0u), 1u);
-        switch (_112)
+        _162 -= uvec2(uint(_162.y == 0u), 1u);
+        switch (_111)
         {
             default:
             {
@@ -304,23 +304,23 @@ void _114(int _111, int _112, int _113)
     }
 }
 
-void _183(int _179, int _180, int _181, int _182)
+void _182(int _178, int _179, int _180, int _181)
 {
-    int _185 = 0;
-    uvec2 _191 = uvec2(4294967295u);
-    uvec2 _209 = uvec2(4294967295u);
+    uvec2 _190 = uvec2(4294967295u);
+    uvec2 _208 = uvec2(4294967295u);
+    int _184 = 0;
     for (;;)
     {
-        if (all(equal(uvec2(0u), _191)))
+        if (all(equal(uvec2(0u), _190)))
         {
             break;
         }
-        _191 -= uvec2(uint(_191.y == 0u), 1u);
-        switch (_179)
+        _190 -= uvec2(uint(_190.y == 0u), 1u);
+        switch (_178)
         {
             case 1:
             {
-                _185 = 1;
+                _184 = 1;
                 break;
             }
             default:
@@ -332,12 +332,12 @@ void _183(int _179, int _180, int _181, int _182)
     }
     for (;;)
     {
-        if (all(equal(uvec2(0u), _209)))
+        if (all(equal(uvec2(0u), _208)))
         {
             break;
         }
-        _209 -= uvec2(uint(_209.y == 0u), 1u);
-        switch (_179)
+        _208 -= uvec2(uint(_208.y == 0u), 1u);
+        switch (_178)
         {
             case 1:
             {
@@ -345,7 +345,7 @@ void _183(int _179, int _180, int _181, int _182)
             }
             case 2:
             {
-                switch (_180)
+                switch (_179)
                 {
                     case 1:
                     {
@@ -353,11 +353,11 @@ void _183(int _179, int _180, int _181, int _182)
                     }
                     default:
                     {
-                        switch (_181)
+                        switch (_180)
                         {
                             case 1:
                             {
-                                _185 = 2;
+                                _184 = 2;
                                 break;
                             }
                             default:
@@ -382,12 +382,12 @@ void _183(int _179, int _180, int _181, int _182)
 void main()
 {
     _5();
-    _51(1);
-    _57();
-    _63();
-    _72();
-    _83(1);
-    _114(1, 2, 3);
-    _183(1, 2, 3, 4);
+    _50(1);
+    _56();
+    _62();
+    _71();
+    _82(1);
+    _113(1, 2, 3);
+    _182(1, 2, 3, 4);
 }
 

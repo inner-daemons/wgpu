@@ -28,8 +28,8 @@ OpDecorate %32 Location 0
 %16 = OpTypeFunction %2
 %17 = OpConstant  %4  0
 %18 = OpConstant  %4  1
-%20 = OpTypePointer Function %6
-%21 = OpConstantNull  %6
+%19 = OpConstantNull  %6
+%21 = OpTypePointer Function %6
 %23 = OpTypePointer Function %3
 %26 = OpTypeInt 32 0
 %25 = OpConstant  %26  0
@@ -37,14 +37,15 @@ OpDecorate %32 Location 0
 %34 = OpConstantComposite  %3  %18 %17 %17 %18
 %15 = OpFunction  %2  None %16
 %7 = OpLabel
-%19 = OpVariable  %20  Function %21
+%20 = OpVariable  %21  Function
 %10 = OpLoad  %5  %8
 OpBranch %22
 %22 = OpLabel
+OpStore %20 %19
 %24 = OpCompositeConstruct  %3  %10 %17 %18
-%27 = OpAccessChain  %23  %19 %25
+%27 = OpAccessChain  %23  %20 %25
 OpStore %27 %24
-%28 = OpLoad  %6  %19
+%28 = OpLoad  %6  %20
 %29 = OpCompositeExtract  %3  %28 0
 OpStore %11 %29
 %30 = OpCompositeExtract  %5  %28 1

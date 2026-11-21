@@ -109,11 +109,12 @@ OpMemberDecorate %35 0 Offset 0
 %357 = OpTypePointer Uniform %11
 %38 = OpFunction  %2  None %39
 %37 = OpLabel
-%46 = OpVariable  %47  Function %45
+%46 = OpVariable  %47  Function
 %42 = OpAccessChain  %40  %13 %41
 %44 = OpAccessChain  %43  %16 %41
 OpBranch %48
 %48 = OpLabel
+OpStore %46 %45
 %49 = OpLoad  %6  %46
 %50 = OpISub  %6  %49 %45
 OpStore %46 %50
@@ -175,11 +176,12 @@ OpReturn
 OpFunctionEnd
 %103 = OpFunction  %2  None %39
 %102 = OpLabel
-%108 = OpVariable  %47  Function %45
+%108 = OpVariable  %47  Function
 %105 = OpAccessChain  %104  %19 %41
 %107 = OpAccessChain  %106  %22 %41
 OpBranch %109
 %109 = OpLabel
+OpStore %108 %45
 %110 = OpLoad  %6  %108
 %111 = OpISub  %6  %110 %45
 OpStore %108 %111
@@ -247,11 +249,12 @@ OpReturn
 OpFunctionEnd
 %165 = OpFunction  %2  None %39
 %164 = OpLabel
-%170 = OpVariable  %47  Function %45
+%170 = OpVariable  %47  Function
 %167 = OpAccessChain  %166  %25 %41
 %169 = OpAccessChain  %168  %28 %41
 OpBranch %171
 %171 = OpLabel
+OpStore %170 %45
 %172 = OpLoad  %6  %170
 %173 = OpISub  %6  %172 %45
 OpStore %170 %173
@@ -397,11 +400,12 @@ OpReturn
 OpFunctionEnd
 %298 = OpFunction  %2  None %39
 %297 = OpLabel
-%303 = OpVariable  %47  Function %45
+%303 = OpVariable  %47  Function
 %300 = OpAccessChain  %299  %31 %41
 %302 = OpAccessChain  %301  %34 %41
 OpBranch %304
 %304 = OpLabel
+OpStore %303 %45
 %305 = OpLoad  %6  %303
 %306 = OpISub  %6  %305 %45
 OpStore %303 %306

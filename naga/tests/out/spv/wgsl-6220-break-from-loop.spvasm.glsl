@@ -3,8 +3,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 
 void _5()
 {
-    int _10 = 0;
     uvec2 _27 = uvec2(4294967295u);
+    int _10 = 0;
     for (;;)
     {
         if (all(equal(uvec2(0u), _27)))
