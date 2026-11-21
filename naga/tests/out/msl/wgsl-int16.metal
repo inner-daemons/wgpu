@@ -64,8 +64,10 @@ short int16_function(
     device UniformCompatible& output,
     device StorageCompatible& output_arrays
 ) {
-    short val = static_cast<short>(20);
-    type_13 arr = type_13 {{static_cast<short>(1), static_cast<short>(2), static_cast<short>(3), static_cast<short>(4)}};
+    short val;
+    type_13 arr;
+    val = static_cast<short>(20);
+    arr = type_13 {{static_cast<short>(1), static_cast<short>(2), static_cast<short>(3), static_cast<short>(4)}};
     short phony = private_variable;
     short _e5 = val;
     val = as_type<short>(static_cast<ushort>(as_type<ushort>(static_cast<ushort>(_e5)) + as_type<ushort>(static_cast<ushort>(static_cast<short>(5)))));
@@ -139,30 +141,30 @@ short int16_function(
     short _e126 = val;
     bool cmp_ne = _e126 != static_cast<short>(0);
     val = cmp_lt ? static_cast<short>(2) : static_cast<short>(1);
-    short _e139 = val;
-    arr.inner[0] = _e139;
-    short _e141 = arr.inner[1];
-    val = _e141;
-    short _e144 = arr.inner[static_cast<ushort>(1)];
-    val = _e144;
-    short _e147 = val;
-    output.val_u32_ = static_cast<uint>(_e147);
-    short _e151 = val;
-    output.val_i32_ = static_cast<int>(_e151);
-    short _e155 = val;
-    output.val_f32_ = static_cast<float>(_e155);
-    uint _e159 = output.val_u32_;
-    val = static_cast<short>(_e159);
-    short _e161 = val;
-    ushort as_unsigned = as_type<ushort>(_e161);
+    short _e134 = val;
+    arr.inner[0] = _e134;
+    short _e136 = arr.inner[1];
+    val = _e136;
+    short _e139 = arr.inner[static_cast<ushort>(1)];
+    val = _e139;
+    short _e142 = val;
+    output.val_u32_ = static_cast<uint>(_e142);
+    short _e146 = val;
+    output.val_i32_ = static_cast<int>(_e146);
+    short _e150 = val;
+    output.val_f32_ = static_cast<float>(_e150);
+    uint _e154 = output.val_u32_;
+    val = static_cast<short>(_e154);
+    short _e156 = val;
+    ushort as_unsigned = as_type<ushort>(_e156);
     val = as_type<short>(as_unsigned);
-    metal::short2 _e166 = input_uniform.val_i16_2_;
-    metal::short2 _e169 = input_uniform.val_i16_2_;
-    metal::short2 v = as_type<metal::short2>(static_cast<metal::ushort2>(as_type<metal::ushort2>(static_cast<metal::ushort2>(_e166)) + as_type<metal::ushort2>(static_cast<metal::ushort2>(_e169))));
+    metal::short2 _e161 = input_uniform.val_i16_2_;
+    metal::short2 _e164 = input_uniform.val_i16_2_;
+    metal::short2 v = as_type<metal::short2>(static_cast<metal::ushort2>(as_type<metal::ushort2>(static_cast<metal::ushort2>(_e161)) + as_type<metal::ushort2>(static_cast<metal::ushort2>(_e164))));
     metal::short2 v2_ = as_type<metal::short2>(static_cast<metal::ushort2>(as_type<metal::ushort2>(static_cast<metal::ushort2>(v)) * as_type<metal::ushort2>(static_cast<metal::ushort2>(metal::short2(static_cast<short>(2))))));
     output.val_i16_2_ = v2_;
-    short _e176 = val;
-    return _e176;
+    short _e171 = val;
+    return _e171;
 }
 
 ushort naga_div(ushort lhs, ushort rhs) {
@@ -181,7 +183,8 @@ ushort uint16_function(
     device UniformCompatible& output,
     device StorageCompatible& output_arrays
 ) {
-    ushort val_1 = static_cast<ushort>(20);
+    ushort val_1;
+    val_1 = static_cast<ushort>(20);
     ushort _e3 = val_1;
     val_1 = _e3 + static_cast<ushort>(5);
     ushort _e6 = val_1;
@@ -249,7 +252,7 @@ struct main_Input {
 };
 [[max_total_threads_per_threadgroup(64)]] kernel void main_(
   uint subgroup_invocation_id [[thread_index_in_simdgroup]]
-, uint __local_invocation_index [[thread_index_in_threadgroup]]
+, uint local_invocation_index [[thread_index_in_threadgroup]]
 , constant UniformCompatible& input_uniform [[user(fake0)]]
 , device UniformCompatible const& input_storage [[user(fake0)]]
 , device StorageCompatible const& input_arrays [[user(fake0)]]
@@ -257,13 +260,16 @@ struct main_Input {
 , device StorageCompatible& output_arrays [[user(fake0)]]
 , threadgroup ushort& shared_val
 ) {
-    short private_variable = static_cast<short>(1);
-    if (__local_invocation_index == 0u) {
-        shared_val = {};
+    short private_variable;
+    short sg_val;
+    ushort sg_uval;
+    sg_val = static_cast<short>(0);
+    sg_uval = static_cast<ushort>(0);
+    private_variable = static_cast<short>(1);
+    if (local_invocation_index == 0u) {
+        shared_val = static_cast<ushort>(0);
     }
     metal::threadgroup_barrier(metal::mem_flags::mem_threadgroup);
-    short sg_val = {};
-    ushort sg_uval = {};
     shared_val = static_cast<ushort>(0);
     ushort _e6 = uint16_function(static_cast<ushort>(67), input_uniform, input_storage, input_arrays, output, output_arrays);
     short _e8 = int16_function(static_cast<short>(60), private_variable, input_uniform, input_storage, input_arrays, output, output_arrays);

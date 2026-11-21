@@ -53,7 +53,8 @@ fragment main_Output main_(
 , constant _mslBufferSizes& _buffer_sizes [[user(fake0)]]
 ) {
     const FragmentIn fragment_in = { varyings.index };
-    uint u1_ = 0u;
+    uint u1_;
+    u1_ = 0u;
     uint uniform_index = uni.index;
     uint non_uniform_index = fragment_in.index;
     uint _e7 = u1_;

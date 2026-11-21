@@ -28,12 +28,13 @@ constant float cz3_ = float {};
 constant metal::uint2 cz4_ = metal::uint2 {};
 constant metal::float2x2 cz5_ = metal::float2x2 {};
 constant type_10 cz6_ = type_10 {};
-constant Foo cz7_ = Foo {};
+constant Foo cz7_ = Foo();
 constant metal::uint2 cp1_ = metal::uint2(0u);
 
 kernel void main_(
 ) {
-    Foo foo = {};
+    Foo foo;
+    foo = Foo();
     foo = Foo {metal::float4(1.0), 1};
     metal::float2x2 m0_ = metal::float2x2(metal::float2(1.0, 0.0), metal::float2(0.0, 1.0));
     metal::float4x4 m1_ = metal::float4x4(metal::float4(1.0, 0.0, 0.0, 0.0), metal::float4(0.0, 1.0, 0.0, 0.0), metal::float4(0.0, 0.0, 1.0, 0.0), metal::float4(0.0, 0.0, 0.0, 1.0));

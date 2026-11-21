@@ -112,10 +112,14 @@ metal::float4 test(
     NagaExternalTextureWrapper t,
     metal::sampler samp
 ) {
-    metal::float4 a = {};
-    metal::float4 b = {};
-    metal::float4 c = {};
-    metal::uint2 d = {};
+    metal::float4 a;
+    metal::float4 b;
+    metal::float4 c;
+    metal::uint2 d;
+    a = metal::float4 {};
+    b = metal::float4 {};
+    c = metal::float4 {};
+    d = metal::uint2 {};
     metal::float4 _e4 = nagaTextureSampleBaseClampToEdge(t, samp, metal::float2(0.0));
     a = _e4;
     metal::float4 _e8 = nagaTextureLoadExternal(t, metal::uint2(metal::int2(0)));

@@ -21,7 +21,8 @@ vertex vsOutput_1 vs(
   vsInput varyings [[stage_in]]
 ) {
     const auto xy = varyings.xy;
-    OurVertexShaderOutput vsOutput = {};
+    OurVertexShaderOutput vsOutput;
+    vsOutput = OurVertexShaderOutput();
     vsOutput.position = metal::float4(xy, 0.0, 1.0);
     OurVertexShaderOutput _e6 = vsOutput;
     const auto _tmp = _e6;

@@ -42,26 +42,40 @@ metal::float4 mock_function(
     threadgroup type_5& in_workgroup,
     thread type_6& in_private
 ) {
-    type_9 in_function = type_9 {{metal::float4(0.707, 0.0, 0.0, 1.0), metal::float4(0.0, 0.707, 0.0, 1.0)}};
-    metal::float4 _e18 = in_storage.a.inner[i];
-    metal::float4 _e22 = in_uniform.a.inner[i];
-    metal::float4 _e25 = (uint(l) < image_2d_array.get_num_mip_levels() && uint(i) < image_2d_array.get_array_size() && metal::all(metal::uint2(c) < metal::uint2(image_2d_array.get_width(l), image_2d_array.get_height(l))) ? image_2d_array.read(metal::uint2(c), i, l): DefaultConstructible());
-    float _e29 = in_workgroup.inner[metal::min(unsigned(i), 29u)];
-    float _e34 = in_private.inner[metal::min(unsigned(i), 39u)];
-    metal::float4 _e38 = in_function.inner[metal::min(unsigned(i), 1u)];
-    return ((((_e18 + _e22) + _e25) + metal::float4(_e29)) + metal::float4(_e34)) + _e38;
+    type_9 in_function;
+    in_function = type_9 {{metal::float4(0.707, 0.0, 0.0, 1.0), metal::float4(0.0, 0.707, 0.0, 1.0)}};
+    metal::float4 _e7 = in_storage.a.inner[i];
+    metal::float4 _e11 = in_uniform.a.inner[i];
+    metal::float4 _e14 = (uint(l) < image_2d_array.get_num_mip_levels() && uint(i) < image_2d_array.get_array_size() && metal::all(metal::uint2(c) < metal::uint2(image_2d_array.get_width(l), image_2d_array.get_height(l))) ? image_2d_array.read(metal::uint2(c), i, l): DefaultConstructible());
+    float _e18 = in_workgroup.inner[metal::min(unsigned(i), 29u)];
+    float _e23 = in_private.inner[metal::min(unsigned(i), 39u)];
+    metal::float4 _e27 = in_function.inner[metal::min(unsigned(i), 1u)];
+    return ((((_e7 + _e11) + _e14) + metal::float4(_e18)) + metal::float4(_e23)) + _e27;
 }
 
+struct main_Input {
+};
 kernel void main_(
-  uint __local_invocation_index [[thread_index_in_threadgroup]]
+  uint local_invocation_index [[thread_index_in_threadgroup]]
 , device InStorage const& in_storage [[user(fake0)]]
 , constant InUniform& in_uniform [[user(fake0)]]
 , metal::texture2d_array<float, metal::access::sample> image_2d_array [[user(fake0)]]
 , threadgroup type_5& in_workgroup
 ) {
-    type_6 in_private = {};
-    if (__local_invocation_index == 0u) {
-        in_workgroup = {};
+    type_6 in_private;
+    uint zero_init_index;
+    in_private = type_6 {};
+    zero_init_index = local_invocation_index;
+    uint2 loop_bound = uint2(4294967295u);
+    while(true) {
+        if (metal::all(loop_bound == uint2(0u))) { break; }
+        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        uint _e12 = zero_init_index;
+        if (_e12 >= 30u) {
+            break;
+        }
+        in_workgroup.inner[metal::min(unsigned(_e12), 29u)] = 0.0;
+        zero_init_index = _e12 + 1u;
     }
     metal::threadgroup_barrier(metal::mem_flags::mem_threadgroup);
     metal::float4 _e5 = mock_function(metal::int2(1, 2), 3, 4, in_storage, in_uniform, image_2d_array, in_workgroup, in_private);

@@ -16,7 +16,8 @@ int f(
 
 void named(
 ) {
-    int a = 0;
+    int a;
+    a = 0;
     bool cmp = {};
     uint2 loop_bound = uint2(4294967295u);
     bool loop_init = true;
@@ -41,7 +42,8 @@ void named(
 
 void call_result(
 ) {
-    int a_1 = 0;
+    int a_1;
+    a_1 = 0;
     int v = {};
     uint2 loop_bound_1 = uint2(4294967295u);
     bool loop_init_1 = true;
@@ -64,31 +66,34 @@ void call_result(
 
 void through_pointer(
 ) {
-    type_1 arr = type_1 {{0, 1, 2, 3}};
-    int i = 0;
-    int _e8 = {};
+    type_1 arr;
+    int i;
+    arr = type_1 {{0, 1, 2, 3}};
+    i = 0;
+    int _e3 = {};
     uint2 loop_bound_2 = uint2(4294967295u);
     bool loop_init_2 = true;
     while(true) {
         if (metal::all(loop_bound_2 == uint2(0u))) { break; }
         loop_bound_2 -= uint2(loop_bound_2.y == 0u, 1u);
         if (!loop_init_2) {
-            int _e13 = arr.inner[_e8];
-            if (_e13 > 2) {
+            int _e8 = arr.inner[_e3];
+            if (_e8 > 2) {
                 break;
             }
         }
         loop_init_2 = false;
-        _e8 = i;
-        int _e10 = i;
-        i = as_type<int>(as_type<uint>(_e10) + as_type<uint>(1));
+        _e3 = i;
+        int _e5 = i;
+        i = as_type<int>(as_type<uint>(_e5) + as_type<uint>(1));
     }
     return;
 }
 
 void nested(
 ) {
-    int a_2 = 0;
+    int a_2;
+    a_2 = 0;
     bool outer = {};
     uint2 loop_bound_3 = uint2(4294967295u);
     bool loop_init_3 = true;
@@ -126,7 +131,8 @@ void nested(
 
 void dead_use(
 ) {
-    int a_3 = 0;
+    int a_3;
+    a_3 = 0;
     int v_1 = {};
     int w = {};
     uint2 loop_bound_5 = uint2(4294967295u);
@@ -158,7 +164,8 @@ void dead_use(
 void restricted_image_load(
     metal::texture2d<float, metal::access::sample> tex
 ) {
-    int i_1 = 0;
+    int i_1;
+    i_1 = 0;
     float val = {};
     uint2 loop_bound_6 = uint2(4294967295u);
     bool loop_init_6 = true;
@@ -230,9 +237,12 @@ void break_if_uses_continuing(
 
 void name_reuse(
 ) {
-    float a_4 = 0.0;
-    int a_5 = {};
-    float b = {};
+    float a_4;
+    int a_5;
+    float b;
+    a_4 = 0.0;
+    a_5 = 0;
+    b = 0.0;
     uint2 loop_bound_9 = uint2(4294967295u);
     bool loop_init_9 = true;
     while(true) {
@@ -258,7 +268,8 @@ kernel void main_(
   metal::texture2d<float, metal::access::sample> tex [[user(fake0)]]
 , device metal::float2 const& v0_ [[user(fake0)]]
 ) {
-    int counter = 0;
+    int counter;
+    counter = 0;
     named();
     call_result();
     through_pointer();

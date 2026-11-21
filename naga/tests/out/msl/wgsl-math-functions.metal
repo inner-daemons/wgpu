@@ -57,8 +57,10 @@ _frexp_result_vec4_f32_ naga_frexp(metal::float4 arg) {
 
 fragment void main_(
 ) {
-    float runtime_f32_ = 1.0;
-    int runtime_i32_ = 1;
+    float runtime_f32_;
+    int runtime_i32_;
+    runtime_f32_ = 1.0;
+    runtime_i32_ = 1;
     metal::float4 v = metal::float4(0.0);
     float a = ((1.0) * 57.295779513082322865);
     float b = ((1.0) * 0.017453292519943295474);

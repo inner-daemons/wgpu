@@ -65,7 +65,8 @@ vertex vs_mainOutput vs_main(
 ) {
     const auto position = varyings.position;
     const auto normal = varyings.normal;
-    VertexOutput out = {};
+    VertexOutput out;
+    out = VertexOutput();
     metal::float4x4 w = u_entity.world;
     metal::float4x4 _e7 = u_entity.world;
     metal::float4 world_pos = _e7 * static_cast<metal::float4>(position);
@@ -97,8 +98,10 @@ fragment fs_mainOutput fs_main(
 , constant _mslBufferSizes& _buffer_sizes [[user(fake0)]]
 ) {
     const VertexOutput in = { proj_position, varyings_1.world_normal, varyings_1.world_position };
-    metal::float3 color = c_ambient;
-    uint i = 0u;
+    metal::float3 color;
+    uint i;
+    color = c_ambient;
+    i = 0u;
     metal::float3 normal_1 = metal::normalize(in.world_normal);
     uint2 loop_bound = uint2(4294967295u);
     bool loop_init = true;
@@ -150,8 +153,10 @@ fragment fs_main_without_storageOutput fs_main_without_storage(
 , metal::sampler sampler_shadow [[user(fake0)]]
 ) {
     const VertexOutput in_1 = { proj_position_1, varyings_2.world_normal, varyings_2.world_position };
-    metal::float3 color_1 = c_ambient;
-    uint i_1 = 0u;
+    metal::float3 color_1;
+    uint i_1;
+    color_1 = c_ambient;
+    i_1 = 0u;
     metal::float3 normal_2 = metal::normalize(in_1.world_normal);
     uint2 loop_bound_1 = uint2(4294967295u);
     bool loop_init_1 = true;

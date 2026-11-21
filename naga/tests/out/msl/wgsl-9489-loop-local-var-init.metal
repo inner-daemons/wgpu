@@ -15,10 +15,14 @@ kernel void main_(
   device type_1 const& input [[buffer(0)]]
 , device type_2& output [[buffer(1)]]
 ) {
-    uint t = 0u;
-    metal::float4 acc_noinit = {};
-    metal::float4 acc_init = {};
-    uint d = {};
+    uint t;
+    metal::float4 acc_noinit;
+    metal::float4 acc_init;
+    uint d;
+    t = 0u;
+    acc_noinit = metal::float4 {};
+    acc_init = metal::float4 {};
+    d = 0u;
     uint2 loop_bound = uint2(4294967295u);
     bool loop_init = true;
     while(true) {

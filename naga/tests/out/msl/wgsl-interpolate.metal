@@ -37,7 +37,8 @@ struct vert_mainOutput {
 };
 vertex vert_mainOutput vert_main(
 ) {
-    FragmentInput out = {};
+    FragmentInput out;
+    out = FragmentInput();
     out.position = metal::float4(2.0, 4.0, 5.0, 6.0);
     out._flat = 8u;
     out.flat_first = 9u;

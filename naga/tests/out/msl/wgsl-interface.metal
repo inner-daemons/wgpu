@@ -77,9 +77,7 @@ struct computeInput {
 , metal::uint3 num_wgs [[threadgroups_per_grid]]
 , threadgroup type_4& output
 ) {
-    if (local_index == 0u) {
-        output = {};
-    }
+    output.inner[local_index] = 0u;
     metal::threadgroup_barrier(metal::mem_flags::mem_threadgroup);
     output.inner[0] = (((global_id.x + local_id.x) + local_index) + wg_id.x) + num_wgs.x;
     return;
@@ -98,7 +96,8 @@ vertex vertex_two_structsOutput vertex_two_structs(
 ) {
     const Input1_ in1_ = { index_1 };
     const Input2_ in2_ = { index_2 };
-    uint index = 2u;
+    uint index;
+    index = 2u;
     uint _e8 = index;
     return vertex_two_structsOutput { metal::float4(static_cast<float>(in1_.index), static_cast<float>(in2_.index), static_cast<float>(_e8), 0.0), 1.0 };
 }

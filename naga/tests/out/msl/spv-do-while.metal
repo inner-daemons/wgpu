@@ -27,7 +27,8 @@ void f_u0028_b1_u003b(
 
 void main_1(
 ) {
-    bool param = {};
+    bool param;
+    param = false;
     param = false;
     f_u0028_b1_u003b(param);
     return;

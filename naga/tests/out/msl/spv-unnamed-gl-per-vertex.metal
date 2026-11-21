@@ -32,8 +32,10 @@ struct main_Output {
 vertex main_Output main_(
   uint param [[vertex_id]]
 ) {
-    type_4 global = type_4 {metal::float4(0.0, 0.0, 0.0, 1.0), 1.0, type_3 {}, type_3 {}};
-    int global_1 = {};
+    type_4 global;
+    int global_1;
+    global = type_4 {metal::float4(0.0, 0.0, 0.0, 1.0), 1.0, type_3 {}, type_3 {}};
+    global_1 = 0;
     global_1 = static_cast<int>(param);
     function(global, global_1);
     float _e6 = global.member.y;

@@ -82,8 +82,10 @@ struct Outer {
 void test_matrix_within_struct_accesses(
     constant Baz& baz
 ) {
-    int idx = 1;
-    Baz t = Baz {metal::float3x2(metal::float2(1.0), metal::float2(2.0), metal::float2(3.0))};
+    int idx;
+    Baz t;
+    idx = 1;
+    t = Baz {metal::float3x2(metal::float2(1.0), metal::float2(2.0), metal::float2(3.0))};
     int _e3 = idx;
     idx = as_type<int>(as_type<uint>(_e3) - as_type<uint>(1));
     metal::float3x2 l0_ = baz.m;
@@ -98,28 +100,30 @@ void test_matrix_within_struct_accesses(
     int _e36 = idx;
     int _e38 = idx;
     float l6_ = baz.m[_e36][_e38];
-    int _e51 = idx;
-    idx = as_type<int>(as_type<uint>(_e51) + as_type<uint>(1));
+    int _e43 = idx;
+    idx = as_type<int>(as_type<uint>(_e43) + as_type<uint>(1));
     t.m = metal::float3x2(metal::float2(6.0), metal::float2(5.0), metal::float2(4.0));
     t.m[0] = metal::float2(9.0);
-    int _e66 = idx;
-    t.m[_e66] = metal::float2(90.0);
+    int _e58 = idx;
+    t.m[_e58] = metal::float2(90.0);
     t.m[0].y = 10.0;
-    int _e76 = idx;
-    t.m[0][_e76] = 20.0;
-    int _e80 = idx;
-    t.m[_e80].y = 30.0;
-    int _e85 = idx;
-    int _e87 = idx;
-    t.m[_e85][_e87] = 40.0;
+    int _e68 = idx;
+    t.m[0][_e68] = 20.0;
+    int _e72 = idx;
+    t.m[_e72].y = 30.0;
+    int _e77 = idx;
+    int _e79 = idx;
+    t.m[_e77][_e79] = 40.0;
     return;
 }
 
 void test_matrix_within_array_within_struct_accesses(
     constant MatCx2InArray& nested_mat_cx2_
 ) {
-    int idx_1 = 1;
-    MatCx2InArray t_1 = MatCx2InArray {type_15 {}};
+    int idx_1;
+    MatCx2InArray t_1;
+    idx_1 = 1;
+    t_1 = MatCx2InArray {type_15 {}};
     int _e3 = idx_1;
     idx_1 = as_type<int>(as_type<uint>(_e3) - as_type<uint>(1));
     type_15 l0_1 = nested_mat_cx2_.am;
@@ -135,21 +139,21 @@ void test_matrix_within_array_within_struct_accesses(
     int _e46 = idx_1;
     int _e48 = idx_1;
     float l7_ = nested_mat_cx2_.am.inner[0][_e46][_e48];
-    int _e55 = idx_1;
-    idx_1 = as_type<int>(as_type<uint>(_e55) + as_type<uint>(1));
+    int _e53 = idx_1;
+    idx_1 = as_type<int>(as_type<uint>(_e53) + as_type<uint>(1));
     t_1.am = type_15 {};
     t_1.am.inner[0] = metal::float4x2(metal::float2(8.0), metal::float2(7.0), metal::float2(6.0), metal::float2(5.0));
     t_1.am.inner[0][0] = metal::float2(9.0);
-    int _e77 = idx_1;
-    t_1.am.inner[0][_e77] = metal::float2(90.0);
+    int _e75 = idx_1;
+    t_1.am.inner[0][_e75] = metal::float2(90.0);
     t_1.am.inner[0][0].y = 10.0;
-    int _e89 = idx_1;
-    t_1.am.inner[0][0][_e89] = 20.0;
-    int _e94 = idx_1;
-    t_1.am.inner[0][_e94].y = 30.0;
+    int _e87 = idx_1;
+    t_1.am.inner[0][0][_e87] = 20.0;
+    int _e92 = idx_1;
+    t_1.am.inner[0][_e92].y = 30.0;
+    int _e98 = idx_1;
     int _e100 = idx_1;
-    int _e102 = idx_1;
-    t_1.am.inner[0][_e100][_e102] = 40.0;
+    t_1.am.inner[0][_e98][_e100] = 40.0;
     return;
 }
 
@@ -182,8 +186,10 @@ void assign_array_through_ptr_fn(
 
 void assign_through_ptr(
 ) {
-    uint val = 33u;
-    type_22 arr = type_22 {{metal::float4(6.0), metal::float4(7.0)}};
+    uint val;
+    type_22 arr;
+    val = 33u;
+    arr = type_22 {{metal::float4(6.0), metal::float4(7.0)}};
     assign_through_ptr_fn(val);
     assign_array_through_ptr_fn(arr);
     return;
@@ -219,8 +225,10 @@ void assign_to_arg_ptr_array_element(
 
 void assign_to_ptr_components(
 ) {
-    AssignToMember s1_ = {};
-    type_25 a1_ = {};
+    AssignToMember s1_;
+    type_25 a1_;
+    s1_ = AssignToMember();
+    a1_ = type_25 {};
     assign_to_arg_ptr_member(s1_);
     uint _e1 = fetch_arg_ptr_member(s1_);
     assign_to_arg_ptr_array_element(a1_);
@@ -231,7 +239,8 @@ void assign_to_ptr_components(
 bool index_ptr(
     bool value
 ) {
-    type_28 a_1 = {};
+    type_28 a_1;
+    a_1 = type_28 {};
     a_1 = type_28 {{value}};
     bool _e4 = a_1.inner[0];
     return _e4;
@@ -239,25 +248,29 @@ bool index_ptr(
 
 int member_ptr(
 ) {
-    S s = S {42};
-    int _e4 = s.m;
-    return _e4;
+    S s;
+    s = S {42};
+    int _e2 = s.m;
+    return _e2;
 }
 
 int let_members_of_members(
 ) {
-    Inner inner_1 = Outer {}.om_nom_nom;
-    int delishus_1 = Outer {}.om_nom_nom.delicious;
-    if (Outer {}.thing != static_cast<uint>(delishus_1)) {
+    Inner inner_1 = Outer().om_nom_nom;
+    int delishus_1 = Outer().om_nom_nom.delicious;
+    if (Outer().thing != static_cast<uint>(delishus_1)) {
     }
-    return Outer {}.om_nom_nom.delicious;
+    return Outer().om_nom_nom.delicious;
 }
 
 int var_members_of_members(
 ) {
-    Outer thing = Outer {};
-    Inner inner = {};
-    int delishus = {};
+    Outer thing;
+    Inner inner;
+    int delishus;
+    thing = Outer();
+    inner = Inner();
+    delishus = 0;
     Inner _e3 = thing.om_nom_nom;
     inner = _e3;
     int _e6 = inner.delicious;
@@ -287,9 +300,12 @@ vertex foo_vertOutput foo_vert(
 , constant MatCx2InArray& nested_mat_cx2_ [[buffer(3)]]
 , constant _mslBufferSizes& _buffer_sizes [[buffer(24)]]
 ) {
-    GlobalConst msl_padding_global_const = GlobalConst {0u, {}, metal::uint3(0u, 0u, 0u), 0};
-    float foo = 0.0;
-    type_20 c2_ = {};
+    GlobalConst msl_padding_global_const;
+    float foo;
+    type_20 c2_;
+    foo = 0.0;
+    c2_ = type_20 {};
+    msl_padding_global_const = GlobalConst {0u, {}, metal::uint3(0u, 0u, 0u), 0};
     float baz_1 = foo;
     foo = 1.0;
     GlobalConst phony = msl_padding_global_const;

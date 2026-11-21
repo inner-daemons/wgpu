@@ -19,7 +19,8 @@ struct main_Output {
 };
 vertex main_Output main_(
 ) {
-    VertexOutput out = {};
+    VertexOutput out;
+    out = VertexOutput();
     out.clip_distances.inner[0] = 0.5;
     VertexOutput _e4 = out;
     const auto _tmp = _e4;

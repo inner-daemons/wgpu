@@ -7,7 +7,8 @@ using metal::uint;
 
 void control_flow(
 ) {
-    int pos = {};
+    int pos;
+    pos = 0;
     metal::threadgroup_barrier(metal::mem_flags::mem_device);
     metal::threadgroup_barrier(metal::mem_flags::mem_threadgroup);
     metal::threadgroup_barrier(metal::mem_flags::mem_texture);
@@ -257,7 +258,8 @@ void loop_switch_omit_continue_variable_checks(
     int z_1,
     int w
 ) {
-    int pos_1 = 0;
+    int pos_1;
+    pos_1 = 0;
     uint2 loop_bound_4 = uint2(4294967295u);
     while(true) {
         if (metal::all(loop_bound_4 == uint2(0u))) { break; }

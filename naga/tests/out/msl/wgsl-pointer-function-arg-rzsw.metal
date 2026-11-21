@@ -53,8 +53,9 @@ void takes_mat_ptr(
 void local_var(
     uint i
 ) {
-    type_2 arr = type_2 {{1, 2, 3, 4}};
+    type_2 arr;
     int oob = {};
+    arr = type_2 {{1, 2, 3, 4}};
     takes_ptr(uint(i) < 4 ? arr.inner[i] : oob);
     takes_array_ptr(arr);
     return;
@@ -121,8 +122,9 @@ void local_var_from_arg(
     type_2 a,
     uint i_6
 ) {
-    type_2 b = {};
+    type_2 b;
     int oob_8 = {};
+    b = type_2 {};
     b = a;
     takes_ptr(uint(i_6) < 4 ? b.inner[i_6] : oob_8);
     return;
@@ -140,11 +142,16 @@ void let_binding(
 
 kernel void main_(
 ) {
-    type_9 vec_ = {};
-    type_11 mat = {};
-    type_2 arr1d = {};
-    type_13 arr2d = {};
-    type_15 arr3d = {};
+    type_9 vec_;
+    type_11 mat;
+    type_2 arr1d;
+    type_13 arr2d;
+    type_15 arr3d;
+    vec_ = type_9 {};
+    mat = type_11 {};
+    arr1d = type_2 {};
+    arr2d = type_13 {};
+    arr3d = type_15 {};
     local_var(1u);
     mat_vec_ptrs(vec_, mat, 1u);
     argument(arr1d, 1u);

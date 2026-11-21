@@ -75,9 +75,12 @@ constant uint SIZE = 128u;
 kernel void test_atomic_compare_exchange_i32_(
   device type_3& arr_i32_ [[user(fake0)]]
 ) {
-    uint i = 0u;
-    int old = {};
-    bool exchanged = {};
+    uint i;
+    int old;
+    bool exchanged;
+    i = 0u;
+    old = 0;
+    exchanged = false;
     uint2 loop_bound = uint2(4294967295u);
     bool loop_init = true;
     while(true) {
@@ -126,9 +129,12 @@ kernel void test_atomic_compare_exchange_i32_(
 kernel void test_atomic_compare_exchange_u32_(
   device type_5& arr_u32_ [[user(fake0)]]
 ) {
-    uint i_1 = 0u;
-    uint old_1 = {};
-    bool exchanged_1 = {};
+    uint i_1;
+    uint old_1;
+    bool exchanged_1;
+    i_1 = 0u;
+    old_1 = 0u;
+    exchanged_1 = false;
     uint2 loop_bound_2 = uint2(4294967295u);
     bool loop_init_1 = true;
     while(true) {

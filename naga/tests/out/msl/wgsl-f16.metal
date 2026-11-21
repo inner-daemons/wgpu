@@ -55,8 +55,10 @@ half f16_function(
     device UniformCompatible& output,
     device StorageCompatible& output_arrays
 ) {
-    LayoutTest l = {};
-    half val = 15.203125h;
+    LayoutTest l;
+    half val;
+    l = LayoutTest();
+    val = 15.203125h;
     half phony = private_variable;
     half _e5 = val;
     val = _e5 + -33344.0h;
@@ -180,7 +182,8 @@ kernel void main_(
 , device UniformCompatible& output [[user(fake0)]]
 , device StorageCompatible& output_arrays [[user(fake0)]]
 ) {
-    half private_variable = 1.0h;
+    half private_variable;
+    private_variable = 1.0h;
     half _e3 = f16_function(2.0h, private_variable, input_uniform, input_storage, input_arrays, output, output_arrays);
     output.final_value = _e3;
     return;

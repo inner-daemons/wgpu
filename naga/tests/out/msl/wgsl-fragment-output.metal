@@ -32,7 +32,8 @@ struct main_vec4vec3_Output {
 };
 fragment main_vec4vec3_Output main_vec4vec3_(
 ) {
-    FragmentOutputVec4Vec3_ output = {};
+    FragmentOutputVec4Vec3_ output;
+    output = FragmentOutputVec4Vec3_();
     output.vec4f = metal::float4(0.0);
     output.vec4i = metal::int4(0);
     output.vec4u = metal::uint4(0u);
@@ -55,7 +56,8 @@ struct main_vec2scalarOutput {
 };
 fragment main_vec2scalarOutput main_vec2scalar(
 ) {
-    FragmentOutputVec2Scalar output_1 = {};
+    FragmentOutputVec2Scalar output_1;
+    output_1 = FragmentOutputVec2Scalar();
     output_1.vec2f = metal::float2(0.0);
     output_1.vec2i = metal::int2(0);
     output_1.vec2u = metal::uint2(0u);

@@ -56,7 +56,8 @@ long int64_function(
     device UniformCompatible& output,
     device StorageCompatible& output_arrays
 ) {
-    long val = 20L;
+    long val;
+    val = 20L;
     long phony = private_variable;
     long _e5 = val;
     val = as_type<long>(as_type<ulong>(_e5) + as_type<ulong>(as_type<long>(as_type<ulong>(as_type<long>(as_type<ulong>(31L) - as_type<ulong>(1002003004005006L))) + as_type<ulong>(-9223372036854775807L))));
@@ -149,7 +150,8 @@ ulong uint64_function(
     device UniformCompatible& output,
     device StorageCompatible& output_arrays
 ) {
-    ulong val_1 = 20uL;
+    ulong val_1;
+    val_1 = 20uL;
     ulong _e3 = val_1;
     val_1 = _e3 + ((31uL + 18446744073709551615uL) - 18446744073709551615uL);
     ulong _e10 = val_1;
@@ -227,7 +229,8 @@ ulong uint64_function(
 , device UniformCompatible& output [[user(fake0)]]
 , device StorageCompatible& output_arrays [[user(fake0)]]
 ) {
-    long private_variable = 1L;
+    long private_variable;
+    private_variable = 1L;
     ulong _e3 = uint64_function(67uL, input_uniform, input_storage, input_arrays, output, output_arrays);
     long _e5 = int64_function(60L, private_variable, input_uniform, input_storage, input_arrays, output, output_arrays);
     output.final_value = _e3 + as_type<ulong>(_e5);

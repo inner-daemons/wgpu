@@ -34,7 +34,8 @@ struct main_Input {
   uint param [[thread_index_in_simdgroup]]
 , device type_1& global_1 [[user(fake0)]]
 ) {
-    uint global = {};
+    uint global;
+    global = 0u;
     global = param;
     function(global, global_1);
 }

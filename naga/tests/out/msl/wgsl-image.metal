@@ -138,7 +138,8 @@ fragment texture_sampleOutput texture_sample(
 , metal::texture3d<float, metal::access::sample> image_3d [[user(fake0)]]
 , metal::sampler sampler_reg [[user(fake0)]]
 ) {
-    metal::float4 a = {};
+    metal::float4 a;
+    a = metal::float4 {};
     metal::float2 _e1 = metal::float2(0.5);
     metal::float3 _e3 = metal::float3(0.5);
     metal::int2 _e6 = metal::int2(3, 1);
@@ -240,7 +241,8 @@ fragment texture_sample_comparisonOutput texture_sample_comparison(
 , metal::depth2d_array<float, metal::access::sample> image_2d_array_depth [[user(fake0)]]
 , metal::depthcube<float, metal::access::sample> image_cube_depth [[user(fake0)]]
 ) {
-    float a_1 = {};
+    float a_1;
+    a_1 = 0.0;
     metal::float2 tc = metal::float2(0.5);
     metal::float3 tc3_ = metal::float3(0.5);
     float _e6 = a_1;

@@ -204,6 +204,8 @@ enum ResolvedInterpolation {
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error(transparent)]
+    Pass(#[from] crate::back::passes::PassError),
+    #[error(transparent)]
     Format(#[from] FmtError),
     #[error("bind target {0:?} is empty")]
     UnimplementedBindTarget(BindTarget),

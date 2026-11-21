@@ -16,10 +16,11 @@ struct RayDesc {
 [[max_total_threads_per_threadgroup(1)]] kernel void main_(
   metal::raytracing::instance_acceleration_structure acc [[user(fake0)]]
 ) {
-    uint i = 0u;
+    uint i;
     metal::raytracing::intersection_query<metal::raytracing::instancing, metal::raytracing::triangle_data> sq = {};
     uint naga_query_init_tracker_for_sq = 0u;
     float naga_query_tmax_tracker_for_sq = 0.0;
+    i = 0u;
     uint2 loop_bound = uint2(4294967295u);
     bool loop_init = true;
     while(true) {

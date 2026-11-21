@@ -25,8 +25,10 @@ void breakIfEmpty(
 void breakIfEmptyBody(
     bool a
 ) {
-    bool b = {};
-    bool c = {};
+    bool b;
+    bool c;
+    b = false;
+    c = false;
     uint2 loop_bound_1 = uint2(4294967295u);
     bool loop_init_1 = true;
     while(true) {
@@ -49,8 +51,10 @@ void breakIfEmptyBody(
 void breakIf(
     bool a_1
 ) {
-    bool d = {};
-    bool e = {};
+    bool d;
+    bool e;
+    d = false;
+    e = false;
     uint2 loop_bound_2 = uint2(4294967295u);
     bool loop_init_2 = true;
     while(true) {
@@ -72,7 +76,8 @@ void breakIf(
 
 void breakIfSeparateVariable(
 ) {
-    uint counter = 0u;
+    uint counter;
+    counter = 0u;
     uint2 loop_bound_3 = uint2(4294967295u);
     bool loop_init_3 = true;
     while(true) {

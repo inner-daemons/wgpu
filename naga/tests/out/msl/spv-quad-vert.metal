@@ -44,12 +44,16 @@ struct main_Output {
 vertex main_Output main_(
   main_Input varyings [[stage_in]]
 ) {
-    metal::float2 v_uv = {};
-    metal::float2 a_uv_1 = {};
-    gl_PerVertex unnamed = gl_PerVertex {metal::float4(0.0, 0.0, 0.0, 1.0), 1.0, type_3 {}, type_3 {}};
-    metal::float2 a_pos_1 = {};
+    metal::float2 v_uv;
+    metal::float2 a_uv_1;
+    gl_PerVertex unnamed;
+    metal::float2 a_pos_1;
     const auto a_uv = varyings.a_uv;
     const auto a_pos = varyings.a_pos;
+    v_uv = metal::float2 {};
+    a_uv_1 = metal::float2 {};
+    unnamed = gl_PerVertex {metal::float4(0.0, 0.0, 0.0, 1.0), 1.0, type_3 {}, type_3 {}};
+    a_pos_1 = metal::float2 {};
     a_uv_1 = a_uv;
     a_pos_1 = a_pos;
     main_1(v_uv, a_uv_1, unnamed, a_pos_1);

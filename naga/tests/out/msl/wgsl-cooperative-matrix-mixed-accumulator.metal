@@ -35,7 +35,8 @@ metal::simdgroup_float8x8 NagaCooperativeMultiplyAdd(const thread metal::simdgro
 , device type_3& accum [[user(fake0)]]
 , constant _mslBufferSizes& _buffer_sizes [[user(fake0)]]
 ) {
-    metal::simdgroup_float8x8 c = {};
+    metal::simdgroup_float8x8 c;
+    c = metal::simdgroup_float8x8 {};
     metal::simdgroup_half8x8 a = NagaCooperativeLoad(&ab[0], 8u, true);
     metal::simdgroup_half8x8 b = NagaCooperativeLoad(&ab[0], 8u, true);
     c = NagaCooperativeLoad(&accum[0], 8u, true);

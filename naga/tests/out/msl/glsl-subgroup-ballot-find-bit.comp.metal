@@ -13,9 +13,12 @@ void main_1(
     thread uint& gl_SubgroupInvocationID_1,
     thread uint& gl_SubgroupSize_1
 ) {
-    metal::uint4 mask = {};
-    uint lsb = {};
-    uint msb = {};
+    metal::uint4 mask;
+    uint lsb;
+    uint msb;
+    mask = metal::uint4 {};
+    lsb = 0u;
+    msb = 0u;
     uint _e4 = gl_SubgroupInvocationID_1;
     uint _e5 = gl_SubgroupSize_1;
     mask = metal::uint4(_e4, _e5, 3u, 4u);
@@ -46,8 +49,10 @@ struct main_Input {
 , uint gl_SubgroupSize [[threads_per_simdgroup]]
 , device Output& global [[user(fake0)]]
 ) {
-    uint gl_SubgroupInvocationID_1 = {};
-    uint gl_SubgroupSize_1 = {};
+    uint gl_SubgroupInvocationID_1;
+    uint gl_SubgroupSize_1;
+    gl_SubgroupInvocationID_1 = 0u;
+    gl_SubgroupSize_1 = 0u;
     gl_SubgroupInvocationID_1 = gl_SubgroupInvocationID;
     gl_SubgroupSize_1 = gl_SubgroupSize;
     main_1(global, gl_SubgroupInvocationID_1, gl_SubgroupSize_1);

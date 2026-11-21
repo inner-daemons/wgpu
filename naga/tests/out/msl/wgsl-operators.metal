@@ -44,15 +44,16 @@ metal::float4 splat(
 
 metal::float2 splat_assignment(
 ) {
-    metal::float2 a = metal::float2(2.0);
-    metal::float2 _e3 = a;
-    a = _e3 + metal::float2(1.0);
-    metal::float2 _e7 = a;
-    a = _e7 - metal::float2(3.0);
-    metal::float2 _e11 = a;
-    a = _e11 / metal::float2(4.0);
-    metal::float2 _e15 = a;
-    return _e15;
+    metal::float2 a;
+    a = metal::float2(2.0);
+    metal::float2 _e1 = a;
+    a = _e1 + metal::float2(1.0);
+    metal::float2 _e5 = a;
+    a = _e5 - metal::float2(3.0);
+    metal::float2 _e9 = a;
+    a = _e9 / metal::float2(4.0);
+    metal::float2 _e13 = a;
+    return _e13;
 }
 
 metal::float3 bool_cast(
@@ -84,13 +85,20 @@ bool s(
 
 void logical(
 ) {
-    bool local = {};
-    bool local_1 = {};
-    bool local_2 = {};
-    bool local_3 = {};
-    bool local_4 = {};
-    bool local_5 = {};
-    bool local_6 = {};
+    bool local;
+    bool local_1;
+    bool local_2;
+    bool local_3;
+    bool local_4;
+    bool local_5;
+    bool local_6;
+    local = false;
+    local_1 = false;
+    local_2 = false;
+    local_3 = false;
+    local_4 = false;
+    local_5 = false;
+    local_6 = false;
     bool neg0_ = !(true);
     metal::bool2 neg1_ = !(metal::bool2(true));
     if (!(true)) {
@@ -196,8 +204,10 @@ metal::uint2 naga_mod(metal::uint2 lhs, metal::uint2 rhs) {
 
 void arithmetic(
 ) {
-    int prevent_const_eval = {};
-    int wgpu_7437_ = {};
+    int prevent_const_eval;
+    int wgpu_7437_;
+    prevent_const_eval = 0;
+    wgpu_7437_ = 0;
     float neg0_1 = -(1.0);
     metal::int2 neg1_1 = naga_neg(metal::int2(1));
     metal::float2 neg2_ = -(metal::float2(1.0));
@@ -347,8 +357,10 @@ void comparison(
 
 void assignment(
 ) {
-    int a_1 = {};
-    metal::int3 vec0_ = metal::int3 {};
+    int a_1;
+    metal::int3 vec0_;
+    a_1 = 0;
+    vec0_ = metal::int3 {};
     a_1 = 1;
     int _e5 = a_1;
     a_1 = as_type<int>(as_type<uint>(_e5) + as_type<uint>(1));

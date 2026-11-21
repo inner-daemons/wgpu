@@ -27,8 +27,10 @@ vertex vs_mainOutput vs_main(
   uint vertex_index [[vertex_id]]
 , constant Data& r_data [[buffer(0)]]
 ) {
-    int tmp1_ = {};
-    int tmp2_ = {};
+    int tmp1_;
+    int tmp2_;
+    tmp1_ = 0;
+    tmp2_ = 0;
     tmp1_ = naga_div(static_cast<int>(vertex_index), 2);
     tmp2_ = static_cast<int>(vertex_index) & 1;
     int _e9 = tmp1_;

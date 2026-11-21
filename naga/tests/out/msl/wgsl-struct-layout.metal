@@ -49,7 +49,8 @@ kernel void no_padding_comp(
   constant NoPadding& no_padding_uniform [[user(fake0)]]
 , device NoPadding const& no_padding_storage [[user(fake0)]]
 ) {
-    NoPadding x = {};
+    NoPadding x;
+    x = NoPadding();
     NoPadding _e2 = no_padding_uniform;
     x = _e2;
     NoPadding _e4 = no_padding_storage;
@@ -94,7 +95,8 @@ kernel void needs_padding_comp(
   constant NeedsPadding& needs_padding_uniform [[user(fake0)]]
 , device NeedsPadding const& needs_padding_storage [[user(fake0)]]
 ) {
-    NeedsPadding x_1 = {};
+    NeedsPadding x_1;
+    x_1 = NeedsPadding();
     NeedsPadding _e2 = needs_padding_uniform;
     x_1 = _e2;
     NeedsPadding _e4 = needs_padding_storage;

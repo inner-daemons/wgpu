@@ -44,10 +44,14 @@ struct main_Input {
 , uint param_2 [[threads_per_simdgroup]]
 , uint param_3 [[thread_index_in_simdgroup]]
 ) {
-    uint global = {};
-    uint global_1 = {};
-    uint global_2 = {};
-    uint global_3 = {};
+    uint global;
+    uint global_1;
+    uint global_2;
+    uint global_3;
+    global = 0u;
+    global_1 = 0u;
+    global_2 = 0u;
+    global_3 = 0u;
     global = param;
     global_1 = param_1;
     global_2 = param_2;

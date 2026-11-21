@@ -68,7 +68,8 @@ vertex render_vertexOutput render_vertex(
         texcoord = unpackFloat32x2_(vb_2_elem.data[0], vb_2_elem.data[1], vb_2_elem.data[2], vb_2_elem.data[3], vb_2_elem.data[4], vb_2_elem.data[5], vb_2_elem.data[6], vb_2_elem.data[7]);
     }
     const VertexInput v_in = { position_1, normal_1, texcoord };
-    VertexOutput v_out = {};
+    VertexOutput v_out;
+    v_out = VertexOutput();
     metal::float4x4 _e6 = mvp_matrix;
     v_out.position = v_in.position * _e6;
     metal::float4 _e11 = do_lighting(v_in.position, v_in.normal);

@@ -29,29 +29,37 @@ constant metal::bool2 compare_vec = metal::bool2(true, false);
 
 void swizzle_of_compose(
 ) {
-    metal::int4 out = metal::int4(4, 3, 2, 1);
+    metal::int4 out;
+    out = metal::int4(4, 3, 2, 1);
     return;
 }
 
 void index_of_compose(
 ) {
-    int out_1 = 2;
+    int out_1;
+    out_1 = 2;
     return;
 }
 
 void compose_three_deep(
 ) {
-    int out_2 = 6;
+    int out_2;
+    out_2 = 6;
     return;
 }
 
 void non_constant_initializers(
 ) {
-    int w = 30;
-    int x = {};
-    int y = {};
-    int z = 70;
-    metal::int4 out_3 = {};
+    int w;
+    int x;
+    int y;
+    int z;
+    metal::int4 out_3;
+    w = 30;
+    x = 0;
+    y = 0;
+    z = 70;
+    out_3 = metal::int4 {};
     int _e2 = w;
     x = _e2;
     int _e4 = x;
@@ -66,13 +74,15 @@ void non_constant_initializers(
 
 void splat_of_constant(
 ) {
-    metal::int4 out_4 = metal::int4(-4, -4, -4, -4);
+    metal::int4 out_4;
+    out_4 = metal::int4(-4, -4, -4, -4);
     return;
 }
 
 void compose_of_constant(
 ) {
-    metal::int4 out_5 = metal::int4(-4, -4, -4, -4);
+    metal::int4 out_5;
+    out_5 = metal::int4(-4, -4, -4, -4);
     return;
 }
 
@@ -97,56 +107,80 @@ uint map_texture_kind(
 
 void compose_of_splat(
 ) {
-    metal::float4 x_1 = metal::float4(2.0, 1.0, 1.0, 1.0);
+    metal::float4 x_1;
+    x_1 = metal::float4(2.0, 1.0, 1.0, 1.0);
     return;
 }
 
 void test_local_const(
 ) {
-    type_6 arr = {};
+    type_6 arr;
+    arr = type_6 {};
     return;
 }
 
 void compose_vector_zero_val_binop(
 ) {
-    metal::int3 a = metal::int3(1, 1, 1);
-    metal::int3 b = metal::int3(0, 1, 2);
-    metal::int3 c = metal::int3(1, 0, 2);
+    metal::int3 a;
+    metal::int3 b;
+    metal::int3 c;
+    a = metal::int3(1, 1, 1);
+    b = metal::int3(0, 1, 2);
+    c = metal::int3(1, 0, 2);
     return;
 }
 
 void relational(
 ) {
-    bool scalar_any_false = false;
-    bool scalar_any_true = true;
-    bool scalar_all_false = false;
-    bool scalar_all_true = true;
-    bool vec_any_false = false;
-    bool vec_any_true = true;
-    bool vec_all_false = false;
-    bool vec_all_true = true;
+    bool scalar_any_false;
+    bool scalar_any_true;
+    bool scalar_all_false;
+    bool scalar_all_true;
+    bool vec_any_false;
+    bool vec_any_true;
+    bool vec_all_false;
+    bool vec_all_true;
+    scalar_any_false = false;
+    scalar_any_true = true;
+    scalar_all_false = false;
+    scalar_all_true = true;
+    vec_any_false = false;
+    vec_any_true = true;
+    vec_all_false = false;
+    vec_all_true = true;
     return;
 }
 
 void packed_dot_product(
 ) {
-    int signed_four = 4;
-    uint unsigned_four = 4u;
-    int signed_twelve = 12;
-    uint unsigned_twelve = 12u;
-    int signed_seventy = 70;
-    uint unsigned_seventy = 70u;
-    int minus_four = -4;
+    int signed_four;
+    uint unsigned_four;
+    int signed_twelve;
+    uint unsigned_twelve;
+    int signed_seventy;
+    uint unsigned_seventy;
+    int minus_four;
+    signed_four = 4;
+    unsigned_four = 4u;
+    signed_twelve = 12;
+    unsigned_twelve = 12u;
+    signed_seventy = 70;
+    unsigned_seventy = 70u;
+    minus_four = -4;
     return;
 }
 
 void abstract_access(
     uint i
 ) {
-    float a_1 = 1.0;
-    uint b_1 = 1u;
-    int c_1 = {};
-    int d = {};
+    float a_1;
+    uint b_1;
+    int c_1;
+    int d;
+    a_1 = 1.0;
+    b_1 = 1u;
+    c_1 = 0;
+    d = 0;
     c_1 = type_9 {{1, 2, 3, 4, 5, 6, 7, 8, 9}}.inner[i];
     d = metal::int4(1, 2, 3, 4)[i];
     return;

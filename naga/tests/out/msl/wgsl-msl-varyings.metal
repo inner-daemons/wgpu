@@ -26,7 +26,8 @@ vertex vs_mainOutput vs_main(
 ) {
     const Vertex vertex_ = { varyings.position };
     const NoteInstance note = { varyings.position_1 };
-    VertexOutput out = {};
+    VertexOutput out;
+    out = VertexOutput();
     VertexOutput _e3 = out;
     const auto _tmp = _e3;
     return vs_mainOutput { _tmp.position };

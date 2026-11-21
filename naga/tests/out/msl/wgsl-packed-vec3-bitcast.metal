@@ -23,7 +23,8 @@ vertex vs_mainOutput vs_main(
   vs_mainInput varyings [[stage_in]]
 ) {
     const VertexInput in = { varyings.chunk, varyings.texture_index };
-    VertexOutput out = {};
+    VertexOutput out;
+    out = VertexOutput();
     metal::float3 position = static_cast<metal::float3>(as_type<metal::int3>(as_type<metal::uint3>(metal::int3(in.chunk)) - as_type<metal::uint3>(metal::int3(5))));
     VertexOutput _e7 = out;
     const auto _tmp = _e7;
