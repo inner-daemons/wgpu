@@ -263,6 +263,7 @@ By @alextechcc in [#8014](https://github.com/gfx-rs/wgpu/pull/8014).
 - Bit reinterpretation is now represented in the Naga IR by the new `naga::ir::Expression::Bitcast`, which names its result type. `naga::ir::Expression::As` now only converts, and its `kind` and `convert` fields are replaced by `target: Scalar`. By @DouglasDwyer in [#10613](https://github.com/gfx-rs/wgpu/pull/10613).
 - The GLSL backend's `Writer` API now matches the other backends: `Writer::new(out, options, pipeline_options, policies)` no longer takes the module and cannot fail, and `Writer::write(module, info)` takes the module and returns all errors. By @inner-daemons in [#11045](https://github.com/gfx-rs/wgpu/pull/11045).
 - The GLSL backend's `ReflectionInfo` now reports resources by binding instead of `Handle<GlobalVariable>`, so it stays valid if the module is compacted before writing. `uniforms` is now a `Vec<BufferMapping>`, and `TextureMapping` carries a `GlobalResource` (binding and name) for the texture and sampler, plus the image's type. By @inner-daemons in [#11079](https://github.com/gfx-rs/wgpu/pull/11079).
+- The SPIR-V, HLSL and MSL backends' `force_loop_bounding` option now runs one shared IR pass instead of each backend's own loop counter. The counter is the same, but SPIR-V now resets it before each loop instead of once per function, and on HLSL and MSL it is checked after a loop's `continuing` block instead of before. By @inner-daemons in #TODO.
 
 #### Hal
 

@@ -25,6 +25,7 @@ the entry points don't use.
 )]
 
 mod emit;
+mod loop_bounding;
 
 use alloc::{borrow::Cow, boxed::Box};
 
@@ -64,12 +65,17 @@ pub struct PassOptions {
 pub(crate) struct Passes {
     /// See [`PassOptions::compact`].
     pub compact: bool,
+    /// Run [`loop_bounding`].
+    pub loop_bounding: bool,
 }
 
 impl From<PassOptions> for Passes {
     fn from(options: PassOptions) -> Self {
         let PassOptions { compact } = options;
-        Self { compact }
+        Self {
+            compact,
+            loop_bounding: false,
+        }
     }
 }
 
@@ -78,16 +84,24 @@ impl From<PassOptions> for Passes {
 /// Return the module the backend should write, which is `module` itself if no
 /// pass changed anything, and its [`ModuleInfo`].
 pub(crate) fn run<'a>(
-    module: Cow<'a, Module>,
+    mut module: Cow<'a, Module>,
     passes: &Passes,
 ) -> Result<(Cow<'a, Module>, ModuleInfo), PassError> {
-    let Passes { compact } = *passes;
+    let Passes {
+        compact,
+        loop_bounding,
+    } = *passes;
     // Each pass calls `Cow::to_mut` only if it will change the module, which
     // copies a borrowed module and is free for an owned one, reports whether
     // it changed it, and adds what it left for compaction to remove to
     // `dropped`.
-    let changed = false;
+    let mut changed = false;
     let dropped = Dropped::default();
+    // Loop bounding runs before any pass that writes loops of its own, so
+    // those loops aren't bounded.
+    if loop_bounding {
+        changed |= loop_bounding::run(&mut module);
+    }
     finish(module, changed, compact, &dropped)
 }
 
