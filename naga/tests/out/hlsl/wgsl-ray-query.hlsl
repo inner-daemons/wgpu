@@ -85,6 +85,7 @@ RayIntersection query_loop(float3 pos, float3 dir, RaytracingAccelerationStructu
 {
     RayQuery<RAY_FLAG_NONE> rq_1;
     uint naga_query_init_tracker_for_rq_1 = 0;
+    uint2 loop_bound = (uint2)0;
 
     {
         RayDesc_ naga_desc = ConstructRayDesc_(4u, 255u, 0.1, 100.0, pos, dir);
@@ -113,10 +114,13 @@ RayIntersection query_loop(float3 pos, float3 dir, RaytracingAccelerationStructu
             rq_1.TraceRayInline(acs, naga_desc.flags, naga_desc.cull_mask, RayDescFromRayDesc_(naga_desc));
         }
     }
-    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    loop_bound = (4294967295u).xx;
     while(true) {
-        if (all(loop_bound == uint2(0u, 0u))) { break; }
-        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        uint2 _e17 = loop_bound;
+        if (all((_e17 == (0u).xx))) {
+            break;
+        }
+        loop_bound = (_e17 - uint2(((_e17.y == 0u) ? 1u : 0u), 1u));
         bool _e9 = false;
         {
             bool naga_has_initialized = ((naga_query_init_tracker_for_rq_1 & 1) == 1);

@@ -93,18 +93,22 @@ float4 fs_main(FragmentInput_fs_main fragmentinput_fs_main) : SV_Target0
     VertexOutput in_ = { float4(fragmentinput_fs_main.proj_position_1.xyz, 1.0 / fragmentinput_fs_main.proj_position_1.w), fragmentinput_fs_main.world_normal_1, fragmentinput_fs_main.world_position_1 };
     float3 color = c_ambient;
     uint i = 0u;
+    uint2 loop_bound = (uint2)0;
 
     float3 normal_1 = normalize(in_.world_normal);
-    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    loop_bound = (4294967295u).xx;
     bool loop_init = true;
     while(true) {
-        if (all(loop_bound == uint2(0u, 0u))) { break; }
-        loop_bound -= uint2(loop_bound.y == 0u, 1u);
         if (!loop_init) {
             uint _e40 = i;
             i = (_e40 + 1u);
         }
         loop_init = false;
+        uint2 _e55 = loop_bound;
+        if (all((_e55 == (0u).xx))) {
+            break;
+        }
+        loop_bound = (_e55 - uint2(((_e55.y == 0u) ? 1u : 0u), 1u));
         uint _e7 = i;
         uint _e11 = u_globals.num_lights.x;
         if ((_e7 < min(_e11, c_max_lights))) {
@@ -132,18 +136,22 @@ float4 fs_main_without_storage(FragmentInput_fs_main_without_storage fragmentinp
     VertexOutput in_1 = { float4(fragmentinput_fs_main_without_storage.proj_position_2.xyz, 1.0 / fragmentinput_fs_main_without_storage.proj_position_2.w), fragmentinput_fs_main_without_storage.world_normal_2, fragmentinput_fs_main_without_storage.world_position_2 };
     float3 color_1 = c_ambient;
     uint i_1 = 0u;
+    uint2 loop_bound_1 = (uint2)0;
 
     float3 normal_2 = normalize(in_1.world_normal);
-    uint2 loop_bound_1 = uint2(4294967295u, 4294967295u);
+    loop_bound_1 = (4294967295u).xx;
     bool loop_init_1 = true;
     while(true) {
-        if (all(loop_bound_1 == uint2(0u, 0u))) { break; }
-        loop_bound_1 -= uint2(loop_bound_1.y == 0u, 1u);
         if (!loop_init_1) {
             uint _e40 = i_1;
             i_1 = (_e40 + 1u);
         }
         loop_init_1 = false;
+        uint2 _e55 = loop_bound_1;
+        if (all((_e55 == (0u).xx))) {
+            break;
+        }
+        loop_bound_1 = (_e55 - uint2(((_e55.y == 0u) ? 1u : 0u), 1u));
         uint _e7 = i_1;
         uint _e11 = u_globals.num_lights.x;
         if ((_e7 < min(_e11, c_max_lights))) {

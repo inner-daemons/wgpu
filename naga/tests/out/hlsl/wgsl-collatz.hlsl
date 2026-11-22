@@ -12,12 +12,16 @@ uint collatz_iterations(uint n_base)
 {
     uint n = (uint)0;
     uint i = 0u;
+    uint2 loop_bound = (uint2)0;
 
     n = n_base;
-    uint2 loop_bound = uint2(4294967295u, 4294967295u);
+    loop_bound = (4294967295u).xx;
     while(true) {
-        if (all(loop_bound == uint2(0u, 0u))) { break; }
-        loop_bound -= uint2(loop_bound.y == 0u, 1u);
+        uint2 _e30 = loop_bound;
+        if (all((_e30 == (0u).xx))) {
+            break;
+        }
+        loop_bound = (_e30 - uint2(((_e30.y == 0u) ? 1u : 0u), 1u));
         uint _e4 = n;
         if ((_e4 > 1u)) {
         } else {
