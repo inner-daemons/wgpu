@@ -50,9 +50,6 @@ impl Function {
                 for local_var in self.ray_query_t_max_tracker_variables.values() {
                     local_var.instruction.to_words(sink);
                 }
-                for local_var in self.force_loop_bounding_vars.iter() {
-                    local_var.instruction.to_words(sink);
-                }
                 for internal_var in self.spilled_composites.values() {
                     internal_var.instruction.to_words(sink);
                 }
@@ -470,23 +467,8 @@ impl Writer {
         self.get_pointer_type_id(f32_id, class)
     }
 
-    pub(super) fn get_vec2u_pointer_type_id(&mut self, class: spirv::StorageClass) -> Word {
-        let vec2u_id = self.get_numeric_type_id(NumericType::Vector {
-            size: crate::VectorSize::Bi,
-            scalar: crate::Scalar::U32,
-        });
-        self.get_pointer_type_id(vec2u_id, class)
-    }
-
     pub(super) fn get_bool_type_id(&mut self) -> Word {
         self.get_numeric_type_id(NumericType::Scalar(crate::Scalar::BOOL))
-    }
-
-    pub(super) fn get_vec2_bool_type_id(&mut self) -> Word {
-        self.get_numeric_type_id(NumericType::Vector {
-            size: crate::VectorSize::Bi,
-            scalar: crate::Scalar::BOOL,
-        })
     }
 
     pub(super) fn get_vec3_bool_type_id(&mut self) -> Word {
@@ -1674,7 +1656,6 @@ impl Writer {
 
             // Steal the Writer's temp list for a bit.
             temp_list: core::mem::take(&mut self.temp_list),
-            force_loop_bounding: self.force_loop_bounding,
             writer: self,
             expression_constness: super::ExpressionConstnessTracker::from_arena(
                 &ir_function.expressions,
@@ -4063,7 +4044,13 @@ impl Writer {
         debug_info: &Option<DebugInfo>,
         words: &mut Vec<Word>,
     ) -> Result<(), Error> {
-        let (ir_module, info) = crate::back::passes::run(ir_module.into(), &self.passes.into())?;
+        let (ir_module, info) = crate::back::passes::run(
+            ir_module.into(),
+            &crate::back::passes::Passes {
+                loop_bounding: self.force_loop_bounding,
+                ..self.passes.into()
+            },
+        )?;
         let (ir_module, info) = (&*ir_module, &info);
         self.reset();
 
