@@ -1,0 +1,18 @@
+[package]
+name = "host-copy-bench"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Benchmarks host texture copies, CPU-visible buffers and the Vulkan host barrier"
+
+[dependencies]
+bytemuck.workspace = true
+env_logger.workspace = true
+pollster.workspace = true
+wgpu.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ash.workspace = true
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2-metal.workspace = true

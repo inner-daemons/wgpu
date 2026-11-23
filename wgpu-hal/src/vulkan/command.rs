@@ -175,6 +175,22 @@ impl crate::CommandEncoder for super::CommandEncoder {
     unsafe fn end_encoding(&mut self) -> Result<super::CommandBuffer, crate::DeviceError> {
         let raw = self.active;
         self.active = vk::CommandBuffer::null();
+        if self.device.bench_host_barrier {
+            let barrier = vk::MemoryBarrier::default()
+                .src_access_mask(vk::AccessFlags::MEMORY_WRITE)
+                .dst_access_mask(vk::AccessFlags::HOST_READ | vk::AccessFlags::HOST_WRITE);
+            unsafe {
+                self.device.raw.cmd_pipeline_barrier(
+                    raw,
+                    vk::PipelineStageFlags::ALL_COMMANDS,
+                    vk::PipelineStageFlags::HOST,
+                    vk::DependencyFlags::empty(),
+                    &[barrier],
+                    &[],
+                    &[],
+                )
+            };
+        }
         unsafe { self.device.raw.end_command_buffer(raw) }.map_err(map_err)?;
         fn map_err(err: vk::Result) -> crate::DeviceError {
             // We don't use VK_KHR_video_encode_queue

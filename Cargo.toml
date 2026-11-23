@@ -3,6 +3,7 @@ resolver = "3"
 members = [
     "cts_runner",
     "deno_webgpu",
+    "host-copy-bench",
 
     # default members
     "benches",

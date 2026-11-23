@@ -1808,6 +1808,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "host-copy-bench"
+version = "0.0.0"
+dependencies = [
+ "ash",
+ "bytemuck",
+ "env_logger",
+ "objc2-metal 0.3.2",
+ "pollster",
+ "wgpu",
+]
+
+[[package]]
 name = "http"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"

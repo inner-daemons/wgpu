@@ -3403,6 +3403,7 @@ impl super::Adapter {
 
         let shared = Arc::new(super::DeviceShared {
             raw: raw_device,
+            bench_host_barrier: std::env::var("WGPU_BENCH_VK_HOST_BARRIER").as_deref() == Ok("1"),
             family_index,
             queue_flags,
             queue_index,

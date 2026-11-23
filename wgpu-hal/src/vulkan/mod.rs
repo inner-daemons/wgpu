@@ -639,6 +639,9 @@ struct RenderPassKey {
 
 struct DeviceShared {
     raw: ash::Device,
+    /// Benchmark experiment: end every command buffer with a global
+    /// device-write to host memory barrier. Set by `WGPU_BENCH_VK_HOST_BARRIER=1`.
+    bench_host_barrier: bool,
     family_index: u32,
     queue_flags: vk::QueueFlags,
     queue_index: u32,
