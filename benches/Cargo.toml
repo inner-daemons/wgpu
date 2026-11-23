@@ -19,6 +19,10 @@ harness = false
 name = "naga-passes-cpu"
 harness = false
 
+[[bench]]
+name = "naga-passes-driver"
+harness = false
+
 [features]
 tracy = ["dep:tracy-client"]
 
