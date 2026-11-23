@@ -7,19 +7,35 @@ optimizations.
 
 ## Running it
 
-You need a Rust toolchain (<https://rustup.rs>). From the repository root:
+You need a Rust toolchain (<https://rustup.rs>) and Python 3.8 or later. From
+the repository root:
+
+```sh
+python3 host-copy-bench/run.py --name "MacBook Air M2, macOS 15.3"
+```
+
+(On Windows, use `py` or `python` instead of `python3`.) Describe the machine
+in `--name`: its model, GPU and OS.
+
+The script builds the benchmark, runs every benchmark group three times, one
+after another, and writes a `host-copy-bench-<date>.tar.gz` file to the current
+directory. Please send that file back. It contains the results, the
+benchmark's output, and the OS version, CPU model, memory size and git commit.
+It doesn't contain your username, hostname or file paths. It takes a few minutes
+on recent hardware.
+
+Each benchmark group runs in its own process, so if a driver crashes, the other
+groups' results are still collected, along with the crash log.
+
+Arguments after `--` go to the benchmark itself, for example
+`python3 host-copy-bench/run.py --name "..." -- --adapter radeon`. To run the
+benchmark directly:
 
 ```sh
 cargo run --release -p host-copy-bench -- --csv results.csv
 ```
 
-This takes under a minute per GPU on recent hardware. It prints a Markdown
-report and writes a CSV file. Please run it three times, with
-`--csv results-1.csv`, `--csv results-2.csv` and `--csv results-3.csv`, since
-some numbers vary between runs. Send back the CSV files, plus the name of the
-machine (for example "MacBook Air M2, macOS 15.3").
-
-Options:
+Benchmark options:
 
 - `--quick`: one size per benchmark, for a fast check that it works.
 - `--adapter NAME`: only GPUs whose name contains `NAME` (case-insensitive).
