@@ -405,10 +405,18 @@ fn run_case(
     )?;
     let checksum = fnv1a(&read_buffer(device, &res.results_readback, size)?);
 
-    let mut use_timestamps = config.timestamps && first.gpu_ms.is_some();
-    for _ in 0..config.warmup {
-        let run = dispatch(state, res, &pipeline, config.groups, use_timestamps, None)?;
-        use_timestamps &= run.gpu_ms.is_some();
+    // The first timestamp pair can be unusable (seen on Metal), so decide from the last warm-up.
+    let mut use_timestamps = false;
+    for _ in 0..config.warmup.max(2) {
+        let run = dispatch(
+            state,
+            res,
+            &pipeline,
+            config.groups,
+            config.timestamps,
+            None,
+        )?;
+        use_timestamps = config.timestamps && run.gpu_ms.is_some();
     }
 
     let mut gpu = Vec::new();

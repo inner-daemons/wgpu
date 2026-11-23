@@ -205,7 +205,7 @@ fn measure(
     let mut kind = "";
 
     for run in 0..total_runs {
-        let varied = vary::vary(&shader.source, &eps, run + 1);
+        let varied = vary::vary(&shader.source, &eps, vary::salt(run));
         kind = varied.kind;
         let mut constants = base_constants.clone();
         constants.extend(varied.constants.iter().cloned());

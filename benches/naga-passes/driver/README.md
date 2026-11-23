@@ -174,7 +174,7 @@ All optional environment variables: `NAGA_PASSES_PIPELINE_ITERS` (default 8),
 `NAGA_PASSES_GPU_CAP_MS` (8000, stop timing a shader after that long), `NAGA_PASSES_GPU_WALL`
 (set it to use wall time even when timestamps exist), `WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL` (see above), `NAGA_PASSES_FILTER` (comma separated
 substrings of shader names), `NAGA_PASSES_SKIP` (substrings of cases to skip, for example one that
-crashes the driver), `NAGA_PASSES_OUT` (where the JSON goes). To run one benchmark by hand:
+crashes the driver), `NAGA_PASSES_OUT` (where the JSON goes). `NAGA_PASSES_SALT_BASE` (0 to 89; by default a random offset is added to the variation per process, so that repeated runs and `--rounds` do not hit an on-disk shader cache). To run one benchmark by hand:
 
 ```sh
 WGPU_BACKEND=vulkan cargo bench -p wgpu-benchmark --bench naga-passes-driver -- naga_passes::gpu_runtime

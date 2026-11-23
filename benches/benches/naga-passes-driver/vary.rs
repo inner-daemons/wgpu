@@ -157,6 +157,24 @@ fn replace_ident(source: &str, from: &str, to: &str) -> String {
     out
 }
 
+/// The salt for iteration `run`. A per-process offset keeps separate runs from compiling the same
+/// shaders, which an on-disk driver cache would otherwise serve. `NAGA_PASSES_SALT_BASE` fixes it.
+pub fn salt(run: u32) -> u32 {
+    static BASE: std::sync::OnceLock<u32> = std::sync::OnceLock::new();
+    let base = *BASE.get_or_init(|| {
+        std::env::var("NAGA_PASSES_SALT_BASE")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or_else(|| {
+                let nanos = std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .map_or(0, |d| d.as_nanos());
+                (nanos ^ (nanos >> 17) ^ u128::from(std::process::id())) as u32
+            })
+    });
+    (base % 90) * 10 + run + 1
+}
+
 pub fn vary(source: &str, entry_points: &[&str], salt: u32) -> Varied {
     if source.contains("override BENCH_SALT") {
         return Varied {
