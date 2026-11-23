@@ -25,6 +25,9 @@ use crate::{
 };
 
 const BENCH: &str = "gpu_runtime";
+/// Read by wgpu-hal's Vulkan backend on the bench branches only: use naga's zero-init polyfill
+/// even when the device can zero workgroup memory natively.
+const FORCE_POLYFILL_ENV: &str = "WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL";
 const PARAMS_SIZE: u64 = 4096;
 /// The largest workgroup size of the benchmark shaders.
 const MAX_WORKGROUP_SIZE: u64 = 256;
@@ -270,6 +273,25 @@ pub fn gpu_runtime(ctx: BenchmarkContext) -> anyhow::Result<Vec<SubBenchResult>>
     store.set_meta("max_compute_workgroup_storage_size", limit);
     let mut shaders = corpus::bench_shaders(limit);
     corpus::apply_filter(&mut shaders);
+
+    let forced_polyfill = std::env::var_os(FORCE_POLYFILL_ENV).is_some();
+    store.set_meta("zero_init_polyfill_forced", forced_polyfill);
+    if forced_polyfill && state.adapter_info.backend != wgpu::Backend::Vulkan {
+        for shader in &shaders {
+            store.finish(
+                &shader.name,
+                vec![Record::failed(
+                    BENCH,
+                    shader.group,
+                    &shader.name,
+                    "gpu_time",
+                    "skipped",
+                    "N/A: only the Vulkan backend has a native zero-init mode",
+                )],
+            );
+        }
+        return Ok(Vec::new());
+    }
 
     let res = resources(&state, &config);
 
