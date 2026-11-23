@@ -13,6 +13,8 @@ use std::{
 
 use wgpu::util::DeviceExt as _;
 
+mod scenarios;
+
 const MB: u64 = 1 << 20;
 
 struct Options {
@@ -43,7 +45,7 @@ impl Options {
                 "--help" | "-h" => {
                     println!(
                         "usage: host-copy-bench [--quick] [--csv FILE] [--adapter NAME] \
-                         [--include-cpu] [--skip textures|buffers|barrier]..."
+                         [--include-cpu] [--skip textures|buffers|scenarios|barrier]..."
                     );
                     std::process::exit(0);
                 }
@@ -201,12 +203,7 @@ impl Ctx {
         readback.unmap();
         let gpu =
             ticks[1].wrapping_sub(ticks[0]) as f64 * self.queue.get_timestamp_period() as f64 / 1e6;
-        // Some drivers report zero or garbage for pass timestamps.
-        if gpu > 0.0 && gpu < wall * 10.0 {
-            gpu
-        } else {
-            wall
-        }
+        plausible_gpu_time(gpu, wall)
     }
 
     fn uniform(&self, params: [u32; 4]) -> wgpu::Buffer {
@@ -251,6 +248,18 @@ fn request_device(
             eprintln!("  failed to create a device: {e}");
             None
         }
+    }
+}
+
+/// Uses the GPU time unless it can't be right. Some drivers, such as Apple's
+/// Metal driver, sometimes report pass timestamps far too close together. The
+/// GPU time can't exceed the wall time around the submission, and for long
+/// enough work it is most of it.
+fn plausible_gpu_time(gpu: f64, wall: f64) -> f64 {
+    if gpu <= wall && (gpu >= wall * 0.5 || wall < 2.0) && gpu > 0.0 {
+        gpu
+    } else {
+        wall
     }
 }
 
@@ -482,7 +491,9 @@ impl TextureCase {
     fn create(&self, ctx: &Ctx, variant: TextureVariant, mapped: bool) -> wgpu::Texture {
         let usage = match variant {
             TextureVariant::Staging => {
-                wgpu::TextureUsages::COPY_DST | wgpu::TextureUsages::TEXTURE_BINDING
+                wgpu::TextureUsages::COPY_DST
+                    | wgpu::TextureUsages::COPY_SRC
+                    | wgpu::TextureUsages::TEXTURE_BINDING
             }
             TextureVariant::Host | TextureVariant::HostOptimized => {
                 wgpu::TextureUsages::HOST_VISIBLE | wgpu::TextureUsages::TEXTURE_BINDING
@@ -545,10 +556,11 @@ impl TextureCase {
         (texture, start.elapsed().as_secs_f64() * 1e3)
     }
 
-    /// Overwrites a texture the GPU has used, returning the time taken until the
-    /// GPU could use it again.
-    fn upload_again(&self, ctx: &Ctx, texture: &wgpu::Texture, variant: TextureVariant) -> f64 {
+    /// Overwrites a texture the GPU has used, timing each phase until the GPU
+    /// could use it again.
+    fn upload_again(&self, ctx: &Ctx, texture: &wgpu::Texture, variant: TextureVariant) -> Phases {
         let start = Instant::now();
+        let mut phases = Phases::default();
         match variant {
             TextureVariant::Staging => {
                 ctx.queue.write_texture(
@@ -557,25 +569,123 @@ impl TextureCase {
                     self.layout,
                     self.extent(),
                 );
+                phases.cpu = ms_since(start);
+                let wait = Instant::now();
                 ctx.submit_empty_and_wait();
+                phases.wait = ms_since(wait);
             }
             TextureVariant::Host | TextureVariant::HostOptimized => {
-                let done = Arc::new(AtomicBool::new(false));
-                let flag = done.clone();
-                texture.map_async(wgpu::MapMode::Write, move |r| {
-                    r.unwrap();
-                    flag.store(true, Ordering::Release);
-                });
-                wait_for_map(ctx, &done);
+                map_texture(ctx, texture, wgpu::MapMode::Write);
+                phases.wait = ms_since(start);
+                let cpu = Instant::now();
                 self.host_write(texture);
                 texture.unmap();
+                phases.cpu = ms_since(cpu);
                 if variant == TextureVariant::HostOptimized {
+                    let optimize = Instant::now();
                     metal_optimize(ctx, texture);
+                    phases.wait += ms_since(optimize);
                 }
             }
         }
-        start.elapsed().as_secs_f64() * 1e3
+        phases.total = ms_since(start);
+        phases
     }
+
+    /// Reads the whole texture back into memory, through a buffer or from the
+    /// host.
+    fn read_back(&self, ctx: &Ctx, texture: &wgpu::Texture, variant: TextureVariant) -> f64 {
+        let start = Instant::now();
+        let mut out = vec![0u8; self.data.len()];
+        match variant {
+            TextureVariant::Staging => {
+                let row = self.layout.bytes_per_row.unwrap();
+                let rows = self.layout.rows_per_image.unwrap();
+                let padded = row.next_multiple_of(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
+                let buffer = ctx.device.create_buffer(&wgpu::BufferDescriptor {
+                    label: None,
+                    size: (padded * rows) as u64,
+                    usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+                    mapped_at_creation: false,
+                });
+                let mut encoder = ctx.device.create_command_encoder(&Default::default());
+                encoder.copy_texture_to_buffer(
+                    texture.as_image_copy(),
+                    wgpu::TexelCopyBufferInfo {
+                        buffer: &buffer,
+                        layout: wgpu::TexelCopyBufferLayout {
+                            offset: 0,
+                            bytes_per_row: Some(padded),
+                            rows_per_image: Some(rows),
+                        },
+                    },
+                    self.extent(),
+                );
+                ctx.queue.submit(Some(encoder.finish()));
+                map_buffer(ctx, &buffer, wgpu::MapMode::Read);
+                {
+                    let view = buffer.get_mapped_range(..).unwrap();
+                    for (dst, src) in out
+                        .chunks_exact_mut(row as usize)
+                        .zip(view.chunks(padded as usize))
+                    {
+                        dst.copy_from_slice(&src[..row as usize]);
+                    }
+                }
+                buffer.unmap();
+            }
+            TextureVariant::Host | TextureVariant::HostOptimized => {
+                map_texture(ctx, texture, wgpu::MapMode::Read);
+                texture.get_mapped_texture().unwrap().copy_to_memory(
+                    wgpu::TexelCopyTextureInfoBase {
+                        texture: (),
+                        mip_level: 0,
+                        origin: wgpu::Origin3d::ZERO,
+                        aspect: wgpu::TextureAspect::All,
+                    },
+                    &mut out,
+                    self.layout,
+                    self.extent(),
+                );
+                texture.unmap();
+            }
+        }
+        std::hint::black_box(&out);
+        ms_since(start)
+    }
+}
+
+#[derive(Default)]
+struct Phases {
+    total: f64,
+    /// Waiting for the GPU: submitting and waiting for the copy, or for the map.
+    wait: f64,
+    /// Copying on the CPU.
+    cpu: f64,
+}
+
+fn ms_since(start: Instant) -> f64 {
+    start.elapsed().as_secs_f64() * 1e3
+}
+
+fn map_texture(ctx: &Ctx, texture: &wgpu::Texture, mode: wgpu::MapMode) {
+    let done = Arc::new(AtomicBool::new(false));
+    let flag = done.clone();
+    texture.map_async(mode, move |r| {
+        r.unwrap();
+        flag.store(true, Ordering::Release);
+    });
+    wait_for_map(ctx, &done);
+}
+
+fn map_buffer(ctx: &Ctx, buffer: &wgpu::Buffer, mode: wgpu::MapMode) {
+    let done = Arc::new(AtomicBool::new(false));
+    let flag = done.clone();
+    buffer.map_async(mode, .., move |r| {
+        r.unwrap();
+        flag.store(true, Ordering::Release);
+    });
+    wait_for_map(ctx, &done);
 }
 
 fn noise(len: usize, seed: u64) -> Vec<u8> {
@@ -737,8 +847,26 @@ impl Sampler {
     }
 }
 
+/// Texel reads per invocation, so every dispatch reads about 256M texels and
+/// runs long enough to be measured at full clocks.
+fn sample_reps(size: u32) -> u32 {
+    ((256 << 20) / (size * size)).clamp(1, 16384)
+}
+
+/// Keeps the GPU busy for a while so clocks ramp up before measuring.
+fn warm_up(ctx: &Ctx, sampler: &Sampler) {
+    let texture = TextureCase::new(wgpu::TextureFormat::Rgba8Unorm, 1024, Content::Noise)
+        .upload_fresh(ctx, TextureVariant::Staging)
+        .0;
+    let start = Instant::now();
+    while start.elapsed().as_millis() < 500 {
+        sampler.run(ctx, &texture, sample_reps(1024));
+    }
+}
+
 fn bench_textures(ctx: &mut Ctx) {
     let sampler = Sampler::new(ctx);
+    warm_up(ctx, &sampler);
     let sizes: &[u32] = if ctx.quick {
         &[1024]
     } else {
@@ -780,7 +908,7 @@ fn bench_textures(ctx: &mut Ctx) {
                 println!("  textures: {name}");
                 // Enough reads per dispatch that small textures aren't dominated by
                 // dispatch overhead.
-                let reps = ((64 << 20) / (size * size)).clamp(1, 4096);
+                let reps = sample_reps(size);
                 let texel_reads = (size as f64) * (size as f64) * reps as f64;
                 for &variant in &variants {
                     let mut fresh = Vec::new();
@@ -794,12 +922,23 @@ fn bench_textures(ctx: &mut Ctx) {
                     }
                     let texture = texture.unwrap();
                     let mut again = Vec::new();
+                    let mut again_cpu = Vec::new();
+                    let mut again_wait = Vec::new();
                     for _ in 0..iterations {
-                        again.push(case.upload_again(ctx, &texture, variant));
+                        let phases = case.upload_again(ctx, &texture, variant);
+                        again.push(phases.total);
+                        again_cpu.push(phases.cpu);
+                        again_wait.push(phases.wait);
                         sampler.run(ctx, &texture, 1);
                     }
                     let steady: Vec<f64> = (0..iterations * 2)
                         .map(|_| sampler.run(ctx, &texture, reps))
+                        .collect();
+                    let readback: Vec<f64> = (0..iterations)
+                        .map(|_| {
+                            sampler.run(ctx, &texture, 1);
+                            case.read_back(ctx, &texture, variant)
+                        })
                         .collect();
                     if ctx.took_error() {
                         eprintln!("  {name} {}: skipped after an error", variant.name());
@@ -808,9 +947,28 @@ fn bench_textures(ctx: &mut Ctx) {
                     let v = variant.name();
                     ctx.record("texture", &name, v, "upload_fresh", median(fresh), "ms");
                     ctx.record("texture", &name, v, "upload_again", median(again), "ms");
+                    ctx.record(
+                        "texture",
+                        &name,
+                        v,
+                        "upload_again_cpu",
+                        median(again_cpu),
+                        "ms",
+                    );
+                    ctx.record(
+                        "texture",
+                        &name,
+                        v,
+                        "upload_again_wait",
+                        median(again_wait),
+                        "ms",
+                    );
                     ctx.record("texture", &name, v, "first_sample", median(first_use), "ms");
+                    ctx.record("texture", &name, v, "readback", median(readback), "ms");
+                    let fastest = steady.iter().copied().fold(f64::INFINITY, f64::min);
                     let steady = median(steady);
                     ctx.record("texture", &name, v, "sample", steady, "ms");
+                    ctx.record("texture", &name, v, "sample_min", fastest, "ms");
                     ctx.record(
                         "texture",
                         &name,
@@ -1301,6 +1459,14 @@ fn main() {
             }
             if options.runs("buffers") {
                 bench_buffers(&mut ctx);
+                scenarios::buffer_readback(&mut ctx);
+            }
+            if options.runs("scenarios") {
+                scenarios::render_targets(&mut ctx);
+                scenarios::atlas_updates(&mut ctx);
+                scenarios::mip_chains(&mut ctx);
+                scenarios::threaded_uploads(&mut ctx);
+                scenarios::busy_uploads(&mut ctx);
             }
             rows.append(&mut ctx.rows);
         }

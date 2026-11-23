@@ -23,3 +23,16 @@ fn fs_main(in: VertexOut) -> @location(0) vec4<f32> {
     }
     return acc / 16.0;
 }
+
+fn hash(p: vec2<u32>) -> f32 {
+    var h = p.x * 374761393u + p.y * 668265263u;
+    h = (h ^ (h >> 13u)) * 1274126177u;
+    return f32(h & 0xffu) / 255.0;
+}
+
+// Smooth gradients with a little noise, roughly like rendered content.
+@fragment
+fn fs_fill(in: VertexOut) -> @location(0) vec4<f32> {
+    let n = hash(vec2<u32>(in.position.xy)) * 0.05;
+    return vec4<f32>(in.uv.x + n, in.uv.y, 0.5 - n, 1.0);
+}
