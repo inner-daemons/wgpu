@@ -1,6 +1,9 @@
 // Helper heavy: many small functions with pointer parameters, nested several
 // calls deep. Backends that cannot express a call (or that inline everything,
 // like HLSL after the inlining passes) pay for it here.
+//
+// Only pointers to whole local variables are passed: trunk's SPIR-V writer
+// panics on a pointer to a member of a local variable passed to a function.
 
 struct Params {
     ctl: vec4<u32>, // x: seed, y: trips
@@ -11,7 +14,6 @@ struct State {
     b: u32,
     c: u32,
     d: u32,
-    arr: array<u32, 8>,
 }
 
 @group(0) @binding(0) var<storage, read_write> results: array<u32>;
@@ -139,59 +141,75 @@ fn arr_7(a: ptr<function, array<u32, 8>>, idx: u32) {
     arr_6(a, idx + 1u);
 }
 
-fn state_0(s: ptr<function, State>, x: u32) {
-    leaf_0(&(*s).a, x);
-    arr_0(&(*s).arr, x + 0u);
+fn state_0(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_0(&t, x);
+    (*s).a = t;
+    arr_0(arr, x + 0u);
     (*s).b += pure_0((*s).c, x);
 }
 
-fn state_1(s: ptr<function, State>, x: u32) {
-    leaf_1(&(*s).a, x);
-    arr_1(&(*s).arr, x + 1u);
+fn state_1(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_1(&t, x);
+    (*s).a = t;
+    arr_1(arr, x + 1u);
     (*s).b += pure_1((*s).c, x);
-    state_0(s, x + 1u);
+    state_0(s, arr, x + 1u);
 }
 
-fn state_2(s: ptr<function, State>, x: u32) {
-    leaf_2(&(*s).a, x);
-    arr_2(&(*s).arr, x + 2u);
+fn state_2(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_2(&t, x);
+    (*s).a = t;
+    arr_2(arr, x + 2u);
     (*s).b += pure_2((*s).c, x);
-    state_1(s, x + 1u);
+    state_1(s, arr, x + 1u);
 }
 
-fn state_3(s: ptr<function, State>, x: u32) {
-    leaf_3(&(*s).a, x);
-    arr_3(&(*s).arr, x + 3u);
+fn state_3(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_3(&t, x);
+    (*s).a = t;
+    arr_3(arr, x + 3u);
     (*s).b += pure_3((*s).c, x);
-    state_2(s, x + 1u);
+    state_2(s, arr, x + 1u);
 }
 
-fn state_4(s: ptr<function, State>, x: u32) {
-    leaf_4(&(*s).a, x);
-    arr_4(&(*s).arr, x + 4u);
+fn state_4(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_4(&t, x);
+    (*s).a = t;
+    arr_4(arr, x + 4u);
     (*s).b += pure_4((*s).c, x);
-    state_3(s, x + 1u);
+    state_3(s, arr, x + 1u);
 }
 
-fn state_5(s: ptr<function, State>, x: u32) {
-    leaf_5(&(*s).a, x);
-    arr_5(&(*s).arr, x + 5u);
+fn state_5(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_5(&t, x);
+    (*s).a = t;
+    arr_5(arr, x + 5u);
     (*s).b += pure_5((*s).c, x);
-    state_4(s, x + 1u);
+    state_4(s, arr, x + 1u);
 }
 
-fn state_6(s: ptr<function, State>, x: u32) {
-    leaf_6(&(*s).a, x);
-    arr_6(&(*s).arr, x + 6u);
+fn state_6(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_6(&t, x);
+    (*s).a = t;
+    arr_6(arr, x + 6u);
     (*s).b += pure_6((*s).c, x);
-    state_5(s, x + 1u);
+    state_5(s, arr, x + 1u);
 }
 
-fn state_7(s: ptr<function, State>, x: u32) {
-    leaf_7(&(*s).a, x);
-    arr_7(&(*s).arr, x + 7u);
+fn state_7(s: ptr<function, State>, arr: ptr<function, array<u32, 8>>, x: u32) {
+    var t = (*s).a;
+    leaf_7(&t, x);
+    (*s).a = t;
+    arr_7(arr, x + 7u);
     (*s).b += pure_7((*s).c, x);
-    state_6(s, x + 1u);
+    state_6(s, arr, x + 1u);
 }
 
 @compute @workgroup_size(WG)
@@ -202,13 +220,15 @@ fn main(
     let seed = params.ctl.x ^ BENCH_SALT;
     let trips = params.ctl.y;
 
-    var st = State(seed, lid, 3u, 5u, array<u32, 8>());
+    var st = State(seed, lid, 3u, 5u);
+    var arr = array<u32, 8>();
+    var d = 7u;
     var acc = 0u;
     for (var j = 0u; j < trips; j++) {
-        state_7(&st, j ^ seed);
-        leaf_4(&st.d, j);
-        arr_2(&st.arr, j + lid);
-        acc += pure_6(st.a, st.b) ^ st.arr[j & 7u];
+        state_7(&st, &arr, j ^ seed);
+        leaf_4(&d, j);
+        arr_2(&arr, j + lid);
+        acc += pure_6(st.a, st.b) ^ arr[j & 7u];
     }
-    results[wid.x * WG + lid] = acc + st.a + st.b + st.c + st.d;
+    results[wid.x * WG + lid] = acc + st.a + st.b + st.c + st.d + d;
 }
