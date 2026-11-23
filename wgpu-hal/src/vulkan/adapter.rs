@@ -2661,7 +2661,10 @@ impl super::Instance {
                 .unwrap_or_default(),
             zero_initialize_workgroup_memory: phd_features
                 .zero_initialize_workgroup_memory
-                .is_some_and(|ext| ext.shader_zero_initialize_workgroup_memory == vk::TRUE),
+                .is_some_and(|ext| ext.shader_zero_initialize_workgroup_memory == vk::TRUE)
+                // Benchmark-only: lets `naga-passes-driver` compare naga's polyfill with the
+                // native mode. Unset by default, so this does not change behavior.
+                && std::env::var_os("WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL").is_none(),
             image_format_list: phd_capabilities.device_api_version >= vk::API_VERSION_1_2
                 || phd_capabilities.supports_extension(khr::image_format_list::NAME),
             maximum_samplers: phd_capabilities
