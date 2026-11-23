@@ -1,0 +1,77 @@
+#![cfg_attr(target_arch = "wasm32", no_main)]
+#![cfg(not(target_arch = "wasm32"))]
+//! Pipeline creation and shader runtime on a real device, for comparing two checkouts across
+//! drivers. See `benches/naga-passes/driver/README.md`.
+
+use pollster::block_on;
+use wgpu_benchmark::Benchmark;
+
+#[path = "../naga-passes-common/mod.rs"]
+mod common;
+mod pipeline;
+mod reflect;
+mod runtime;
+mod vary;
+
+struct DeviceState {
+    adapter_info: wgpu::AdapterInfo,
+    device: wgpu::Device,
+    queue: wgpu::Queue,
+}
+
+impl DeviceState {
+    fn new() -> Self {
+        let base_backend = if cfg!(target_os = "macos") {
+            // We don't want to use Molten-VK on Mac.
+            wgpu::Backends::METAL
+        } else {
+            wgpu::Backends::all()
+        };
+
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor {
+            backends: wgpu::Backends::from_env().unwrap_or(base_backend),
+            ..wgpu::InstanceDescriptor::new_without_display_handle_from_env()
+        });
+
+        let adapter = block_on(wgpu::util::initialize_adapter_from_env_or_default(
+            &instance, None,
+        ))
+        .unwrap();
+
+        let adapter_info = adapter.get_info();
+        println!(
+            "  Using adapter: {} ({:?})",
+            adapter_info.name, adapter_info.backend
+        );
+
+        let (device, queue) = block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            required_features: adapter.features(),
+            required_limits: adapter.limits(),
+            default_queue: wgpu::QueueDescriptor { label: None },
+            memory_hints: wgpu::MemoryHints::Performance,
+            experimental_features: unsafe { wgpu::ExperimentalFeatures::enabled() },
+            label: None,
+            trace: wgpu::Trace::Off,
+        }))
+        .unwrap();
+
+        Self {
+            adapter_info,
+            device,
+            queue,
+        }
+    }
+}
+
+fn main() {
+    wgpu_benchmark::main(vec![
+        Benchmark {
+            name: "naga_passes::pipeline_creation",
+            func: pipeline::pipeline_creation,
+        },
+        Benchmark {
+            name: "naga_passes::gpu_runtime",
+            func: runtime::gpu_runtime,
+        },
+    ]);
+}
