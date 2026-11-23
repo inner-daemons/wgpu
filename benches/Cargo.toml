@@ -14,6 +14,11 @@ publish = false
 name = "wgpu-benchmark"
 harness = false
 
+# The naga pass comparison benchmarks. See `naga-passes/README.md`.
+[[bench]]
+name = "naga-passes-cpu"
+harness = false
+
 [features]
 tracy = ["dep:tracy-client"]
 
