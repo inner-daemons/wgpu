@@ -29,8 +29,31 @@ benches/naga-passes/driver/run.sh --backends vulkan,gl   # which wgpu backends t
 benches/naga-passes/driver/run.sh --rounds 3             # repeat, alternating order (less noise)
 benches/naga-passes/driver/run.sh --quick                # about a minute, for checking setup only
 benches/naga-passes/driver/run.sh --out DIR              # where the results go
+benches/naga-passes/driver/run.sh --full-tests           # also run the test suite, see below
 benches/naga-passes/driver/run.sh /path/to/trunk-bench /path/to/passes-bench   # existing checkouts
 ```
+
+## Also run the full test suite (optional, long)
+
+```sh
+benches/naga-passes/driver/run.sh --full-tests           # benchmarks, then the tests
+benches/naga-passes/driver/run.sh --full-tests --no-bench   # only the tests
+```
+
+This runs `cargo xtask test` in both checkouts, one after the other. It needs
+[cargo-nextest](https://nexte.st) (`cargo install cargo-nextest --locked`) and, for most tests,
+the [Vulkan SDK](https://vulkan.lunarg.com/sdk/home) on `PATH` (see `docs/testing.md`). It builds
+the whole workspace twice and runs every GPU test on your default adapter, so expect roughly 20
+to 60 minutes per checkout after the build, and more on slow machines (an estimate; it has not
+been timed). The tests run on trunk as well so that failures that already exist there can be told
+from new ones.
+
+Please send back `tests/trunk.log` and `tests/combined.log` (or at least the two
+`tests/*-failures.txt` lists), and `tests/failure-diff.txt`, which lists the tests that fail only
+on the combined branch, only on trunk, and on both. A test that fails on both is probably a
+problem of the device or the setup, not of the passes. The suite also runs the benchmarks once
+each in test mode, so a benchmark that cannot run on your device can show up as a test failure;
+say so if it does.
 
 ## Which backends run
 
@@ -78,6 +101,20 @@ includes some overhead). The shaders:
 - `helpers_*`: many small functions with pointer parameters, nested several calls deep;
 - `matcx2_*`: reads of `mat2x2`, `mat3x2` and `mat4x2` in a uniform buffer.
 
+**Zero-init, native or polyfilled (Vulkan only).** wgpu-hal's Vulkan backend zero-initializes
+workgroup memory natively (`VK_KHR_zero_initialize_workgroup_memory`, core in Vulkan 1.3) when
+the device reports support for it, and otherwise naga polyfills it with stores and a barrier. On
+the combined branch the polyfill is the shared zero-init pass, and on trunk it is the SPIR-V
+writer's own code. Most desktop drivers support the native mode, so the polyfill would not be
+measured on them. On Vulkan the runner therefore runs `gpu_runtime` a second time into
+`<checkout>/vulkan-polyfill/`, with the environment variable
+`WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL=1`, which makes the Vulkan backend behave as if the
+device lacked the native feature. That variable exists only on the two benchmark branches, in
+`wgpu-hal/src/vulkan/adapter.rs`, and does nothing unless it is set. The comparison has a
+section "Zero-init on Vulkan" with native and polyfilled times side by side for each checkout.
+If the device has no native support, the two runs are the same. On other backends this variant is
+reported as `skipped` with the reason "N/A".
+
 The output of the first dispatch is hashed (`checksum`), and the comparison reports `MISMATCH`
 if the two builds compute different results.
 
@@ -88,6 +125,8 @@ or the directory it was made from. It contains:
 
 - `comparison.md` and `comparison.csv`: the comparison table with absolute and % change;
 - `<checkout>/<backend>/r<N>/*.json` and `*.log`: the raw results and the output of each run;
+- `tests/` (only with `--full-tests`): the logs, failure lists and `failure-diff.txt` of the test
+  runs;
 - `wgpu-info.txt`: the adapters and their limits and features (from `cargo run -p wgpu-info`);
 - `run-info.txt`: date, `uname`, OS version, Rust version, the two commits.
 
@@ -133,7 +172,7 @@ Also look at:
 All optional environment variables: `NAGA_PASSES_PIPELINE_ITERS` (default 8),
 `NAGA_PASSES_GPU_GROUPS` (4096), `NAGA_PASSES_GPU_RUNS` (40), `NAGA_PASSES_GPU_WARMUP` (5),
 `NAGA_PASSES_GPU_CAP_MS` (8000, stop timing a shader after that long), `NAGA_PASSES_GPU_WALL`
-(set it to use wall time even when timestamps exist), `NAGA_PASSES_FILTER` (comma separated
+(set it to use wall time even when timestamps exist), `WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL` (see above), `NAGA_PASSES_FILTER` (comma separated
 substrings of shader names), `NAGA_PASSES_SKIP` (substrings of cases to skip, for example one that
 crashes the driver), `NAGA_PASSES_OUT` (where the JSON goes). To run one benchmark by hand:
 

@@ -310,6 +310,56 @@ class Report:
                 )
             self.add(table(["shader", "median", "%", "p90", "%", "check", "src"], rows))
 
+    def get(self, side, backend, case, metric="gpu_time"):
+        recs = side.get(("gpu_runtime", backend, case, metric))
+        rec = merge(recs) if recs else None
+        return rec if rec and rec["status"] == "ok" else None
+
+    def zero_init(self):
+        backends = self.backends("gpu_runtime")
+        if "vulkan" not in backends:
+            return
+        self.add("## Zero-init on Vulkan: native mode vs naga's polyfill\n")
+        if "vulkan-polyfill" not in backends:
+            self.add("N/A: no polyfill run (the `vulkan-polyfill` results are missing).\n")
+            return
+        self.add(
+            "The `vulkan` run uses `VK_KHR_zero_initialize_workgroup_memory` when the device "
+            "supports it. The `vulkan-polyfill` run forces naga's polyfill (the shared zero-init "
+            "pass on the combined branch, the SPIR-V writer's own code on trunk). If the device "
+            "has no native support both runs polyfill and the columns agree. `overhead` is "
+            "polyfill vs native for one checkout; the last column is the passes checkout vs "
+            "the base checkout, both polyfilled. Milliseconds, medians.\n"
+        )
+        cases = sorted(
+            {k[2] for k in list(self.base) + list(self.new) if k[0] == "gpu_runtime" and k[2].startswith("zeroinit_")}
+        )
+        rows = []
+        for case in cases:
+            row = [case]
+            polyfilled = []
+            for side in (self.base, self.new):
+                native = self.get(side, "vulkan", case)
+                poly = self.get(side, "vulkan-polyfill", case)
+                polyfilled.append(poly)
+                if native and poly:
+                    row += [f"{native['median']:.3f}", f"{poly['median']:.3f}", pct(native["median"], poly["median"])]
+                else:
+                    row += ["N/A", "N/A", ""]
+            if polyfilled[0] and polyfilled[1]:
+                row.append(pct(polyfilled[0]["median"], polyfilled[1]["median"]))
+            else:
+                row.append("N/A")
+            rows.append(row)
+        bl, nl = self.base_label, self.new_label
+        self.add(
+            table(
+                ["shader", f"{bl} native", f"{bl} polyfill", f"{bl} overhead",
+                 f"{nl} native", f"{nl} polyfill", f"{nl} overhead", "polyfill, new vs base"],
+                rows,
+            )
+        )
+
     def problems(self):
         self.add("## Errors, crashes and skipped cases\n")
         self.add(
@@ -398,6 +448,7 @@ def main():
     report.cpu()
     report.pipeline()
     report.runtime()
+    report.zero_init()
     report.problems()
 
     text = "\n".join(report.out)

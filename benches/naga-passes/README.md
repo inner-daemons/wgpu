@@ -40,8 +40,10 @@ capability set is not restricted, and MSL vertex pulling is off.
 The shaders (`NAGA_PASSES_CORPUS`, comma separated):
 
 - `bench`: the shaders in `benches/benches/naga-passes-common/shaders/`, instantiated with
-  workgroup sizes 64 and 256: `zero_init_array` (1 KB, 16 KB and about 32 KB of workgroup
-  memory), `zero_init_2d`, `zero_init_atomic`, `loops`, `helpers`, `matcx2`;
+  workgroup sizes 64 and 256: `zero_init_array` (1 KB, 16 KB and about 31 KB of workgroup
+  memory), `zero_init_2d`, `zero_init_atomic`, `loops`, `helpers`, `matcx2`. `helpers` passes
+  pointers to whole local variables only, because trunk's SPIR-V writer panics ("Expression is
+  not cached") on a pointer to a member of a local passed to a function;
 - `examples`: `examples/features/src/**/*.wgsl`;
 - `snapshots` (off by default): the naga snapshot test inputs in `naga/tests/in/wgsl`. These
   differ between the branches, so only shaders present in both are compared.
