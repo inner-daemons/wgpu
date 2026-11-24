@@ -10,6 +10,13 @@ comparison.md and comparison.csv into RESULTS_DIR and prints the markdown.
 Statistics: each case's number is its minimum over all samples and rounds (the median of the
 per-round medians is shown for reference). Summaries are geometric means of the per-case
 new/base ratios, not ratios of sums.
+
+GPU runtime is the exception: its primary statistic is the median of the per-round medians.
+Timestamp queries on Metal sometimes return implausibly small values, so the raw minimum of a
+case can be far below the typical time. The result files hold only min, median, mean, p90, max
+and n per round, not the samples, so they cannot be trimmed or rejected individually. A round
+whose minimum is below SUSPECT_MIN_FRACTION of its median is counted as suspect, and the
+comparison reports how many cases are affected.
 """
 
 import argparse
@@ -25,6 +32,7 @@ import json
 
 CPU_METRICS = ["parse", "validate", "overrides", "spv", "spv_polyfill", "hlsl", "msl", "glsl", "total"]
 CPU_BACKENDS = ["spv", "hlsl", "msl", "glsl"]
+SUSPECT_MIN_FRACTION = 0.5
 
 
 def load(root, label):
@@ -115,6 +123,9 @@ def merge(recs):
     out["max"] = max(r["max"] for r in recs)
     out["n"] = sum(r["n"] for r in recs)
     out["rounds"] = len(recs)
+    out["min_suspect_rounds"] = sum(
+        1 for r in recs if r["median"] > 0 and r["min"] < SUSPECT_MIN_FRACTION * r["median"]
+    )
     return out
 
 
@@ -137,6 +148,11 @@ class Ratios:
         for field, pairs in self.fields.items():
             if b[field] > 0 and n[field] > 0:
                 pairs.append((b[field], n[field]))
+
+    def add_if(self, b, n, field):
+        """Only the one field, for geometric means over a subset of the cases."""
+        if b[field] > 0 and n[field] > 0:
+            self.fields[field].append((b[field], n[field]))
 
     def count(self):
         return len(self.fields["min"])
@@ -236,6 +252,8 @@ class Report:
         row["pct_change_min"] = (n["min"] - b["min"]) / b["min"] * 100 if ok and b["min"] else ""
         row["base_error"] = (b or {}).get("error") or ""
         row["new_error"] = (n or {}).get("error") or ""
+        row["base_min_suspect_rounds"] = b.get("min_suspect_rounds", "") if b and b["status"] == "ok" else ""
+        row["new_min_suspect_rounds"] = n.get("min_suspect_rounds", "") if n and n["status"] == "ok" else ""
         self.csv_rows.append(row)
 
     # -- sections --
@@ -361,7 +379,7 @@ class Report:
                     for group in (b.get("group", "?"), "all"):
                         by_group[group][metric].add(b, n)
             for group in ["all"] + sorted(g for g in by_group if g != "all"):
-                self.add(f"Summary: {group} cases\n")
+                self.add(f"#### Summary: {group} cases\n")
                 self.add(self.summary(by_group[group],
                                       ("create_shader_module", "create_pipeline", "total"), "ms"))
             if weak:
@@ -377,7 +395,8 @@ class Report:
                 if metric == "total" and rec.get("group") == "bench":
                     rows.append([case.replace("::main", ""), cell(b, n, "ms"), cell(b, n, "ms", "median")])
             if rows:
-                self.add("Benchmark shaders (total per pipeline):\n")
+                self.add("#### Per-shader totals of the benchmark shaders (one row per shader, not "
+                         "a summary)\n")
                 self.add(table(["shader", f"min, {self.base_label} -> {self.new_label}",
                                 f"median, {self.base_label} -> {self.new_label}"], rows))
             self.largest_changes(bench, backend, {"total"}, "ms")
@@ -394,19 +413,35 @@ class Report:
             "output between the two checkouts; `MISMATCH` means the shader computed something "
             "different.\n"
         )
+        self.add(
+            "**The primary statistic here is the median** (of the per-round medians), not the "
+            "minimum. Timestamp queries, on Metal in particular, sometimes return implausibly "
+            "small values, so the raw minimum can be far below the typical time. The result "
+            "files keep only min, median, mean, p90 and max per round, not the samples, so "
+            "individual samples cannot be trimmed. Instead, a minimum below "
+            f"{SUSPECT_MIN_FRACTION:g} x the median of its round is marked `!` and counted as "
+            "suspect, and the raw `min` columns are shown for reference only.\n"
+        )
         for backend in backends:
             self.add(f"### Backend: {backend}\n")
             rows = []
             ratios = Ratios()
+            trusted = Ratios()
+            suspects = 0
             for case, metric, b, n in self.pairs(bench, backend):
                 self.csv_row(bench, backend, case, metric, b, n)
                 if metric != "gpu_time":
                     continue
                 ok = b and n and b["status"] == "ok" and n["status"] == "ok"
                 if not ok:
-                    rows.append([case, cell(b, n, "ms"), "", "", "", "", ""])
+                    rows.append([case, cell(b, n, "ms", "median"), "", "", "", "", ""])
                     continue
                 ratios.add(b, n)
+                bad_b, bad_n = b["min_suspect_rounds"], n["min_suspect_rounds"]
+                if bad_b or bad_n:
+                    suspects += 1
+                else:
+                    trusted.add_if(b, n, "min")
                 cb, cn = b["aux"].get("checksum"), n["aux"].get("checksum")
                 check = "ok" if cb == cn else "MISMATCH"
                 src = {"timestamp": "ts", "wall": "wall"}
@@ -415,19 +450,31 @@ class Report:
                 rows.append(
                     [
                         case,
-                        f"{b['min']:.3f} -> {n['min']:.3f}",
-                        pct(b["min"], n["min"]),
                         f"{b['median']:.3f} -> {n['median']:.3f}",
                         pct(b["median"], n["median"]),
+                        f"{b['min']:.3f}{' !' if bad_b else ''} -> "
+                        f"{n['min']:.3f}{' !' if bad_n else ''}",
+                        pct(b["min"], n["min"]),
                         check,
                         src_b if src_b == src_n else f"{src_b}/{src_n}",
                     ]
                 )
             if ratios.count():
-                self.add(f"Geometric mean of the per-shader ratios over {ratios.count()} shaders: "
-                         f"min {ratio_pct(ratios.change('min'))}, "
-                         f"median {ratio_pct(ratios.change('median'))}.\n")
-            self.add(table(["shader", "min", "%", "median", "%", "check", "src"], rows))
+                line = (f"Geometric mean of the per-shader ratios over {ratios.count()} shaders: "
+                        f"**median {ratio_pct(ratios.change('median'))}** (primary).")
+                if suspects:
+                    line += (f" The raw minimum is not used: {suspects} of {ratios.count()} "
+                             f"shaders have a suspect minimum (min below "
+                             f"{SUSPECT_MIN_FRACTION:g} x median in at least one round of either "
+                             f"checkout), and the raw min geomean would be "
+                             f"{ratio_pct(ratios.change('min'))}. Over the {trusted.count()} "
+                             f"shaders without a suspect minimum, the min geomean is "
+                             f"{ratio_pct(trusted.change('min')) if trusted.count() else 'n/a'}.")
+                else:
+                    line += (f" No shader has a suspect minimum; min "
+                             f"{ratio_pct(ratios.change('min'))} (reference).")
+                self.add(line + "\n")
+            self.add(table(["shader", "median", "%", "min (raw)", "%", "check", "src"], rows))
 
     def get(self, side, backend, case, metric="gpu_time"):
         recs = side.get(("gpu_runtime", backend, case, metric))
@@ -448,7 +495,7 @@ class Report:
             "pass on the combined branch, the SPIR-V writer's own code on trunk). If the device "
             "has no native support both runs polyfill and the columns agree. `overhead` is "
             "polyfill vs native for one checkout; the last column is the passes checkout vs "
-            "the base checkout, both polyfilled. Milliseconds, minimums.\n"
+            "the base checkout, both polyfilled. Milliseconds, medians (see the GPU runtime section).\n"
         )
         cases = sorted(
             {k[2] for k in list(self.base) + list(self.new) if k[0] == "gpu_runtime" and k[2].startswith("zeroinit_")}
@@ -462,11 +509,12 @@ class Report:
                 poly = self.get(side, "vulkan-polyfill", case)
                 polyfilled.append(poly)
                 if native and poly:
-                    row += [f"{native['min']:.3f}", f"{poly['min']:.3f}", pct(native["min"], poly["min"])]
+                    row += [f"{native['median']:.3f}", f"{poly['median']:.3f}",
+                            pct(native["median"], poly["median"])]
                 else:
                     row += ["N/A", "N/A", ""]
             if polyfilled[0] and polyfilled[1]:
-                row.append(pct(polyfilled[0]["min"], polyfilled[1]["min"]))
+                row.append(pct(polyfilled[0]["median"], polyfilled[1]["median"]))
             else:
                 row.append("N/A")
             rows.append(row)
@@ -628,8 +676,12 @@ def main():
     else:
         report.add("Negative % is faster for the second checkout. Per-case numbers are the "
                    "minimum over all samples and rounds, with the median of the per-round "
-                   "medians for reference. Summary changes are geometric means of per-case "
-                   "new/base ratios, not ratios of sums.\n")
+                   "medians for reference"
+                   + (", except GPU runtime, which uses the median because timestamp minimums "
+                      "can be implausibly small" if any(k[0] == "gpu_runtime" for k in base)
+                      else "")
+                   + ". Summary changes are geometric means of per-case new/base ratios, not "
+                   "ratios of sums.\n")
         rounds = max((len(v) for data in (base, new) for v in data.values()), default=0)
         if rounds < 3 and not quick:
             report.add(f"**Only {rounds} round(s) of results; at least 3 are needed to tell "

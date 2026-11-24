@@ -146,9 +146,14 @@ if the two builds compute different results.
 
 ## Statistics and the load guard
 
-Each case's number is its **minimum** over all samples and rounds, because noise on a busy
-machine only adds time; the median (of the per-round medians) is shown beside it for reference.
-The summary rows of `comparison.md` are **geometric means of the per-case new/base ratios** over
+Pipeline creation: each case's number is its **minimum** over all samples and rounds, because
+noise on a busy machine only adds time; the median (of the per-round medians) is shown beside it
+for reference. GPU runtime: each case's number is its **median** (of the per-round medians),
+because timestamp queries, on Metal in particular, sometimes return implausibly small values that
+make the raw minimum useless. The result files hold only min, median, mean, p90 and max of each
+round, not the samples, so `comparison.md` flags a case whose minimum is below half its median
+in some round (`!`, and `min_suspect_rounds` columns in `comparison.csv`), shows the raw minimum
+for reference only, and reports how many shaders are affected. The summary rows of `comparison.md` are **geometric means of the per-case new/base ratios** over
 the cases that succeeded in both checkouts, so a few long shaders cannot dominate them, as they
 would in a ratio of sums.
 
