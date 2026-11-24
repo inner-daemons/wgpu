@@ -156,15 +156,16 @@ void switch_const_expr_case_selectors()
 
 void loop_switch_continue(int x)
 {
-    uint2 loop_bound = (uint2)0;
+    uint2 loop_bound = (4294967295u).xx;
 
-    loop_bound = (4294967295u).xx;
     while(true) {
-        uint2 _e7 = loop_bound;
-        if (all((_e7 == (0u).xx))) {
-            break;
+        {
+            uint2 _e6 = loop_bound;
+            loop_bound = (_e6 - uint2(((_e6.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e6 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound = (_e7 - uint2(((_e7.y == 0u) ? 1u : 0u), 1u));
         bool should_continue = false;
         switch(x) {
             case 1: {
@@ -184,17 +185,18 @@ void loop_switch_continue(int x)
 
 void loop_switch_continue_nesting(int x_1, int y, int z)
 {
-    uint2 loop_bound_1 = (uint2)0;
-    uint2 loop_bound_2 = (uint2)0;
-    uint2 loop_bound_3 = (uint2)0;
+    uint2 loop_bound_1 = (4294967295u).xx;
+    uint2 loop_bound_2 = (4294967295u).xx;
+    uint2 loop_bound_3 = (4294967295u).xx;
 
-    loop_bound_1 = (4294967295u).xx;
     while(true) {
-        uint2 _e24 = loop_bound_1;
-        if (all((_e24 == (0u).xx))) {
-            break;
+        {
+            uint2 _e23 = loop_bound_1;
+            loop_bound_1 = (_e23 - uint2(((_e23.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e23 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound_1 = (_e24 - uint2(((_e24.y == 0u) ? 1u : 0u), 1u));
         bool should_continue_1 = false;
         switch(x_1) {
             case 1: {
@@ -210,11 +212,13 @@ void loop_switch_continue_nesting(int x_1, int y, int z)
                     default: {
                         loop_bound_2 = (4294967295u).xx;
                         while(true) {
-                            uint2 _e9 = loop_bound_2;
-                            if (all((_e9 == (0u).xx))) {
-                                break;
+                            {
+                                uint2 _e11 = loop_bound_2;
+                                loop_bound_2 = (_e11 - uint2(((_e11.y == 0u) ? 1u : 0u), 1u));
+                                if (all((_e11 == (0u).xx))) {
+                                    break;
+                                }
                             }
-                            loop_bound_2 = (_e9 - uint2(((_e9.y == 0u) ? 1u : 0u), 1u));
                             bool should_continue_2 = false;
                             switch(z) {
                                 case 1: {
@@ -253,13 +257,14 @@ void loop_switch_continue_nesting(int x_1, int y, int z)
             continue;
         }
     }
-    loop_bound_3 = (4294967295u).xx;
     while(true) {
-        uint2 _e39 = loop_bound_3;
-        if (all((_e39 == (0u).xx))) {
-            break;
+        {
+            uint2 _e35 = loop_bound_3;
+            loop_bound_3 = (_e35 - uint2(((_e35.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e35 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound_3 = (_e39 - uint2(((_e39.y == 0u) ? 1u : 0u), 1u));
         bool should_continue_4 = false;
         do {
             do {
@@ -280,16 +285,17 @@ void loop_switch_continue_nesting(int x_1, int y, int z)
 void loop_switch_omit_continue_variable_checks(int x_2, int y_1, int z_1, int w)
 {
     int pos_1 = int(0);
-    uint2 loop_bound_4 = (uint2)0;
-    uint2 loop_bound_5 = (uint2)0;
+    uint2 loop_bound_4 = (4294967295u).xx;
+    uint2 loop_bound_5 = (4294967295u).xx;
 
-    loop_bound_4 = (4294967295u).xx;
     while(true) {
-        uint2 _e14 = loop_bound_4;
-        if (all((_e14 == (0u).xx))) {
-            break;
+        {
+            uint2 _e13 = loop_bound_4;
+            loop_bound_4 = (_e13 - uint2(((_e13.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e13 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound_4 = (_e14 - uint2(((_e14.y == 0u) ? 1u : 0u), 1u));
         bool should_continue_5 = false;
         switch(x_2) {
             case 1: {
@@ -301,13 +307,14 @@ void loop_switch_omit_continue_variable_checks(int x_2, int y_1, int z_1, int w)
             }
         }
     }
-    loop_bound_5 = (4294967295u).xx;
     while(true) {
-        uint2 _e29 = loop_bound_5;
-        if (all((_e29 == (0u).xx))) {
-            break;
+        {
+            uint2 _e25 = loop_bound_5;
+            loop_bound_5 = (_e25 - uint2(((_e25.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e25 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound_5 = (_e29 - uint2(((_e29.y == 0u) ? 1u : 0u), 1u));
         bool should_continue_6 = false;
         switch(x_2) {
             case 1: {

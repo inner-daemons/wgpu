@@ -1,8 +1,7 @@
 void f_u0028_b1_u003b(inout bool cond)
 {
-    uint2 loop_bound = (uint2)0;
+    uint2 loop_bound = (4294967295u).xx;
 
-    loop_bound = (4294967295u).xx;
     bool loop_init = true;
     while(true) {
         if (!loop_init) {
@@ -12,11 +11,13 @@ void f_u0028_b1_u003b(inout bool cond)
             }
         }
         loop_init = false;
-        uint2 _e9 = loop_bound;
-        if (all((_e9 == (0u).xx))) {
-            break;
+        {
+            uint2 _e8 = loop_bound;
+            loop_bound = (_e8 - uint2(((_e8.y == 0u) ? 1u : 0u), 1u));
+            if (all((_e8 == (0u).xx))) {
+                break;
+            }
         }
-        loop_bound = (_e9 - uint2(((_e9.y == 0u) ? 1u : 0u), 1u));
         continue;
     }
     return;
