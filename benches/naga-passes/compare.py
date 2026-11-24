@@ -3,8 +3,9 @@
 
     compare.py RESULTS_DIR [--base trunk] [--new combined]
 
-RESULTS_DIR holds <label>/<backend>/r<round>/<benchmark>.json files, as written by run.sh.
-Writes comparison.md and comparison.csv into RESULTS_DIR and prints the markdown.
+RESULTS_DIR holds <label>/<backend>/r<round>/<benchmark>.json files, as written by run.py and
+cpu.py, and <benchmark>.failed.json files for benchmarks that could not run. Writes
+comparison.md and comparison.csv into RESULTS_DIR and prints the markdown.
 """
 
 import argparse
@@ -22,11 +23,25 @@ CPU_BACKENDS = ["spv", "hlsl", "msl", "glsl"]
 
 
 def load(root, label):
-    """Returns {(bench, backend, case, metric): [record per round]} and per-run metadata."""
+    """Returns {(bench, backend, case, metric): [record per round]}, per-run metadata and the
+    failures recorded for benchmarks that could not run."""
     records = defaultdict(list)
     meta = {}
+    failures = []
     for path in sorted(glob.glob(os.path.join(root, label, "*", "r*", "*.json"))):
         backend = path.split(os.sep)[-3]
+        if path.endswith(".failed.json"):
+            try:
+                with open(path) as f:
+                    failure = json.load(f)
+            except (OSError, ValueError) as e:
+                print(f"warning: cannot read {path}: {e}", file=sys.stderr)
+                continue
+            failure["label"] = label
+            failure["backend"] = backend
+            failure["round"] = path.split(os.sep)[-2]
+            failures.append(failure)
+            continue
         try:
             with open(path) as f:
                 data = json.load(f)
@@ -37,7 +52,44 @@ def load(root, label):
         meta[(bench, backend)] = data.get("meta", {})
         for record in data.get("records", []):
             records[(bench, backend, record["case"], record["metric"])].append(record)
-    return records, meta
+    return records, meta, failures
+
+
+def run_info(root):
+    """The `key: value` lines of run-info.txt (the first of each key)."""
+    info = {}
+    try:
+        with open(os.path.join(root, "run-info.txt"), encoding="utf-8", errors="replace") as f:
+            for line in f:
+                key, sep, value = line.partition(":")
+                if sep and key.strip() and key.strip() not in info:
+                    info[key.strip()] = value.strip()
+                if sep and key.strip() == "gpu":
+                    info.setdefault("gpus", []).append(value.strip())
+    except OSError:
+        pass
+    return info
+
+
+def driver_text(meta, backend, info):
+    """The driver of an adapter. Metal and DX12 adapters report none, so use the OS and GPU
+    details that run.py recorded."""
+    driver = " ".join(x for x in (meta.get("driver", ""), meta.get("driver_info", "")) if x)
+    if driver:
+        return driver
+    name = meta.get("backend", backend).lower()
+    if name == "metal" or backend == "metal":
+        parts = []
+        if info.get("ProductVersion"):
+            parts.append(f"macOS {info['ProductVersion']} ({info.get('BuildVersion', '?')})")
+        if info.get("metal"):
+            parts.append(info["metal"])
+        return ", ".join(parts) or "n/a"
+    for gpu in info.get("gpus", []):
+        gpu_name, _, version = gpu.partition(", driver ")
+        if version and gpu_name and gpu_name.lower() in meta.get("adapter_name", "").lower():
+            return version
+    return "n/a"
 
 
 def merge(recs):
@@ -74,9 +126,14 @@ def table(headers, rows):
 
 
 class Report:
-    def __init__(self, base, new, base_label, new_label):
+    def __init__(self, base, new, base_label, new_label, base_meta=None, new_meta=None,
+                 base_failures=(), new_failures=()):
         self.base = base
         self.new = new
+        self.base_meta = base_meta or {}
+        self.new_meta = new_meta or {}
+        self.base_failures = list(base_failures)
+        self.new_failures = list(new_failures)
         self.base_label = base_label
         self.new_label = new_label
         self.out = []
@@ -360,6 +417,43 @@ class Report:
             )
         )
 
+    def failed_runs(self):
+        """Benchmarks that did not produce results, or produced them on one side only."""
+        seen = {}
+        for label, meta, failures in (
+            (self.base_label, self.base_meta, self.base_failures),
+            (self.new_label, self.new_meta, self.new_failures),
+        ):
+            for (bench, backend) in meta:
+                seen.setdefault((backend, bench), {}).setdefault(label, [])
+            for failure in failures:
+                seen.setdefault((failure["backend"], failure["bench"]), {}).setdefault(
+                    label, []
+                ).append(failure)
+        rows = []
+        for (backend, bench), sides in sorted(seen.items()):
+            for label in (self.base_label, self.new_label):
+                failures = sides.get(label)
+                if failures is None:
+                    rows.append([label, backend, bench, "-", "no results", "not run or no result file"])
+                    continue
+                for failure in failures:
+                    kind = "failed, not retried" if failure.get("deterministic") else "gave up"
+                    rows.append(
+                        [label, backend, bench, failure.get("round", ""), kind,
+                         str(failure.get("error", "")).replace("\n", " ").replace("|", "/")[:300]]
+                    )
+        if not rows:
+            return
+        self.add("## Benchmarks that produced no results\n")
+        self.add(
+            "A benchmark process that fails the same way twice in a row, with no new results, "
+            "is not retried (a startup panic, for example). Partial results of a run that gave "
+            "up after repeated crashes are kept and compared. `no results` means that side has "
+            "no result file for this benchmark.\n"
+        )
+        self.add(table(["checkout", "backend", "bench", "round", "outcome", "message"], rows))
+
     def problems(self):
         self.add("## Errors, crashes and skipped cases\n")
         self.add(
@@ -426,33 +520,48 @@ def main():
     parser.add_argument("--new", default="combined")
     args = parser.parse_args()
 
-    base, base_meta = load(args.results, args.base)
-    new, new_meta = load(args.results, args.new)
-    if not base or not new:
-        print(f"no results for {args.base if not base else args.new} in {args.results}", file=sys.stderr)
-        return 1
+    base, base_meta, base_failures = load(args.results, args.base)
+    new, new_meta, new_failures = load(args.results, args.new)
 
-    report = Report(base, new, args.base, args.new)
+    report = Report(base, new, args.base, args.new, base_meta, new_meta, base_failures, new_failures)
     report.add(f"# naga passes: {args.base} vs {args.new}\n")
-    report.add("Negative % is faster for the second checkout. `abs` is new minus base.\n")
+    status = 0
+    if not base or not new:
+        status = 1
+        missing = [label for label, data in ((args.base, base), (args.new, new)) if not data]
+        report.add(
+            "**No results for " + " and ".join(f"`{m}`" for m in missing) + f" in "
+            f"`{args.results}`**: every benchmark run failed or nothing was written. "
+            "There is nothing to compare; see the failures below and the `*.log` files.\n"
+        )
+    else:
+        report.add("Negative % is faster for the second checkout. `abs` is new minus base.\n")
+    failed = len(base_failures) + len(new_failures)
+    if failed and base and new:
+        report.add(f"**{failed} benchmark run(s) failed to complete; see \"Benchmarks that "
+                   "produced no results\" below.**\n")
+    info = run_info(args.results)
     adapters = {}
     for (bench, backend), meta in list(new_meta.items()) + list(base_meta.items()):
         if "adapter_name" in meta:
             adapters[backend] = (
                 f"{meta['adapter_name']} ({meta.get('backend', backend)}, {meta.get('device_type', '?')}), "
-                f"driver {meta.get('driver', '?')} {meta.get('driver_info', '')}".strip()
+                f"driver {driver_text(meta, backend, info)}"
             )
     for backend, text in sorted(adapters.items()):
         report.add(f"- `{backend}`: {text}")
     report.add("")
-    report.cpu()
-    report.pipeline()
-    report.runtime()
-    report.zero_init()
-    report.problems()
+    if status == 0:
+        report.cpu()
+        report.pipeline()
+        report.runtime()
+        report.zero_init()
+    report.failed_runs()
+    if status == 0:
+        report.problems()
 
     text = "\n".join(report.out)
-    with open(os.path.join(args.results, "comparison.md"), "w") as f:
+    with open(os.path.join(args.results, "comparison.md"), "w", encoding="utf-8") as f:
         f.write(text + "\n")
     if report.csv_rows:
         with open(os.path.join(args.results, "comparison.csv"), "w", newline="") as f:
@@ -460,7 +569,7 @@ def main():
             writer.writeheader()
             writer.writerows(report.csv_rows)
     print(text)
-    return 0
+    return status
 
 
 if __name__ == "__main__":

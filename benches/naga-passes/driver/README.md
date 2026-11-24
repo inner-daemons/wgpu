@@ -5,15 +5,24 @@ real GPU and driver: how long it takes to create pipelines, and how fast the com
 run. Results depend a lot on the driver, so we would like to see them on as many OS, GPU and
 driver combinations as possible. Thank you for running them.
 
-You do not need to know wgpu. You need a Rust toolchain ([rustup](https://rustup.rs)), git, bash
-and python3. On Windows use Git Bash.
+You do not need to know wgpu. You need a Rust toolchain ([rustup](https://rustup.rs)), git and
+Python 3.9 or newer (standard library only). The Vulkan SDK is needed only for `--full-tests`.
+
+- **Windows**: install Python from [python.org](https://www.python.org/downloads/) or with
+  `winget install Python.Python.3.12`, [Git for Windows](https://gitforwindows.org) and rustup
+  (with the MSVC build tools). Run the commands below as `py benches\naga-passes\driver\run.py`
+  in PowerShell or `cmd`. The default backends are `dx12,vulkan`. If git complains about long
+  paths, run `git config --global core.longpaths true`.
+- **macOS**: Xcode command line tools (`xcode-select --install`), then `python3`. The default
+  backend is `metal`.
+- **Linux**: a C toolchain, `python3` and the GPU driver (Vulkan). The default backend is `vulkan`.
 
 ## Run it
 
 ```sh
 git clone <the fork URL> wgpu && cd wgpu
 git fetch origin trunk-bench naga-passes-bench
-benches/naga-passes/driver/run.sh
+python3 benches/naga-passes/driver/run.py        # Windows: py benches\naga-passes\driver\run.py
 ```
 
 That is the whole thing. It creates two git worktrees of the two branches, builds both (the
@@ -25,19 +34,19 @@ and keep a laptop on mains power.
 Useful options:
 
 ```sh
-benches/naga-passes/driver/run.sh --backends vulkan,gl   # which wgpu backends to run
-benches/naga-passes/driver/run.sh --rounds 3             # repeat, alternating order (less noise)
-benches/naga-passes/driver/run.sh --quick                # about a minute, for checking setup only
-benches/naga-passes/driver/run.sh --out DIR              # where the results go
-benches/naga-passes/driver/run.sh --full-tests           # also run the test suite, see below
-benches/naga-passes/driver/run.sh /path/to/trunk-bench /path/to/passes-bench   # existing checkouts
+python3 benches/naga-passes/driver/run.py --backends vulkan,gl   # which wgpu backends to run
+python3 benches/naga-passes/driver/run.py --rounds 3             # repeat, alternating order (less noise)
+python3 benches/naga-passes/driver/run.py --quick                # about a minute, for checking setup only
+python3 benches/naga-passes/driver/run.py --out DIR              # where the results go
+python3 benches/naga-passes/driver/run.py --full-tests           # also run the test suite, see below
+python3 benches/naga-passes/driver/run.py /path/to/trunk-bench /path/to/passes-bench   # existing checkouts
 ```
 
 ## Also run the full test suite (optional, long)
 
 ```sh
-benches/naga-passes/driver/run.sh --full-tests           # benchmarks, then the tests
-benches/naga-passes/driver/run.sh --full-tests --no-bench   # only the tests
+python3 benches/naga-passes/driver/run.py --full-tests           # benchmarks, then the tests
+python3 benches/naga-passes/driver/run.py --full-tests --no-bench   # only the tests
 ```
 
 This runs `cargo xtask test` in both checkouts, one after the other. It needs
@@ -128,7 +137,7 @@ or the directory it was made from. It contains:
 - `tests/` (only with `--full-tests`): the logs, failure lists and `failure-diff.txt` of the test
   runs;
 - `wgpu-info.txt`: the adapters and their limits and features (from `cargo run -p wgpu-info`);
-- `run-info.txt`: date, `uname`, OS version, Rust version, the two commits.
+- `run-info.txt`: date, `uname`, OS version, CPU and GPU, Rust version, the two commits.
 
 Please add, in your message, what the files cannot say:
 
@@ -156,7 +165,14 @@ Every measurement has a status in the JSON, in `comparison.md` (last section) an
   with the next one, so one bad shader does not lose the run. The log
   (`*.log` next to the JSON) has the last output before the crash; on Windows also check for
   "device lost" or TDR messages, and on Linux `dmesg` for GPU resets.
-- `skipped`: not attempted (mesh pipelines are not benchmarked).
+- `skipped`: not attempted: mesh pipelines are not benchmarked, or the shader needs a feature the
+  device lacks (the reason says which). The device is created with only timestamp queries and the
+  features the example shaders use, so a driver that mis-reports an unrelated feature still works.
+
+A benchmark process that dies is started again and carries on after the case that killed it. If it
+fails twice in a row with the same message and no new results (a startup panic, say), the runner
+stops, writes the message to `<bench>.failed.json` next to the log, and `comparison.md` lists it
+under "Benchmarks that produced no results". A missing file for one checkout is listed there too.
 
 Also look at:
 

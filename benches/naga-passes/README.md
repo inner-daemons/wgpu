@@ -6,8 +6,8 @@ separate bench targets so each can run on its own:
 
 | target | measures | needs a GPU | runner |
 |---|---|---|---|
-| `naga-passes-cpu` | the naga half of compiling a pipeline | no | `cpu.sh` (this file) |
-| `naga-passes-driver` | pipeline creation including the driver compiler, and shader runtime | yes | [`driver/run.sh`](driver/README.md) |
+| `naga-passes-cpu` | the naga half of compiling a pipeline | no | `cpu.py` (this file) |
+| `naga-passes-driver` | pipeline creation including the driver compiler, and shader runtime | yes | [`driver/run.py`](driver/README.md) |
 
 The two checkouts are the branches `trunk-bench` and `naga-passes-bench`. They carry identical
 benchmark code, except `benches/benches/naga-passes-cpu/naga_adapter.rs`: the naga backend
@@ -53,11 +53,17 @@ as errors for that backend, and a panic in a writer is caught and recorded.
 
 ### Running it
 
+You need a Rust toolchain ([rustup](https://rustup.rs)), git and Python 3.9 or newer. The scripts
+use only the Python standard library. Use `python3` on macOS and Linux, and `py` on Windows (Python
+from python.org or `winget install Python.Python.3.12`, plus [Git for Windows](https://gitforwindows.org));
+`python` also works where it is Python 3.
+
 ```sh
 # From any checkout that has benches/naga-passes (about 5 to 15 minutes the first time, which is
 # mostly building two copies of wgpu; the benchmark itself is estimated at 1 to 3 minutes per
 # checkout and round, not measured yet).
-benches/naga-passes/cpu.sh ../wgpu-trunk-bench ../wgpu-passes-bench [OUT_DIR [ROUNDS]]
+python3 benches/naga-passes/cpu.py ../wgpu-trunk-bench ../wgpu-passes-bench [OUT_DIR [ROUNDS]]
+# Windows: py benches\naga-passes\cpu.py ..\wgpu-trunk-bench ..\wgpu-passes-bench
 ```
 
 It builds both, runs the benchmark `ROUNDS` times (default 3) per checkout, alternating which
