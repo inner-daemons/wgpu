@@ -271,10 +271,9 @@ def main():
                 write_text(results / f"{label}.log", stderr)
                 manifest["runs"].append(entry)
                 if entry["exit_code"] != 0:
-                    print(
-                        f"  {group} failed ({entry['exit_code']}); its log is in the tarball",
-                        flush=True,
-                    )
+                    print(f"  {group} failed ({entry['exit_code']}):", flush=True)
+                    for line in stderr.strip().splitlines()[-10:]:
+                        print(f"    {line}", flush=True)
     except KeyboardInterrupt:
         interrupted = True
         manifest["interrupted"] = True
@@ -292,9 +291,15 @@ def main():
     print(f"Wrote {tarball}")
     if failed:
         print(f"{len(failed)} of {len(manifest['runs'])} benchmark runs failed; the tarball has their logs.")
-    print("Please send that file back.")
+    if not manifest["adapters"]:
+        print("No GPU was benchmarked, so the file has no results. The errors above say why.")
+    else:
+        print(f"Benchmarked: {', '.join(manifest['adapters'])}")
+        print("Please send that file back.")
     if interrupted:
         sys.exit(130)
+    if not manifest["adapters"]:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

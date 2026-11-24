@@ -1466,19 +1466,27 @@ fn main() {
 
     let mut report = String::from("# host-copy-bench\n\n");
     let mut all_rows = Vec::new();
+    let mut skipped = Vec::new();
+    let mut benched = 0;
     for adapter in adapters {
         let info = adapter.get_info();
-        if info.backend == wgpu::Backend::Gl || info.backend == wgpu::Backend::BrowserWebGpu {
+        let skip =
+            if info.backend == wgpu::Backend::Gl || info.backend == wgpu::Backend::BrowserWebGpu {
+                Some("OpenGL and WebGPU are not benchmarked")
+            } else if info.device_type == wgpu::DeviceType::Cpu && !options.include_cpu {
+                Some("software renderer; pass --include-cpu to include it")
+            } else if let Some(filter) = &options.adapter_filter
+                && !info.name.to_lowercase().contains(filter)
+            {
+                Some("doesn't match --adapter")
+            } else {
+                None
+            };
+        if let Some(reason) = skip {
+            skipped.push(format!("{} ({:?}): {reason}", info.name, info.backend));
             continue;
         }
-        if info.device_type == wgpu::DeviceType::Cpu && !options.include_cpu {
-            continue;
-        }
-        if let Some(filter) = &options.adapter_filter
-            && !info.name.to_lowercase().contains(filter)
-        {
-            continue;
-        }
+        benched += 1;
         println!("{} ({:?})", info.name, info.backend);
         let mut section = String::new();
         describe(&adapter, &mut section);
@@ -1507,6 +1515,17 @@ fn main() {
         print_rows(&rows, &mut section);
         report.push_str(&section);
         all_rows.extend(rows);
+    }
+
+    if benched == 0 {
+        eprintln!("error: no GPU was benchmarked.");
+        for line in &skipped {
+            eprintln!("  skipped {line}");
+        }
+        if skipped.is_empty() {
+            eprintln!("  wgpu found no adapters. Check that the GPU drivers are installed.");
+        }
+        std::process::exit(2);
     }
 
     println!();
