@@ -234,40 +234,51 @@ pub(crate) fn render_targets(ctx: &mut Ctx) {
     }
     let case = format!("Rgba8Unorm {size}x{size}, {passes} passes");
     println!("  render targets: {case}");
-    for (variant, usage) in variants {
-        let texture = create_texture(ctx, square(size), 1, usage, false);
+    let textures: Vec<wgpu::Texture> = variants
+        .iter()
+        .map(|&(_, usage)| create_texture(ctx, square(size), 1, usage, false))
+        .collect();
+    let render = |ctx: &Ctx, texture: &wgpu::Texture| {
         let view = texture.create_view(&Default::default());
-        let render = |ctx: &Ctx| {
-            time_gpu(ctx, |encoder, queries| {
-                for i in 0..passes {
-                    let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                        color_attachments: &[Some(color_attachment(&view))],
-                        timestamp_writes: queries.filter(|_| i == 0 || i == passes - 1).map(
-                            |query_set| wgpu::RenderPassTimestampWrites {
-                                query_set,
-                                beginning_of_pass_write_index: (i == 0).then_some(0),
-                                end_of_pass_write_index: (i == passes - 1).then_some(1),
-                            },
-                        ),
-                        ..Default::default()
-                    });
-                    pass.set_pipeline(&pipeline);
-                    pass.draw(0..3, 0..1);
-                }
-            })
-        };
-        render(ctx);
-        let times: Vec<f64> = (0..6).map(|_| render(ctx)).collect();
-        let reps = sample_reps(size);
-        sampler.run(ctx, &texture, reps);
-        let samples: Vec<f64> = (0..6).map(|_| sampler.run(ctx, &texture, reps)).collect();
-        if ctx.took_error() {
-            eprintln!("  render targets {variant}: skipped after an error");
-            continue;
+        time_gpu(ctx, |encoder, queries| {
+            for i in 0..passes {
+                let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                    color_attachments: &[Some(color_attachment(&view))],
+                    timestamp_writes: queries.filter(|_| i == 0 || i == passes - 1).map(
+                        |query_set| wgpu::RenderPassTimestampWrites {
+                            query_set,
+                            beginning_of_pass_write_index: (i == 0).then_some(0),
+                            end_of_pass_write_index: (i == passes - 1).then_some(1),
+                        },
+                    ),
+                    ..Default::default()
+                });
+                pass.set_pipeline(&pipeline);
+                pass.draw(0..3, 0..1);
+            }
+        })
+    };
+    let reps = sample_reps(size);
+    let mut render_times = vec![Vec::new(); textures.len()];
+    let mut sample_times = vec![Vec::new(); textures.len()];
+    for texture in &textures {
+        render(ctx, texture);
+    }
+    // Alternate between the variants so clock changes affect both equally.
+    for _ in 0..8 {
+        for (i, texture) in textures.iter().enumerate() {
+            render_times[i].push(render(ctx, texture));
+            sample_times[i].push(sampler.run(ctx, texture, reps));
         }
-        let render_ms = median(times);
-        let sample_ms = median(samples);
-        let pixels = (size as f64) * (size as f64);
+    }
+    if ctx.took_error() {
+        eprintln!("  render targets: skipped after an error");
+        return;
+    }
+    let pixels = (size as f64) * (size as f64);
+    for (i, &(variant, _)) in variants.iter().enumerate() {
+        let render_ms = median(render_times[i].clone());
+        let sample_ms = median(sample_times[i].clone());
         ctx.record("render_target", &case, variant, "render", render_ms, "ms");
         ctx.record(
             "render_target",
@@ -285,6 +296,24 @@ pub(crate) fn render_targets(ctx: &mut Ctx) {
             pixels * reps as f64 / (sample_ms * 1e6),
             "Gtexel/s",
         );
+        if i > 0 {
+            ctx.record(
+                "render_target",
+                &case,
+                variant,
+                "render_vs_normal",
+                paired_ratio(&render_times[i], &render_times[0]),
+                "x",
+            );
+            ctx.record(
+                "render_target",
+                &case,
+                variant,
+                "sample_vs_normal",
+                paired_ratio(&sample_times[i], &sample_times[0]),
+                "x",
+            );
+        }
     }
 }
 
@@ -535,7 +564,6 @@ pub(crate) fn threaded_uploads(ctx: &mut Ctx) {
 pub(crate) fn busy_uploads(ctx: &mut Ctx) {
     let frames = if ctx.quick { 60 } else { 240 };
     let warmup = 10;
-    let passes = 6;
     let upload_size = 1024;
     let target = ctx.device.create_texture(&wgpu::TextureDescriptor {
         label: None,
@@ -566,8 +594,27 @@ pub(crate) fn busy_uploads(ctx: &mut Ctx) {
     let fixed = TextureCase::new(RGBA8, upload_size, Content::Noise)
         .upload_fresh(ctx, TextureVariant::Staging)
         .0;
-    let case =
-        format!("2560x1440, {passes} passes, one {upload_size}x{upload_size} upload per frame");
+    let busy = BusyFrame {
+        pipeline,
+        filter,
+        target_view,
+    };
+    // Enough passes that a frame without uploads takes about 12 ms, so the loop is
+    // limited by the GPU on any device.
+    let calibrate = |ctx: &Ctx, passes: u32| {
+        busy.submit(ctx, &fixed, passes);
+        ctx.wait();
+        let start = Instant::now();
+        for _ in 0..5 {
+            busy.submit(ctx, &fixed, passes);
+        }
+        ctx.wait();
+        ms_since(start) / 5.0
+    };
+    let probe = 6;
+    let probe_ms = calibrate(ctx, probe);
+    let passes = ((probe as f64 * 12.0 / probe_ms.max(0.01)).round() as u32).clamp(probe, 400);
+    let case = format!("2560x1440, one {upload_size}x{upload_size} upload per frame");
     println!("  busy uploads: {case}");
     let mut variants = vec![
         ("no uploads", None),
@@ -576,84 +623,130 @@ pub(crate) fn busy_uploads(ctx: &mut Ctx) {
     if host_visible(ctx, RGBA8) {
         variants.push(("host", Some(TextureVariant::Host)));
     }
-    for (name, variant) in variants {
-        let frame = |ctx: &Ctx| {
-            let source = match variant {
-                None => fixed.clone(),
-                Some(TextureVariant::Staging) => {
-                    let texture =
-                        create_texture(ctx, square(upload_size), 1, staging_usage(), false);
-                    ctx.queue.write_texture(
-                        texture.as_image_copy(),
-                        &data,
-                        layout,
-                        square(upload_size),
-                    );
-                    texture
-                }
-                Some(_) => {
-                    let texture = create_texture(ctx, square(upload_size), 1, host_usage(), true);
-                    texture.get_mapped_texture_mut().unwrap().copy_from_memory(
-                        host_range(0, wgpu::Origin3d::ZERO),
-                        &data,
-                        layout,
-                        square(upload_size),
-                    );
-                    texture.unmap();
-                    texture
-                }
-            };
-            let view = source.create_view(&Default::default());
-            let bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
-                label: None,
-                layout: &pipeline.get_bind_group_layout(0),
-                entries: &[
-                    wgpu::BindGroupEntry {
-                        binding: 0,
-                        resource: wgpu::BindingResource::TextureView(&view),
-                    },
-                    wgpu::BindGroupEntry {
-                        binding: 1,
-                        resource: wgpu::BindingResource::Sampler(&filter),
-                    },
-                ],
-            });
-            let mut encoder = ctx.device.create_command_encoder(&Default::default());
-            for _ in 0..passes {
-                let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
-                    color_attachments: &[Some(color_attachment(&target_view))],
-                    ..Default::default()
-                });
-                pass.set_pipeline(&pipeline);
-                pass.set_bind_group(0, &bind_group, &[]);
-                pass.draw(0..3, 0..1);
+    let frame = |ctx: &Ctx, variant: Option<TextureVariant>| {
+        let source = match variant {
+            None => fixed.clone(),
+            Some(TextureVariant::Staging) => {
+                let texture = create_texture(ctx, square(upload_size), 1, staging_usage(), false);
+                ctx.queue.write_texture(
+                    texture.as_image_copy(),
+                    &data,
+                    layout,
+                    square(upload_size),
+                );
+                texture
             }
-            ctx.queue.submit(Some(encoder.finish()))
+            Some(_) => {
+                let texture = create_texture(ctx, square(upload_size), 1, host_usage(), true);
+                texture.get_mapped_texture_mut().unwrap().copy_from_memory(
+                    host_range(0, wgpu::Origin3d::ZERO),
+                    &data,
+                    layout,
+                    square(upload_size),
+                );
+                texture.unmap();
+                texture
+            }
         };
+        busy.submit(ctx, &source, passes)
+    };
+    // Runs `count` frames with two in flight and returns each frame's time.
+    let run = |ctx: &Ctx, variant: Option<TextureVariant>, count: u32| {
         let mut in_flight = VecDeque::new();
         let mut times = Vec::new();
-        for i in 0..warmup + frames {
+        for _ in 0..count {
             let start = Instant::now();
-            in_flight.push_back(frame(ctx));
+            in_flight.push_back(frame(ctx, variant));
             if in_flight.len() > 2 {
                 wait_for(ctx, in_flight.pop_front().flatten());
             }
-            if i >= warmup {
-                times.push(ms_since(start));
-            }
+            times.push(ms_since(start));
         }
         ctx.wait();
-        if ctx.took_error() {
-            eprintln!("  busy uploads {name}: skipped after an error");
-            continue;
+        times
+    };
+    for &(_, variant) in &variants {
+        run(ctx, variant, warmup);
+    }
+    // Alternate between the variants in chunks so clock changes affect all of
+    // them equally.
+    let chunk = 20;
+    let mut times = vec![Vec::new(); variants.len()];
+    let mut chunk_means = vec![Vec::new(); variants.len()];
+    for _ in 0..frames / chunk {
+        for (i, &(_, variant)) in variants.iter().enumerate() {
+            let chunk_times = run(ctx, variant, chunk);
+            chunk_means[i].push(chunk_times.iter().sum::<f64>() / chunk as f64);
+            times[i].extend(chunk_times);
         }
+    }
+    if ctx.took_error() {
+        eprintln!("  busy uploads: skipped after an error");
+        return;
+    }
+    for (i, &(name, _)) in variants.iter().enumerate() {
+        let times = &mut times[i];
         let mean = times.iter().sum::<f64>() / times.len() as f64;
         times.sort_by(f64::total_cmp);
         let p95 = times[times.len() * 95 / 100];
         let max = *times.last().unwrap();
+        ctx.record("busy", &case, name, "passes", passes as f64, "passes");
         ctx.record("busy", &case, name, "frame_mean", mean, "ms");
         ctx.record("busy", &case, name, "frame_p95", p95, "ms");
         ctx.record("busy", &case, name, "frame_max", max, "ms");
+        if i > 0 {
+            ctx.record(
+                "busy",
+                &case,
+                name,
+                "frame_vs_no_uploads",
+                paired_ratio(&chunk_means[i], &chunk_means[0]),
+                "x",
+            );
+        }
+    }
+}
+
+struct BusyFrame {
+    pipeline: wgpu::RenderPipeline,
+    filter: wgpu::Sampler,
+    target_view: wgpu::TextureView,
+}
+
+impl BusyFrame {
+    /// Submits `passes` full-screen passes that sample `source`.
+    fn submit(
+        &self,
+        ctx: &Ctx,
+        source: &wgpu::Texture,
+        passes: u32,
+    ) -> Option<wgpu::SubmissionIndex> {
+        let view = source.create_view(&Default::default());
+        let bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: None,
+            layout: &self.pipeline.get_bind_group_layout(0),
+            entries: &[
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: wgpu::BindingResource::TextureView(&view),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&self.filter),
+                },
+            ],
+        });
+        let mut encoder = ctx.device.create_command_encoder(&Default::default());
+        for _ in 0..passes {
+            let mut pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+                color_attachments: &[Some(color_attachment(&self.target_view))],
+                ..Default::default()
+            });
+            pass.set_pipeline(&self.pipeline);
+            pass.set_bind_group(0, &bind_group, &[]);
+            pass.draw(0..3, 0..1);
+        }
+        ctx.queue.submit(Some(encoder.finish()))
     }
 }
 

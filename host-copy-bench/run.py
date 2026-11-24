@@ -16,12 +16,15 @@ import json
 import os
 import platform
 import re
+import shutil
 import subprocess
 import sys
 import tarfile
-import tempfile
 import time
 from pathlib import Path
+
+if sys.version_info < (3, 8):
+    sys.exit("This script needs Python 3.8 or later.")
 
 GROUPS = ["textures", "buffers", "scenarios", "barrier"]
 TIMEOUT_SECONDS = 30 * 60
@@ -82,18 +85,44 @@ def benchmark_env() -> dict:
 
 
 def build() -> Path:
-    print("Building host-copy-bench in release mode...", flush=True)
-    subprocess.run(
-        ["cargo", "build", "--release", "-p", "host-copy-bench"],
+    if shutil.which("cargo") is None:
+        sys.exit("cargo was not found. Install Rust from https://rustup.rs and try again.")
+    print("Building host-copy-bench in release mode (this can take a few minutes)...", flush=True)
+    # Cargo's progress goes to stderr, which is left attached so it's visible.
+    result = subprocess.run(
+        ["cargo", "build", "--release", "-p", "host-copy-bench", "--message-format=json"],
         cwd=repo_root(),
-        check=True,
+        stdout=subprocess.PIPE,
+        text=True,
+        encoding="utf-8",
+        errors="replace",
     )
-    exe = "host-copy-bench.exe" if platform.system() == "Windows" else "host-copy-bench"
-    target = Path(os.environ.get("CARGO_TARGET_DIR", repo_root() / "target"))
-    path = target / "release" / exe
-    if not path.exists():
-        sys.exit(f"built binary not found at {path}")
-    return path
+    if result.returncode != 0:
+        sys.exit("Building the benchmark failed; the error is above.")
+    for line in result.stdout.splitlines():
+        try:
+            message = json.loads(line)
+        except ValueError:
+            continue
+        if (
+            message.get("reason") == "compiler-artifact"
+            and message.get("target", {}).get("name") == "host-copy-bench"
+            and message.get("executable")
+        ):
+            return Path(message["executable"])
+    sys.exit("Cargo didn't report where it built the benchmark.")
+
+
+def write_text(path: Path, text: str):
+    path.write_text(text, encoding="utf-8", errors="replace")
+
+
+def decode(output) -> str:
+    if output is None:
+        return ""
+    if isinstance(output, bytes):
+        return output.decode("utf-8", errors="replace")
+    return output
 
 
 def main():
@@ -127,16 +156,18 @@ def main():
         "runs": [],
     }
 
-    with tempfile.TemporaryDirectory() as tmp:
-        results = Path(tmp) / f"host-copy-bench-{stamp}"
-        results.mkdir()
+    args.out.mkdir(parents=True, exist_ok=True)
+    results = args.out / f"host-copy-bench-{stamp}"
+    results.mkdir()
+    interrupted = False
+    try:
         for run in range(1, args.runs + 1):
             for group in GROUPS:
                 label = f"run{run}-{group}"
                 skip = [arg for other in GROUPS if other != group for arg in ("--skip", other)]
                 csv = results / f"{label}.csv"
                 command = [str(binary), *skip, "--csv", str(csv), *args.bench_args]
-                print(f"[{run}/{args.runs}] {group}...", flush=True)
+                print(f"[run {run}/{args.runs}] {group}...", flush=True)
                 start = time.monotonic()
                 entry = {"run": run, "group": group, "csv": csv.name}
                 try:
@@ -146,29 +177,34 @@ def main():
                         env=env,
                         capture_output=True,
                         text=True,
+                        encoding="utf-8",
+                        errors="replace",
                         timeout=TIMEOUT_SECONDS,
                     )
                     entry["exit_code"] = result.returncode
                     stdout, stderr = result.stdout, result.stderr
                 except subprocess.TimeoutExpired as e:
                     entry["exit_code"] = "timeout"
-                    stdout = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
-                    stderr = e.stderr.decode() if isinstance(e.stderr, bytes) else (e.stderr or "")
+                    stdout, stderr = decode(e.stdout), decode(e.stderr)
                 entry["seconds"] = round(time.monotonic() - start, 1)
-                (results / f"{label}.md").write_text(stdout)
-                (results / f"{label}.log").write_text(stderr)
+                write_text(results / f"{label}.md", stdout)
+                write_text(results / f"{label}.log", stderr)
                 manifest["runs"].append(entry)
                 if entry["exit_code"] != 0:
                     print(
-                        f"  {group} failed ({entry['exit_code']}), see {label}.log in the tarball",
+                        f"  {group} failed ({entry['exit_code']}); its log is in the tarball",
                         flush=True,
                     )
+    except KeyboardInterrupt:
+        interrupted = True
+        manifest["interrupted"] = True
+        print("\nInterrupted; packing the results so far.", flush=True)
 
-        (results / "manifest.json").write_text(json.dumps(manifest, indent=2))
-        args.out.mkdir(parents=True, exist_ok=True)
-        tarball = args.out / f"{results.name}.tar.gz"
-        with tarfile.open(tarball, "w:gz") as tar:
-            tar.add(results, arcname=results.name)
+    write_text(results / "manifest.json", json.dumps(manifest, indent=2))
+    tarball = args.out / f"{results.name}.tar.gz"
+    with tarfile.open(tarball, "w:gz") as tar:
+        tar.add(results, arcname=results.name)
+    shutil.rmtree(results)
 
     failed = [r for r in manifest["runs"] if r["exit_code"] != 0]
     print()
@@ -176,6 +212,8 @@ def main():
     if failed:
         print(f"{len(failed)} of {len(manifest['runs'])} benchmark runs failed; the tarball has their logs.")
     print("Please send that file back.")
+    if interrupted:
+        sys.exit(130)
 
 
 if __name__ == "__main__":

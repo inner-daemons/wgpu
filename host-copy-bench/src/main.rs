@@ -263,6 +263,22 @@ fn plausible_gpu_time(gpu: f64, wall: f64) -> f64 {
     }
 }
 
+/// The median of the ratios between measurements taken in the same iteration.
+fn paired_ratio(values: &[f64], base: &[f64]) -> f64 {
+    median(values.iter().zip(base).map(|(v, b)| v / b).collect())
+}
+
+#[derive(Default)]
+struct Samples {
+    fresh: Vec<f64>,
+    first_use: Vec<f64>,
+    again: Vec<f64>,
+    again_cpu: Vec<f64>,
+    again_wait: Vec<f64>,
+    steady: Vec<f64>,
+    readback: Vec<f64>,
+}
+
 fn median(mut values: Vec<f64>) -> f64 {
     values.sort_by(f64::total_cmp);
     values[values.len() / 2]
@@ -910,65 +926,62 @@ fn bench_textures(ctx: &mut Ctx) {
                 // dispatch overhead.
                 let reps = sample_reps(size);
                 let texel_reads = (size as f64) * (size as f64) * reps as f64;
-                for &variant in &variants {
-                    let mut fresh = Vec::new();
-                    let mut first_use = Vec::new();
-                    let mut texture = None;
-                    for _ in 0..iterations {
-                        let (t, ms) = case.upload_fresh(ctx, variant);
-                        fresh.push(ms);
-                        first_use.push(sampler.run(ctx, &t, reps));
-                        texture = Some(t);
+                // Variants are measured in turn within every iteration, so clock
+                // and thermal changes affect them equally.
+                let mut samples: Vec<Samples> =
+                    variants.iter().map(|_| Samples::default()).collect();
+                let mut textures = Vec::new();
+                for iteration in 0..iterations {
+                    for (i, &variant) in variants.iter().enumerate() {
+                        let (texture, ms) = case.upload_fresh(ctx, variant);
+                        samples[i].fresh.push(ms);
+                        samples[i].first_use.push(sampler.run(ctx, &texture, reps));
+                        if iteration == iterations - 1 {
+                            textures.push(texture);
+                        }
                     }
-                    let texture = texture.unwrap();
-                    let mut again = Vec::new();
-                    let mut again_cpu = Vec::new();
-                    let mut again_wait = Vec::new();
-                    for _ in 0..iterations {
-                        let phases = case.upload_again(ctx, &texture, variant);
-                        again.push(phases.total);
-                        again_cpu.push(phases.cpu);
-                        again_wait.push(phases.wait);
-                        sampler.run(ctx, &texture, 1);
+                }
+                for _ in 0..iterations {
+                    for (i, &variant) in variants.iter().enumerate() {
+                        let phases = case.upload_again(ctx, &textures[i], variant);
+                        samples[i].again.push(phases.total);
+                        samples[i].again_cpu.push(phases.cpu);
+                        samples[i].again_wait.push(phases.wait);
+                        sampler.run(ctx, &textures[i], 1);
                     }
-                    let steady: Vec<f64> = (0..iterations * 2)
-                        .map(|_| sampler.run(ctx, &texture, reps))
-                        .collect();
-                    let readback: Vec<f64> = (0..iterations)
-                        .map(|_| {
-                            sampler.run(ctx, &texture, 1);
-                            case.read_back(ctx, &texture, variant)
-                        })
-                        .collect();
-                    if ctx.took_error() {
-                        eprintln!("  {name} {}: skipped after an error", variant.name());
-                        continue;
+                }
+                for _ in 0..iterations * 2 {
+                    for (i, texture) in textures.iter().enumerate() {
+                        samples[i].steady.push(sampler.run(ctx, texture, reps));
                     }
+                }
+                for _ in 0..iterations {
+                    for (i, &variant) in variants.iter().enumerate() {
+                        sampler.run(ctx, &textures[i], 1);
+                        samples[i]
+                            .readback
+                            .push(case.read_back(ctx, &textures[i], variant));
+                    }
+                }
+                if ctx.took_error() {
+                    eprintln!("  {name}: skipped after an error");
+                    continue;
+                }
+                for (i, &variant) in variants.iter().enumerate() {
+                    let s = &samples[i];
                     let v = variant.name();
-                    ctx.record("texture", &name, v, "upload_fresh", median(fresh), "ms");
-                    ctx.record("texture", &name, v, "upload_again", median(again), "ms");
-                    ctx.record(
-                        "texture",
-                        &name,
-                        v,
-                        "upload_again_cpu",
-                        median(again_cpu),
-                        "ms",
-                    );
-                    ctx.record(
-                        "texture",
-                        &name,
-                        v,
-                        "upload_again_wait",
-                        median(again_wait),
-                        "ms",
-                    );
-                    ctx.record("texture", &name, v, "first_sample", median(first_use), "ms");
-                    ctx.record("texture", &name, v, "readback", median(readback), "ms");
-                    let fastest = steady.iter().copied().fold(f64::INFINITY, f64::min);
-                    let steady = median(steady);
-                    ctx.record("texture", &name, v, "sample", steady, "ms");
-                    ctx.record("texture", &name, v, "sample_min", fastest, "ms");
+                    let steady = median(s.steady.clone());
+                    for (metric, values) in [
+                        ("upload_fresh", &s.fresh),
+                        ("upload_again", &s.again),
+                        ("upload_again_cpu", &s.again_cpu),
+                        ("upload_again_wait", &s.again_wait),
+                        ("first_sample", &s.first_use),
+                        ("readback", &s.readback),
+                        ("sample", &s.steady),
+                    ] {
+                        ctx.record("texture", &name, v, metric, median(values.clone()), "ms");
+                    }
                     ctx.record(
                         "texture",
                         &name,
@@ -977,8 +990,26 @@ fn bench_textures(ctx: &mut Ctx) {
                         texel_reads / (steady * 1e6),
                         "Gtexel/s",
                     );
+                    if i > 0 {
+                        let base = &samples[0];
+                        for (metric, values, base) in [
+                            ("upload_fresh_vs_staging", &s.fresh, &base.fresh),
+                            ("upload_again_vs_staging", &s.again, &base.again),
+                            ("readback_vs_staging", &s.readback, &base.readback),
+                            ("sample_vs_staging", &s.steady, &base.steady),
+                        ] {
+                            ctx.record(
+                                "texture",
+                                &name,
+                                v,
+                                metric,
+                                paired_ratio(values, base),
+                                "x",
+                            );
+                        }
+                    }
                     if variant != TextureVariant::Staging
-                        && let Some(allowed) = allows_gpu_optimized_contents(&texture)
+                        && let Some(allowed) = allows_gpu_optimized_contents(&textures[i])
                     {
                         ctx.record(
                             "texture",
