@@ -125,3 +125,15 @@ Vulkan only. Compares submit throughput, submit latency and the time per
 frame of a simple 1080p render loop, with and without a memory barrier from
 all GPU writes to the host at the end of every command buffer. Two rounds of
 each, to show the noise.
+
+### Vulkan host image copy queries
+
+Vulkan only, no timing. For about 40 common formats, asks the driver whether
+adding `HOST_TRANSFER` usage keeps device access optimal
+(`VkHostImageCopyDevicePerformanceQueryEXT`) and keeps the image's size
+limits, for each combination of creation flags wgpu can use (plain 2D,
+cube compatible, mutable format, 3D, and 3D compatible with 2D arrays), with
+all usages the format supports and with only sampling and copies. Also
+records `identicalMemoryTypeRequirements`. This shows how often wgpu's
+`HOST_VISIBLE_OPTIMAL` flag, which requires all of them, is stricter than
+asking for one texture would be.

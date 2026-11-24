@@ -68,7 +68,7 @@ struct Row {
     backend: String,
     bench: &'static str,
     case: String,
-    variant: &'static str,
+    variant: String,
     metric: &'static str,
     value: f64,
     unit: &'static str,
@@ -129,7 +129,7 @@ impl Ctx {
             backend: self.backend.clone(),
             bench,
             case: case.to_owned(),
-            variant,
+            variant: variant.to_owned(),
             metric,
             value,
             unit,
@@ -397,6 +397,279 @@ fn describe_metal(adapter: &wgpu::Adapter, out: &mut String) {
 
 #[cfg(not(target_vendor = "apple"))]
 fn describe_metal(_: &wgpu::Adapter, _: &mut String) {}
+
+// ---------------------------------------------------------------------------
+// Vulkan host image copy queries
+// ---------------------------------------------------------------------------
+
+#[cfg(not(target_arch = "wasm32"))]
+const VK_HOST_COPY_FORMATS: &[ash::vk::Format] = {
+    use ash::vk::Format as F;
+    &[
+        F::R8_UNORM,
+        F::R8_UINT,
+        F::R8G8_UNORM,
+        F::R8G8B8A8_UNORM,
+        F::R8G8B8A8_SRGB,
+        F::B8G8R8A8_UNORM,
+        F::B8G8R8A8_SRGB,
+        F::A2B10G10R10_UNORM_PACK32,
+        F::B10G11R11_UFLOAT_PACK32,
+        F::E5B9G9R9_UFLOAT_PACK32,
+        F::R16_UNORM,
+        F::R16_SFLOAT,
+        F::R16G16_SFLOAT,
+        F::R16G16B16A16_UNORM,
+        F::R16G16B16A16_SFLOAT,
+        F::R32_UINT,
+        F::R32_SFLOAT,
+        F::R32G32B32A32_SFLOAT,
+        F::D16_UNORM,
+        F::D32_SFLOAT,
+        F::D24_UNORM_S8_UINT,
+        F::D32_SFLOAT_S8_UINT,
+        F::S8_UINT,
+        F::BC1_RGBA_UNORM_BLOCK,
+        F::BC1_RGBA_SRGB_BLOCK,
+        F::BC3_UNORM_BLOCK,
+        F::BC4_UNORM_BLOCK,
+        F::BC5_UNORM_BLOCK,
+        F::BC6H_UFLOAT_BLOCK,
+        F::BC7_UNORM_BLOCK,
+        F::BC7_SRGB_BLOCK,
+        F::ETC2_R8G8B8_UNORM_BLOCK,
+        F::ETC2_R8G8B8A8_UNORM_BLOCK,
+        F::EAC_R11_UNORM_BLOCK,
+        F::ASTC_4X4_UNORM_BLOCK,
+        F::ASTC_4X4_SRGB_BLOCK,
+        F::ASTC_8X8_UNORM_BLOCK,
+    ]
+};
+
+/// For each format, asks the driver whether host transfer usage keeps device
+/// access optimal and the size limits unchanged, for each combination of
+/// creation flags wgpu can use, with all usages the format supports and with
+/// only sampling and copies.
+#[cfg(not(target_arch = "wasm32"))]
+fn describe_vulkan_host_copy(adapter: &wgpu::Adapter, out: &mut String, rows: &mut Vec<Row>) {
+    use ash::vk;
+    let Some(hal) = (unsafe { adapter.as_hal::<wgpu::hal::api::Vulkan>() }) else {
+        return;
+    };
+    let info = adapter.get_info();
+    let instance = hal.shared_instance().raw_instance();
+    let physical_device = hal.raw_physical_device();
+    let mut record = |case: String, variant: String, metric: &'static str, value: bool| {
+        rows.push(Row {
+            adapter: info.name.clone(),
+            backend: format!("{:?}", info.backend),
+            bench: "vk_host_copy",
+            case,
+            variant,
+            metric,
+            value: value as u32 as f64,
+            unit: "bool",
+        });
+    };
+
+    let supported = unsafe { instance.enumerate_device_extension_properties(physical_device) }
+        .unwrap_or_default()
+        .iter()
+        .any(|e| e.extension_name_as_c_str() == Ok(ash::ext::host_image_copy::NAME));
+    let _ = writeln!(out, "- VK_EXT_host_image_copy: {supported}");
+    record("device".into(), "-".into(), "host_image_copy", supported);
+    if !supported {
+        return;
+    }
+    let mut host_copy_properties = vk::PhysicalDeviceHostImageCopyPropertiesEXT::default();
+    let mut properties =
+        vk::PhysicalDeviceProperties2::default().push_next(&mut host_copy_properties);
+    unsafe { instance.get_physical_device_properties2(physical_device, &mut properties) };
+    let identical = host_copy_properties.identical_memory_type_requirements != vk::FALSE;
+    let _ = writeln!(out, "- identicalMemoryTypeRequirements: {identical}");
+    // wgpu also treats integrated and CPU devices as having one kind of memory.
+    let free_memory = identical
+        || matches!(
+            info.device_type,
+            wgpu::DeviceType::IntegratedGpu | wgpu::DeviceType::Cpu
+        );
+    record(
+        "device".into(),
+        "-".into(),
+        "identical_memory_type_requirements",
+        identical,
+    );
+
+    let variants = [
+        ("2d", vk::ImageType::TYPE_2D, vk::ImageCreateFlags::empty()),
+        (
+            "2d-cube",
+            vk::ImageType::TYPE_2D,
+            vk::ImageCreateFlags::CUBE_COMPATIBLE,
+        ),
+        (
+            "2d-mutable",
+            vk::ImageType::TYPE_2D,
+            vk::ImageCreateFlags::MUTABLE_FORMAT,
+        ),
+        ("3d", vk::ImageType::TYPE_3D, vk::ImageCreateFlags::empty()),
+        (
+            "3d-2d-array",
+            vk::ImageType::TYPE_3D,
+            vk::ImageCreateFlags::TYPE_2D_ARRAY_COMPATIBLE,
+        ),
+    ];
+    let _ = writeln!(out);
+    let _ = writeln!(
+        out,
+        "Host transfer per format and creation flags, with all usages / with sampling and copies only. \
+         Y: optimal, N: not optimal, L: optimal but lower size limits, -: combination unsupported."
+    );
+    let _ = writeln!(out);
+    let mut header = String::from("| format | host transfer |");
+    let mut rule = String::from("|---|---|");
+    for (name, _, _) in variants {
+        header += &format!(" {name} |");
+        rule += "---|";
+    }
+    let _ = writeln!(out, "{header} wgpu optimal |");
+    let _ = writeln!(out, "{rule}---|");
+
+    for &format in VK_HOST_COPY_FORMATS {
+        let name = format!("{format:?}");
+        let mut properties3 = vk::FormatProperties3::default();
+        let mut properties2 = vk::FormatProperties2::default().push_next(&mut properties3);
+        unsafe {
+            instance.get_physical_device_format_properties2(
+                physical_device,
+                format,
+                &mut properties2,
+            )
+        };
+        let features = properties3.optimal_tiling_features;
+        let host_transfer = features.contains(vk::FormatFeatureFlags2::HOST_IMAGE_TRANSFER_EXT);
+        record(name.clone(), "-".into(), "host_transfer", host_transfer);
+        if !host_transfer {
+            let _ = writeln!(out, "| {name} | no |{} |", " |".repeat(variants.len()));
+            continue;
+        }
+        let mut all = vk::ImageUsageFlags::TRANSFER_SRC | vk::ImageUsageFlags::TRANSFER_DST;
+        for (feature, usage) in [
+            (
+                vk::FormatFeatureFlags2::SAMPLED_IMAGE,
+                vk::ImageUsageFlags::SAMPLED,
+            ),
+            (
+                vk::FormatFeatureFlags2::STORAGE_IMAGE,
+                vk::ImageUsageFlags::STORAGE,
+            ),
+            (
+                vk::FormatFeatureFlags2::COLOR_ATTACHMENT,
+                vk::ImageUsageFlags::COLOR_ATTACHMENT,
+            ),
+            (
+                vk::FormatFeatureFlags2::DEPTH_STENCIL_ATTACHMENT,
+                vk::ImageUsageFlags::DEPTH_STENCIL_ATTACHMENT,
+            ),
+        ] {
+            if features.contains(feature) {
+                all |= usage;
+            }
+        }
+        let sampled = vk::ImageUsageFlags::TRANSFER_SRC
+            | vk::ImageUsageFlags::TRANSFER_DST
+            | if features.contains(vk::FormatFeatureFlags2::SAMPLED_IMAGE) {
+                vk::ImageUsageFlags::SAMPLED
+            } else {
+                vk::ImageUsageFlags::empty()
+            };
+
+        let query =
+            |ty: vk::ImageType,
+             flags: vk::ImageCreateFlags,
+             usage: vk::ImageUsageFlags,
+             performance: Option<&mut vk::HostImageCopyDevicePerformanceQueryEXT>| {
+                let info = vk::PhysicalDeviceImageFormatInfo2::default()
+                    .format(format)
+                    .ty(ty)
+                    .tiling(vk::ImageTiling::OPTIMAL)
+                    .usage(usage)
+                    .flags(flags);
+                let mut properties = vk::ImageFormatProperties2::default();
+                if let Some(performance) = performance {
+                    properties = properties.push_next(performance);
+                }
+                unsafe {
+                    instance.get_physical_device_image_format_properties2(
+                        physical_device,
+                        &info,
+                        &mut properties,
+                    )
+                }
+                .ok()
+                .map(|()| properties.image_format_properties)
+            };
+
+        let mut row = format!("| {name} | yes |");
+        let mut wgpu_optimal = free_memory;
+        let mut any = false;
+        for (variant, ty, flags) in variants {
+            let mut cell = Vec::new();
+            for (usage_name, usage) in [("all", all), ("sampled", sampled)] {
+                let key = format!("{variant}/{usage_name}");
+                let Some(base) = query(ty, flags, usage, None) else {
+                    record(name.clone(), key, "supported", false);
+                    cell.push("-");
+                    continue;
+                };
+                record(name.clone(), key.clone(), "supported", true);
+                let mut performance = vk::HostImageCopyDevicePerformanceQueryEXT::default();
+                let host = query(
+                    ty,
+                    flags,
+                    usage | vk::ImageUsageFlags::HOST_TRANSFER_EXT,
+                    Some(&mut performance),
+                );
+                let optimal = host.is_some() && performance.optimal_device_access != vk::FALSE;
+                let identical_layout =
+                    host.is_some() && performance.identical_memory_layout != vk::FALSE;
+                let limits_kept = host.is_some_and(|host| {
+                    host.max_extent.width >= base.max_extent.width
+                        && host.max_extent.height >= base.max_extent.height
+                        && host.max_extent.depth >= base.max_extent.depth
+                        && host.max_mip_levels >= base.max_mip_levels
+                        && host.max_array_layers >= base.max_array_layers
+                        && host.max_resource_size >= base.max_resource_size
+                });
+                record(name.clone(), key.clone(), "optimal", optimal);
+                record(
+                    name.clone(),
+                    key.clone(),
+                    "identical_layout",
+                    identical_layout,
+                );
+                record(name.clone(), key, "limits_kept", limits_kept);
+                if usage_name == "all" {
+                    any = true;
+                    wgpu_optimal &= optimal && limits_kept;
+                }
+                cell.push(match (optimal, limits_kept) {
+                    (true, true) => "Y",
+                    (true, false) => "L",
+                    _ => "N",
+                });
+            }
+            row += &format!(" {} |", cell.join("/"));
+        }
+        let wgpu_optimal = wgpu_optimal && any;
+        record(name.clone(), "-".into(), "wgpu_optimal", wgpu_optimal);
+        let _ = writeln!(out, "{row} {} |", if wgpu_optimal { "yes" } else { "no" });
+    }
+    let _ = writeln!(out);
+}
+
+#[cfg(target_arch = "wasm32")]
+fn describe_vulkan_host_copy(_: &wgpu::Adapter, _: &mut String, _: &mut Vec<Row>) {}
 
 // ---------------------------------------------------------------------------
 // Textures
@@ -1737,6 +2010,9 @@ fn main() {
         describe(&adapter, &mut section);
 
         let mut rows = Vec::new();
+        if options.runs("textures") {
+            describe_vulkan_host_copy(&adapter, &mut section, &mut rows);
+        }
         if let Some(mut ctx) = Ctx::new(&adapter, options.quick) {
             if options.runs("textures") {
                 let implicit = implicit_adapters
