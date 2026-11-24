@@ -242,8 +242,9 @@ fn measure(
     let mut kind = "";
 
     for run in 0..total_runs {
-        let varied = vary::vary(&shader.source, &eps, vary::salt(run));
+        let varied = vary::vary(case, &shader.source, &eps, run);
         kind = varied.kind;
+        dump_varied(case, run, &varied.source);
         let mut constants = base_constants.clone();
         constants.extend(varied.constants.iter().cloned());
 
@@ -283,6 +284,17 @@ fn measure(
         records.push(record);
     }
     records
+}
+
+/// With `NAGA_PASSES_DUMP_VARIED=<dir>`, writes the WGSL of every iteration there, to check that
+/// the cases and iterations differ.
+fn dump_varied(case: &str, run: u32, source: &str) {
+    if let Some(dir) = std::env::var_os("NAGA_PASSES_DUMP_VARIED") {
+        let dir = std::path::PathBuf::from(dir);
+        let name = case.replace(['/', ':', '+'], "_");
+        let _ = std::fs::create_dir_all(&dir);
+        let _ = std::fs::write(dir.join(format!("{name}_r{run}.wgsl")), source);
+    }
 }
 
 fn create(

@@ -26,7 +26,13 @@ import tarfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+import loadguard  # noqa: E402
+
 REPO = HERE.parents[2]
+DEFAULT_ROUNDS = 3
+MIN_ROUNDS = 3
+QUICK_WARNING = "QUICK RUN: a smoke check of the setup only. INVALID FOR COMPARISONS."
 COMPARE = HERE.parent / "compare.py"
 EXE = ".exe" if os.name == "nt" else ""
 BENCH_MAIN = Path("benches") / "benches" / "naga-passes-driver" / "main.rs"
@@ -113,7 +119,10 @@ def write_run_info(out, args, base_dir, new_dir, backends):
         f"backends: {backends}",
         f"rounds: {args.rounds}",
         f"quick: {int(args.quick)}",
+        f"load_limit: {args.max_load:.2f} busy cores ({loadguard.cores()} cores)",
     ]
+    if args.quick:
+        lines.append("quick_note: " + QUICK_WARNING)
     if sys.platform == "darwin":
         lines += capture(["sw_vers"]).splitlines()
     elif sys.platform.startswith("linux"):
@@ -287,7 +296,14 @@ def record_failure(dest, bench, label, backend, attempts, status, error, determi
 
 
 def run_benchmarks(args, env, out, base_dir, new_dir, backends):
+    def guarded(label, directory, bench, dest, backend, round_number, title, extra=None):
+        say(f"== round {round_number}: {title} on {label} ({backend})")
+        with loadguard.group(out, f"{label} {dest.parent.name} {bench} r{round_number}",
+                             dest / f"{bench}.json", args.max_load, args.load_wait):
+            run_bench(env, label, directory, bench, dest, backend, extra)
+
     for round_number in range(1, args.rounds + 1):
+        # The checkout that goes first alternates, so drift in machine speed does not favor one.
         if round_number % 2 == 1:
             order = [(args.base_label, base_dir), (args.new_label, new_dir)]
         else:
@@ -295,18 +311,17 @@ def run_benchmarks(args, env, out, base_dir, new_dir, backends):
         for backend in backends:
             for bench in ("pipeline_creation", "gpu_runtime"):
                 for label, directory in order:
-                    say(f"== round {round_number}: {bench} on {label} ({backend})")
-                    run_bench(env, label, directory, bench,
-                              out / label / backend / f"r{round_number}", backend)
+                    guarded(label, directory, bench,
+                            out / label / backend / f"r{round_number}", backend,
+                            round_number, bench)
             if backend == "vulkan":
                 # The same shaders with naga's workgroup zero-init polyfill forced on, to compare
                 # with the native mode that the run above uses when the device supports it.
                 for label, directory in order:
-                    say(f"== round {round_number}: gpu_runtime with polyfilled zero-init on "
-                        f"{label} (vulkan)")
-                    run_bench(env, label, directory, "gpu_runtime",
-                              out / label / "vulkan-polyfill" / f"r{round_number}", "vulkan",
-                              {"WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL": "1"})
+                    guarded(label, directory, "gpu_runtime",
+                            out / label / "vulkan-polyfill" / f"r{round_number}", "vulkan",
+                            round_number, "gpu_runtime with polyfilled zero-init",
+                            {"WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL": "1"})
 
 
 def run_tests(env, out, label, directory):
@@ -384,12 +399,22 @@ def parse_args():
                         help="Comma separated wgpu backends for the device benchmarks (default: "
                         "metal on macOS, vulkan on Linux, dx12,vulkan on Windows). Add `gl` to "
                         "include the GLES backend.")
-    parser.add_argument("--rounds", type=int, default=1,
-                        help="Run each benchmark N times per checkout, alternating order "
-                        "(default 1).")
+    parser.add_argument("--rounds", type=int, default=None,
+                        help="Run each benchmark N times per checkout, alternating which "
+                        f"checkout goes first (default {DEFAULT_ROUNDS}, or 1 with --quick). "
+                        f"Fewer than {MIN_ROUNDS} rounds is not enough for a comparison.")
     parser.add_argument("--quick", action="store_true",
-                        help="A fast smoke run: few iterations, small dispatches. Not for "
-                        "comparisons.")
+                        help="A smoke check of the setup: 2 samples per pipeline, small "
+                        "dispatches. INVALID FOR COMPARISONS; the results are marked as such.")
+    parser.add_argument("--max-load", type=float, default=None, metavar="CORES",
+                        help="Mark a benchmark group as high_load if the load (busy cores, "
+                        "from the 1 minute load average) at its start or end is above this "
+                        "(default: 1 + 0.25 * the number of cores).")
+    parser.add_argument("--load-wait", type=int, default=loadguard.DEFAULT_SETTLE_SECONDS,
+                        metavar="SECONDS",
+                        help="Before each group, wait up to this long for the load to fall "
+                        f"under the limit (default {loadguard.DEFAULT_SETTLE_SECONDS}; 0 "
+                        "does not wait).")
     parser.add_argument("--no-info", action="store_true",
                         help="Skip collecting adapter information with wgpu-info.")
     parser.add_argument("--full-tests", action="store_true",
@@ -403,8 +428,12 @@ def parse_args():
     args = parser.parse_args()
     if len(args.checkouts) not in (0, 2):
         parser.error("pass either no checkouts or both BASE_CHECKOUT and NEW_CHECKOUT")
+    if args.rounds is None:
+        args.rounds = 1 if args.quick else DEFAULT_ROUNDS
     if args.rounds < 1:
         parser.error("--rounds must be at least 1")
+    if args.max_load is None:
+        args.max_load = loadguard.default_limit()
     labels = [x.strip() for x in args.labels.split(",")]
     if len(labels) != 2 or not all(labels):
         parser.error("--labels takes two names, A,B")
@@ -456,6 +485,12 @@ def main():
             NAGA_PASSES_GPU_WARMUP="1",
         )
 
+    if args.quick:
+        say("!" * 78)
+        say(f"!! {QUICK_WARNING}")
+        say("!" * 78)
+    elif args.rounds < MIN_ROUNDS and not args.no_bench:
+        say(f"warning: {args.rounds} round(s); use at least {MIN_ROUNDS} for a comparison")
     say(f"base ({args.base_label}): {base_dir} ({rev(base_dir, short=True)})")
     say(f"new  ({args.new_label}): {new_dir} ({rev(new_dir, short=True)})")
     say(f"results: {out}")
@@ -493,6 +528,8 @@ def main():
         say(result.stdout)
         (out / "comparison.txt").write_text(result.stdout, encoding="utf-8")
     say("")
+    if args.quick:
+        say(QUICK_WARNING)
     say(f"Results and logs are in {out}")
     say("Send back: the directory (without the build logs if large), or the .tar.gz below.")
     archive = make_archive(out)

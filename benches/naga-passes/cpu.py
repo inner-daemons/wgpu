@@ -18,6 +18,9 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE))
+import loadguard  # noqa: E402
+
 EXE = ".exe" if os.name == "nt" else ""
 BENCH = ["bench", "-p", "wgpu-benchmark", "--bench", "naga-passes-cpu"]
 
@@ -67,11 +70,13 @@ def main():
             dest.mkdir(parents=True, exist_ok=True)
             env = dict(os.environ, NAGA_PASSES_OUT=str(dest))
             log = dest / "cpu_compile.log"
-            with open(log, "wb") as f:
-                status = subprocess.run(
-                    [exe, *BENCH, "--", "naga_passes::cpu_compile"],
-                    cwd=directory, env=env, stdout=f, stderr=subprocess.STDOUT,
-                ).returncode
+            with loadguard.group(out, f"{label} cpu cpu_compile r{round_number}",
+                                 dest / "cpu_compile.json"):
+                with open(log, "wb") as f:
+                    status = subprocess.run(
+                        [exe, *BENCH, "--", "naga_passes::cpu_compile"],
+                        cwd=directory, env=env, stdout=f, stderr=subprocess.STDOUT,
+                    ).returncode
             if status != 0:
                 print(f"   {label} failed; see {log}", flush=True)
                 tail = log.read_text(errors="replace").strip().splitlines()[-3:]
