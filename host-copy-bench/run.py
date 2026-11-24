@@ -3,7 +3,7 @@
 
 Usage, from anywhere in the wgpu repository:
 
-    python3 host-copy-bench/run.py --name "MacBook Air M2, macOS 15.3"
+    python3 host-copy-bench/run.py
 
 Each benchmark group runs in its own process, one after another, so a driver
 crash in one group doesn't lose the others. Extra arguments after `--` are
@@ -42,6 +42,21 @@ def run_quiet(command):
         return ""
 
 
+def pick_fields(text: str, keys) -> dict:
+    """Keeps only the `Key: value` lines named in `keys`. Tools like
+    system_profiler also print serial numbers, which must not be collected."""
+    fields = {}
+    for line in text.splitlines():
+        key, sep, value = line.strip().partition(":")
+        if sep and key in keys and value.strip():
+            fields.setdefault(key, []).append(value.strip())
+    return {k: v[0] if len(v) == 1 else v for k, v in fields.items()}
+
+
+def powershell(command: str) -> str:
+    return run_quiet(["powershell", "-NoProfile", "-NonInteractive", "-Command", command])
+
+
 def system_info() -> dict:
     info = {
         "platform": platform.platform(),
@@ -53,8 +68,18 @@ def system_info() -> dict:
     if system == "Darwin":
         info["macos"] = run_quiet(["sw_vers", "-productVersion"])
         info["cpu"] = run_quiet(["sysctl", "-n", "machdep.cpu.brand_string"])
-        info["model"] = run_quiet(["sysctl", "-n", "hw.model"])
+        info["model_identifier"] = run_quiet(["sysctl", "-n", "hw.model"])
         info["memory_bytes"] = run_quiet(["sysctl", "-n", "hw.memsize"])
+        info["hardware"] = pick_fields(
+            run_quiet(["system_profiler", "SPHardwareDataType"]),
+            {"Model Name", "Chip", "Total Number of Cores", "Memory"},
+        )
+        info["gpus"] = pick_fields(
+            run_quiet(["system_profiler", "SPDisplaysDataType"]),
+            {"Chipset Model", "Vendor", "Total Number of Cores", "VRAM (Total)", "Metal Support"},
+        )
+        battery = run_quiet(["pmset", "-g", "batt"])
+        info["power"] = battery.splitlines()[0] if battery else ""
     elif system == "Linux":
         try:
             info["os_release"] = Path("/etc/os-release").read_text()
@@ -68,10 +93,67 @@ def system_info() -> dict:
         except OSError:
             pass
         info["kernel"] = platform.release()
+        # Only the vendor and product name; the serial number is never read.
+        for field in ("sys_vendor", "product_name", "product_version"):
+            try:
+                info[field] = Path(f"/sys/class/dmi/id/{field}").read_text().strip()
+            except OSError:
+                pass
+        info["gpus"] = [
+            line
+            for line in run_quiet(["lspci"]).splitlines()
+            if re.search(r"VGA|3D controller|Display controller", line)
+        ]
+        power = {}
+        for supply in Path("/sys/class/power_supply").glob("*"):
+            try:
+                kind = (supply / "type").read_text().strip()
+                if kind == "Mains":
+                    power["ac_online"] = (supply / "online").read_text().strip() == "1"
+                elif kind == "Battery":
+                    power["battery_status"] = (supply / "status").read_text().strip()
+            except OSError:
+                pass
+        info["power"] = power
     elif system == "Windows":
         info["windows"] = platform.version()
+        info["os"] = powershell("(Get-CimInstance Win32_OperatingSystem).Caption")
+        info["model"] = powershell(
+            "$c = Get-CimInstance Win32_ComputerSystem; $c.Manufacturer + ' ' + $c.Model"
+        )
+        info["cpu"] = powershell("(Get-CimInstance Win32_Processor).Name")
+        info["gpus"] = powershell(
+            "Get-CimInstance Win32_VideoController | "
+            "ForEach-Object { $_.Name + ', driver ' + $_.DriverVersion }"
+        ).splitlines()
+        # BatteryStatus 2 means on AC power; no battery means a desktop.
+        info["battery_status"] = powershell("(Get-CimInstance Win32_Battery).BatteryStatus")
     info["git_commit"] = run_quiet(["git", "-C", str(repo_root()), "rev-parse", "HEAD"])
     return info
+
+
+def describe(info: dict) -> str:
+    """A one-line summary of the machine for the console."""
+    parts = []
+    hardware = info.get("hardware", {})
+    for value in (
+        hardware.get("Model Name") or info.get("model") or info.get("product_name"),
+        hardware.get("Chip") or info.get("cpu"),
+        info.get("os") or (f"macOS {info['macos']}" if info.get("macos") else None),
+    ):
+        if value:
+            parts.append(str(value))
+    return ", ".join(parts) or info["platform"]
+
+
+def adapters_in(results: Path) -> list:
+    """The GPUs the benchmark ran on, from the headings of its reports."""
+    names = []
+    for report in sorted(results.glob("run1-*.md")):
+        for line in report.read_text(encoding="utf-8", errors="replace").splitlines():
+            if line.startswith("## ") and line[3:] not in names:
+                names.append(line[3:])
+    return names
 
 
 def benchmark_env() -> dict:
@@ -128,8 +210,11 @@ def decode(output) -> str:
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     parser.add_argument(
+        "--note",
         "--name",
-        help='a description of the machine, e.g. "Dell XPS 15, RTX 4060, Windows 11"',
+        dest="note",
+        default="",
+        help="anything worth knowing about the machine or the run, e.g. \"external GPU\"",
     )
     parser.add_argument("--runs", type=int, default=3, help="how many times to run everything")
     parser.add_argument(
@@ -138,20 +223,15 @@ def main():
     parser.add_argument("bench_args", nargs="*", help="extra arguments for the benchmark, after --")
     args = parser.parse_args()
 
-    name = args.name
-    if not name:
-        try:
-            name = input("Describe this machine (model, GPU, OS): ").strip()
-        except EOFError:
-            name = ""
-
+    info = system_info()
+    print(f"Machine: {describe(info)}", flush=True)
     binary = build()
     env = benchmark_env()
     stamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
     manifest = {
-        "name": name,
+        "note": args.note,
         "started": stamp,
-        "system": system_info(),
+        "system": info,
         "bench_args": args.bench_args,
         "runs": [],
     }
@@ -200,6 +280,7 @@ def main():
         manifest["interrupted"] = True
         print("\nInterrupted; packing the results so far.", flush=True)
 
+    manifest["adapters"] = adapters_in(results)
     write_text(results / "manifest.json", json.dumps(manifest, indent=2))
     tarball = args.out / f"{results.name}.tar.gz"
     with tarfile.open(tarball, "w:gz") as tar:
