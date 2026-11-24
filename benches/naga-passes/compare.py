@@ -6,11 +6,16 @@
 RESULTS_DIR holds <label>/<backend>/r<round>/<benchmark>.json files, as written by run.py and
 cpu.py, and <benchmark>.failed.json files for benchmarks that could not run. Writes
 comparison.md and comparison.csv into RESULTS_DIR and prints the markdown.
+
+Statistics: each case's number is its minimum over all samples and rounds (the median of the
+per-round medians is shown for reference). Summaries are geometric means of the per-case
+new/base ratios, not ratios of sums.
 """
 
 import argparse
 import csv
 import glob
+import math
 import os
 import statistics
 import sys
@@ -23,11 +28,13 @@ CPU_BACKENDS = ["spv", "hlsl", "msl", "glsl"]
 
 
 def load(root, label):
-    """Returns {(bench, backend, case, metric): [record per round]}, per-run metadata and the
-    failures recorded for benchmarks that could not run."""
+    """Returns {(bench, backend, case, metric): [record per round]}, per-run metadata, the
+    failures recorded for benchmarks that could not run and the load guard fields of every
+    benchmark group."""
     records = defaultdict(list)
     meta = {}
     failures = []
+    guards = []
     for path in sorted(glob.glob(os.path.join(root, label, "*", "r*", "*.json"))):
         backend = path.split(os.sep)[-3]
         if path.endswith(".failed.json"):
@@ -50,9 +57,12 @@ def load(root, label):
             continue
         bench = data.get("bench", os.path.basename(path)[:-5])
         meta[(bench, backend)] = data.get("meta", {})
+        if "high_load" in data.get("meta", {}):
+            guards.append(dict(data["meta"], label=label, backend=backend, bench=bench,
+                               round=path.split(os.sep)[-2]))
         for record in data.get("records", []):
             records[(bench, backend, record["case"], record["metric"])].append(record)
-    return records, meta, failures
+    return records, meta, failures, guards
 
 
 def run_info(root):
@@ -93,15 +103,51 @@ def driver_text(meta, backend, info):
 
 
 def merge(recs):
-    """One record from the rounds of a measurement: medians of medians if all rounds are ok."""
+    """One record from the rounds of a measurement if all rounds are ok: the minimum of the
+    minimums, the maximum of the maximums, and the median of the other statistics."""
     bad = [r for r in recs if r["status"] != "ok"]
     if bad:
         return dict(bad[0])
     out = dict(recs[0])
-    for key in ("median", "mean", "p90", "min", "max"):
+    for key in ("median", "mean", "p90"):
         out[key] = statistics.median(r[key] for r in recs)
+    out["min"] = min(r["min"] for r in recs)
+    out["max"] = max(r["max"] for r in recs)
     out["n"] = sum(r["n"] for r in recs)
+    out["rounds"] = len(recs)
     return out
+
+
+def geomean(values):
+    values = list(values)
+    return math.exp(sum(math.log(v) for v in values) / len(values)) if values else None
+
+
+def ratio_pct(ratio):
+    return "n/a" if ratio is None else f"{(ratio - 1) * 100:+.1f}%"
+
+
+class Ratios:
+    """Per-case (base, new) pairs of the minimum and the median, for geometric means."""
+
+    def __init__(self):
+        self.fields = {"min": [], "median": []}
+
+    def add(self, b, n):
+        for field, pairs in self.fields.items():
+            if b[field] > 0 and n[field] > 0:
+                pairs.append((b[field], n[field]))
+
+    def count(self):
+        return len(self.fields["min"])
+
+    def change(self, field):
+        pairs = self.fields[field]
+        return geomean(n / b for b, n in pairs)
+
+    def base_new(self, field):
+        pairs = self.fields[field]
+        return geomean(b for b, _ in pairs), geomean(n for _, n in pairs)
 
 
 def pct(base, new):
@@ -127,7 +173,8 @@ def table(headers, rows):
 
 class Report:
     def __init__(self, base, new, base_label, new_label, base_meta=None, new_meta=None,
-                 base_failures=(), new_failures=()):
+                 base_failures=(), new_failures=(), guards=()):
+        self.guards = list(guards)
         self.base = base
         self.new = new
         self.base_meta = base_meta or {}
@@ -183,11 +230,27 @@ class Report:
             )
         else:
             row["abs_change"] = row["pct_change"] = ""
+        ok = b and n and b["status"] == "ok" and n["status"] == "ok"
+        row["base_min"] = b["min"] if b and b["status"] == "ok" else ""
+        row["new_min"] = n["min"] if n and n["status"] == "ok" else ""
+        row["pct_change_min"] = (n["min"] - b["min"]) / b["min"] * 100 if ok and b["min"] else ""
         row["base_error"] = (b or {}).get("error") or ""
         row["new_error"] = (n or {}).get("error") or ""
         self.csv_rows.append(row)
 
     # -- sections --
+
+    def summary(self, acc, metrics, unit):
+        """Rows of geometric means. `acc` maps a metric to its Ratios."""
+        rows = []
+        for metric in metrics:
+            if metric in acc and acc[metric].count():
+                r = acc[metric]
+                base_min, new_min = r.base_new("min")
+                rows.append([metric, r.count(), num(base_min, unit), num(new_min, unit),
+                             ratio_pct(r.change("min")), ratio_pct(r.change("median"))])
+        return table(["metric", "cases", f"{self.base_label} min", f"{self.new_label} min",
+                      "change (min)", "change (median)"], rows)
 
     def cpu(self):
         bench = "cpu_compile"
@@ -197,40 +260,26 @@ class Report:
         self.add("## CPU compile pipeline (naga only)\n")
         self.add(
             "One iteration is parse, validate, process_overrides and one backend write for one "
-            "entry point. Times are microseconds, medians; sums are over the cases that "
-            "succeeded in both checkouts. `spv_polyfill` is the SPIR-V writer with the "
-            "workgroup zero-init polyfill instead of the native mode, and is not part of "
-            "`total`.\n"
+            "entry point. Times are microseconds. The summary rows are geometric means over the "
+            "cases that succeeded in both checkouts (`min` columns are the geometric mean of the "
+            "per-case minimums; the changes are geometric means of per-case ratios). "
+            "`spv_polyfill` is the SPIR-V writer with the workgroup zero-init polyfill instead "
+            "of the native mode, and is not part of `total`.\n"
         )
         for backend in backends:
-            rows_by_group = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0, 0]))
+            by_group = defaultdict(lambda: defaultdict(Ratios))
             sizes = defaultdict(lambda: [0, 0])
             for case, metric, b, n in self.pairs(bench, backend):
                 self.csv_row(bench, backend, case, metric, b, n)
                 if b and n and b["status"] == "ok" and n["status"] == "ok":
                     for group in (b.get("group", "?"), "all"):
-                        acc = rows_by_group[group][metric]
-                        acc[0] += b["median"]
-                        acc[1] += n["median"]
-                        acc[2] += 1
+                        by_group[group][metric].add(b, n)
                     if metric in CPU_BACKENDS + ["spv_polyfill"] and "output_bytes" in b["aux"] and "output_bytes" in n["aux"]:
                         sizes[metric][0] += int(b["aux"]["output_bytes"])
                         sizes[metric][1] += int(n["aux"]["output_bytes"])
-            for group in ["all"] + sorted(g for g in rows_by_group if g != "all"):
-                self.add(f"### Totals: {group} cases\n")
-                rows = []
-                for metric in CPU_METRICS:
-                    if metric in rows_by_group[group]:
-                        b, n, count = rows_by_group[group][metric]
-                        rows.append(
-                            [metric, count, f"{b:,.0f}", f"{n:,.0f}", f"{n - b:+,.0f}", pct(b, n)]
-                        )
-                self.add(
-                    table(
-                        ["metric", "cases", f"{self.base_label} us", f"{self.new_label} us", "abs", "%"],
-                        rows,
-                    )
-                )
+            for group in ["all"] + sorted(g for g in by_group if g != "all"):
+                self.add(f"### Summary: {group} cases\n")
+                self.add(self.summary(by_group[group], CPU_METRICS, "us"))
             if sizes:
                 self.add("### Output size (bytes, sum over cases that succeeded in both)\n")
                 self.add(
@@ -254,7 +303,8 @@ class Report:
         if not cases:
             return
         self.add("### Benchmark shaders\n")
-        self.add("Each cell is `base -> new (%)` in microseconds; `ERR` marks a failed backend.\n")
+        self.add("Each cell is the minimum, `base -> new (%)`, in microseconds; `ERR` marks a "
+                 "failed backend.\n")
         rows = []
         for case in sorted(cases):
             row = [case.replace("::main", "")]
@@ -268,18 +318,23 @@ class Report:
         changes = []
         for case, metric, b, n in self.pairs(bench, backend):
             if metric in metrics and b and n and b["status"] == "ok" and n["status"] == "ok":
-                changes.append((n["median"] - b["median"], case, metric, b["median"], n["median"]))
+                changes.append((n["min"] - b["min"], case, metric, b, n))
         if not changes:
             return
-        changes.sort()
+        changes.sort(key=lambda c: c[:3])
         self.add(f"### Largest changes ({backend})\n")
         rows = []
         head = changes[:limit]
         tail = [c for c in changes[-limit:][::-1] if c not in head]
         for delta, case, metric, b, n in head + tail:
-            rows.append([case, metric, num(b, unit), num(n, unit), f"{delta:+,.3f}".rstrip("0").rstrip("."), pct(b, n)])
-        self.add("Top: most improved first, then most regressed.\n")
-        self.add(table(["case", "metric", self.base_label, self.new_label, "abs", "%"], rows))
+            rows.append([case, metric, num(b["min"], unit), num(n["min"], unit),
+                         pct(b["min"], n["min"]), num(b["median"], unit),
+                         num(n["median"], unit), pct(b["median"], n["median"])])
+        self.add("Ordered by the change in the minimum: most improved first, then most "
+                 "regressed.\n")
+        self.add(table(["case", "metric", f"{self.base_label} min", f"{self.new_label} min",
+                        "% (min)", f"{self.base_label} median", f"{self.new_label} median",
+                        "% (median)"], rows))
 
     def pipeline(self):
         bench = "pipeline_creation"
@@ -288,42 +343,43 @@ class Report:
             return
         self.add("## Pipeline creation through wgpu (includes the driver compiler)\n")
         self.add(
-            "`create_shader_module` plus `create_*_pipeline`, in milliseconds, medians of "
-            "iterations that each compile a varied shader (see the README). Sums are over the "
-            "cases that succeeded in both checkouts.\n"
+            "`create_shader_module` plus `create_*_pipeline`, in milliseconds, for iterations "
+            "that each compile a differently salted shader (see the README). The summary rows "
+            "are geometric means over the cases that succeeded in both checkouts.\n"
         )
         for backend in backends:
             self.add(f"### Backend: {backend}\n")
-            sums = defaultdict(lambda: defaultdict(lambda: [0.0, 0.0, 0]))
+            by_group = defaultdict(lambda: defaultdict(Ratios))
+            weak = set()
             for case, metric, b, n in self.pairs(bench, backend):
                 self.csv_row(bench, backend, case, metric, b, n)
+                if metric == "total":
+                    for rec in (b, n):
+                        if rec and rec.get("aux", {}).get("variation") == "rename":
+                            weak.add(case)
                 if b and n and b["status"] == "ok" and n["status"] == "ok":
                     for group in (b.get("group", "?"), "all"):
-                        acc = sums[group][metric]
-                        acc[0] += b["median"]
-                        acc[1] += n["median"]
-                        acc[2] += 1
-            for group in ["all"] + sorted(g for g in sums if g != "all"):
-                rows = []
-                for metric in ("create_shader_module", "create_pipeline", "total"):
-                    if metric in sums[group]:
-                        b, n, count = sums[group][metric]
-                        rows.append([metric, count, f"{b:,.1f}", f"{n:,.1f}", f"{n - b:+,.1f}", pct(b, n)])
-                self.add(f"Totals: {group} cases\n")
+                        by_group[group][metric].add(b, n)
+            for group in ["all"] + sorted(g for g in by_group if g != "all"):
+                self.add(f"Summary: {group} cases\n")
+                self.add(self.summary(by_group[group],
+                                      ("create_shader_module", "create_pipeline", "total"), "ms"))
+            if weak:
                 self.add(
-                    table(
-                        ["metric", "cases", f"{self.base_label} ms", f"{self.new_label} ms", "abs", "%"],
-                        rows,
-                    )
+                    f"**{len(weak)} case(s) were varied only by renaming their entry points "
+                    "(`variation: rename` in the JSON), which some drivers ignore, so a driver "
+                    "cache may have served them:** " + ", ".join(f"`{c}`" for c in sorted(weak)[:10])
+                    + (", ..." if len(weak) > 10 else "") + "\n"
                 )
             rows = []
             for case, metric, b, n in self.pairs(bench, backend):
                 rec = b or n
                 if metric == "total" and rec.get("group") == "bench":
-                    rows.append([case.replace("::main", ""), cell(b, n, "ms")])
+                    rows.append([case.replace("::main", ""), cell(b, n, "ms"), cell(b, n, "ms", "median")])
             if rows:
                 self.add("Benchmark shaders (total per pipeline):\n")
-                self.add(table(["shader", f"{self.base_label} -> {self.new_label}"], rows))
+                self.add(table(["shader", f"min, {self.base_label} -> {self.new_label}",
+                                f"median, {self.base_label} -> {self.new_label}"], rows))
             self.largest_changes(bench, backend, {"total"}, "ms")
 
     def runtime(self):
@@ -341,6 +397,7 @@ class Report:
         for backend in backends:
             self.add(f"### Backend: {backend}\n")
             rows = []
+            ratios = Ratios()
             for case, metric, b, n in self.pairs(bench, backend):
                 self.csv_row(bench, backend, case, metric, b, n)
                 if metric != "gpu_time":
@@ -349,6 +406,7 @@ class Report:
                 if not ok:
                     rows.append([case, cell(b, n, "ms"), "", "", "", "", ""])
                     continue
+                ratios.add(b, n)
                 cb, cn = b["aux"].get("checksum"), n["aux"].get("checksum")
                 check = "ok" if cb == cn else "MISMATCH"
                 src = {"timestamp": "ts", "wall": "wall"}
@@ -357,15 +415,19 @@ class Report:
                 rows.append(
                     [
                         case,
+                        f"{b['min']:.3f} -> {n['min']:.3f}",
+                        pct(b["min"], n["min"]),
                         f"{b['median']:.3f} -> {n['median']:.3f}",
                         pct(b["median"], n["median"]),
-                        f"{b['p90']:.3f} -> {n['p90']:.3f}",
-                        pct(b["p90"], n["p90"]),
                         check,
                         src_b if src_b == src_n else f"{src_b}/{src_n}",
                     ]
                 )
-            self.add(table(["shader", "median", "%", "p90", "%", "check", "src"], rows))
+            if ratios.count():
+                self.add(f"Geometric mean of the per-shader ratios over {ratios.count()} shaders: "
+                         f"min {ratio_pct(ratios.change('min'))}, "
+                         f"median {ratio_pct(ratios.change('median'))}.\n")
+            self.add(table(["shader", "min", "%", "median", "%", "check", "src"], rows))
 
     def get(self, side, backend, case, metric="gpu_time"):
         recs = side.get(("gpu_runtime", backend, case, metric))
@@ -386,7 +448,7 @@ class Report:
             "pass on the combined branch, the SPIR-V writer's own code on trunk). If the device "
             "has no native support both runs polyfill and the columns agree. `overhead` is "
             "polyfill vs native for one checkout; the last column is the passes checkout vs "
-            "the base checkout, both polyfilled. Milliseconds, medians.\n"
+            "the base checkout, both polyfilled. Milliseconds, minimums.\n"
         )
         cases = sorted(
             {k[2] for k in list(self.base) + list(self.new) if k[0] == "gpu_runtime" and k[2].startswith("zeroinit_")}
@@ -400,11 +462,11 @@ class Report:
                 poly = self.get(side, "vulkan-polyfill", case)
                 polyfilled.append(poly)
                 if native and poly:
-                    row += [f"{native['median']:.3f}", f"{poly['median']:.3f}", pct(native["median"], poly["median"])]
+                    row += [f"{native['min']:.3f}", f"{poly['min']:.3f}", pct(native["min"], poly["min"])]
                 else:
                     row += ["N/A", "N/A", ""]
             if polyfilled[0] and polyfilled[1]:
-                row.append(pct(polyfilled[0]["median"], polyfilled[1]["median"]))
+                row.append(pct(polyfilled[0]["min"], polyfilled[1]["min"]))
             else:
                 row.append("N/A")
             rows.append(row)
@@ -416,6 +478,29 @@ class Report:
                 rows,
             )
         )
+
+    def load(self):
+        """The groups that ran on a busy machine, from the load guard fields."""
+        if not self.guards:
+            return
+        flagged = [g for g in self.guards if g.get("high_load") == "true"]
+        unknown = [g for g in self.guards if g.get("high_load") == "unknown"]
+        self.add("## Machine load\n")
+        self.add(
+            "The runner reads the load (busy cores) before and after every benchmark group. A "
+            "group is `high_load` if either reading is above the limit (by default 1 + 0.25 * "
+            "cores). Timings from flagged groups are unreliable.\n"
+        )
+        if not flagged:
+            self.add(f"No group of {len(self.guards)} was above the limit"
+                     + (f" ({len(unknown)} could not be read)" if unknown else "") + ".\n")
+            return
+        self.add(f"**{len(flagged)} of {len(self.guards)} groups ran under high load.**\n")
+        rows = [[g["label"], g["backend"], g["bench"], g["round"], g.get("load_before", "?"),
+                 g.get("load_after", "?"), g.get("load_limit", "?"), g.get("started_utc", "?")]
+                for g in flagged]
+        self.add(table(["checkout", "backend", "bench", "round", "load before", "load after",
+                        "limit", "started (UTC)"], rows))
 
     def failed_runs(self):
         """Benchmarks that did not produce results, or produced them on one side only."""
@@ -505,12 +590,12 @@ class Report:
             self.add(f"... and {len(only) - 80} more, see comparison.csv.\n")
 
 
-def cell(b, n, unit):
+def cell(b, n, unit, field="min"):
     if b is None or n is None:
         return "missing in " + ("base" if b is None else "new")
     if b["status"] != "ok" or n["status"] != "ok":
-        return f"{'ERR' if b['status'] != 'ok' else num(b['median'], unit)} -> {'ERR' if n['status'] != 'ok' else num(n['median'], unit)}"
-    return f"{num(b['median'], unit)} -> {num(n['median'], unit)} ({pct(b['median'], n['median'])})"
+        return f"{'ERR' if b['status'] != 'ok' else num(b[field], unit)} -> {'ERR' if n['status'] != 'ok' else num(n[field], unit)}"
+    return f"{num(b[field], unit)} -> {num(n[field], unit)} ({pct(b[field], n[field])})"
 
 
 def main():
@@ -520,11 +605,17 @@ def main():
     parser.add_argument("--new", default="combined")
     args = parser.parse_args()
 
-    base, base_meta, base_failures = load(args.results, args.base)
-    new, new_meta, new_failures = load(args.results, args.new)
+    base, base_meta, base_failures, base_guards = load(args.results, args.base)
+    new, new_meta, new_failures, new_guards = load(args.results, args.new)
 
-    report = Report(base, new, args.base, args.new, base_meta, new_meta, base_failures, new_failures)
+    report = Report(base, new, args.base, args.new, base_meta, new_meta, base_failures,
+                    new_failures, base_guards + new_guards)
+    info = run_info(args.results)
+    quick = info.get("quick") == "1"
     report.add(f"# naga passes: {args.base} vs {args.new}\n")
+    if quick:
+        report.add("**QUICK RUN: a smoke check of the setup (2 samples per pipeline, small "
+                   "dispatches). THESE NUMBERS ARE INVALID FOR COMPARISONS.**\n")
     status = 0
     if not base or not new:
         status = 1
@@ -535,12 +626,22 @@ def main():
             "There is nothing to compare; see the failures below and the `*.log` files.\n"
         )
     else:
-        report.add("Negative % is faster for the second checkout. `abs` is new minus base.\n")
+        report.add("Negative % is faster for the second checkout. Per-case numbers are the "
+                   "minimum over all samples and rounds, with the median of the per-round "
+                   "medians for reference. Summary changes are geometric means of per-case "
+                   "new/base ratios, not ratios of sums.\n")
+        rounds = max((len(v) for data in (base, new) for v in data.values()), default=0)
+        if rounds < 3 and not quick:
+            report.add(f"**Only {rounds} round(s) of results; at least 3 are needed to tell "
+                       "noise from a difference.**\n")
+        flagged = sum(1 for g in base_guards + new_guards if g.get("high_load") == "true")
+        if flagged:
+            report.add(f"**{flagged} benchmark group(s) ran on a busy machine; see \"Machine "
+                       "load\" below.**\n")
     failed = len(base_failures) + len(new_failures)
     if failed and base and new:
         report.add(f"**{failed} benchmark run(s) failed to complete; see \"Benchmarks that "
                    "produced no results\" below.**\n")
-    info = run_info(args.results)
     adapters = {}
     for (bench, backend), meta in list(new_meta.items()) + list(base_meta.items()):
         if "adapter_name" in meta:
@@ -556,6 +657,7 @@ def main():
         report.pipeline()
         report.runtime()
         report.zero_init()
+        report.load()
     report.failed_runs()
     if status == 0:
         report.problems()

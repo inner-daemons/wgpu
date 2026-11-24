@@ -66,10 +66,14 @@ python3 benches/naga-passes/cpu.py ../wgpu-trunk-bench ../wgpu-passes-bench [OUT
 # Windows: py benches\naga-passes\cpu.py ..\wgpu-trunk-bench ..\wgpu-passes-bench
 ```
 
-It builds both, runs the benchmark `ROUNDS` times (default 3) per checkout, alternating which
-checkout goes first, and prints and saves a comparison: `OUT_DIR/comparison.md` and
-`comparison.csv`. Negative percentages mean the second checkout, the passes branch, is faster.
-Close other programs while it runs; the CPU is the only thing measured.
+It builds both, runs the benchmark `ROUNDS` times (default 3; use at least 3) per checkout,
+alternating which checkout goes first, and prints and saves a comparison: `OUT_DIR/comparison.md`
+and `comparison.csv`. Negative percentages mean the second checkout, the passes branch, is faster.
+Each case's number is its minimum over all samples and rounds (the median is shown for
+reference), and the summaries are geometric means of per-case ratios. Close other programs while
+it runs; the CPU is the only thing measured. Like the driver runner, it records the system load
+before and after each group (`load-guard.txt`) and flags groups that ran on a busy machine; see
+[the driver README](driver/README.md#statistics-and-the-load-guard).
 
 To run one checkout by hand, and use the harness' own output:
 

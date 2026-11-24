@@ -31,12 +31,19 @@ Expected run time after the build: roughly 5 to 20 minutes per backend (an estim
 on how slow the driver's shader compiler is). Do not use the machine for other work meanwhile,
 and keep a laptop on mains power.
 
+The default is 3 rounds per checkout, and the checkout that goes first alternates between rounds.
+Do not compare fewer than 3 rounds, and never use `--quick` for a comparison: it takes 2 samples
+per pipeline and small dispatches, so one spike decides a case. Its output, `comparison.md` and
+`run-info.txt` say so. If you run the two checkouts by hand instead, alternate which one goes
+first in every round and use at least 3 rounds.
+
 Useful options:
 
 ```sh
 python3 benches/naga-passes/driver/run.py --backends vulkan,gl   # which wgpu backends to run
-python3 benches/naga-passes/driver/run.py --rounds 3             # repeat, alternating order (less noise)
-python3 benches/naga-passes/driver/run.py --quick                # about a minute, for checking setup only
+python3 benches/naga-passes/driver/run.py --rounds 5             # more rounds (default 3), alternating order
+python3 benches/naga-passes/driver/run.py --quick                # about a minute, to check the setup. INVALID for comparisons
+python3 benches/naga-passes/driver/run.py --max-load 3 --load-wait 0   # load guard limit, and do not wait for it
 python3 benches/naga-passes/driver/run.py --out DIR              # where the results go
 python3 benches/naga-passes/driver/run.py --full-tests           # also run the test suite, see below
 python3 benches/naga-passes/driver/run.py /path/to/trunk-bench /path/to/passes-bench   # existing checkouts
@@ -88,17 +95,27 @@ buffers and color targets derived from the shader's inputs and outputs. The shad
 `examples/features/src/**/*.wgsl` and the benchmark shaders below. No pipeline cache is used.
 
 Drivers cache compiled shaders, which would make repeated creation of the same pipeline look
-free, so every iteration compiles a slightly different shader. The benchmark shaders have an
-`override BENCH_SALT` that is set to a different value each time. Other shaders get extra digits
-on the first float literal in each entry point's body, and the entry points are renamed. The
-`variation` field of a result says which was used. The first iteration of every pipeline is not
-part of the statistics, but is reported as `first_ms`. The runner also turns off Mesa's and
-NVIDIA's on-disk shader caches. If a driver keeps a cache that this does not defeat, times for
-`variation: rename` shaders could be too small, on both checkouts.
+free, so every iteration compiles a differently salted shader. The salt depends on the process,
+the iteration, the case name and the stage, so cases with identical sources (several examples use
+the same `blit.wgsl`) differ too. Entry point names are not enough, because some drivers
+(KosmicKrisp) rename every entry point, so the salt is a constant that reaches the compiled code:
+
+- the benchmark shaders have an `override BENCH_SALT`, which is XORed into a live seed;
+- a compute entry point writes the salt to a new storage buffer binding;
+- a vertex or fragment entry point returns its output plus a tiny salted amount (or XORed with the
+  salt, for integers), which adds a few instructions to each stage and no functions;
+- if that is not possible, the first float literal of the entry point gets extra digits
+  (`variation: literal`), and as a last resort only the entry points are renamed
+  (`variation: rename`), which `comparison.md` lists, because a driver cache may serve those.
+
+The `variation` field of a result is the weakest of these used for the case. To look at the
+shaders that were compiled, set `NAGA_PASSES_DUMP_VARIED=<dir>`. The first iteration of every
+pipeline is not part of the statistics, but is reported as `first_ms`. The runner also turns off
+Mesa's and NVIDIA's on-disk shader caches.
 
 **GPU runtime** (`gpu_runtime`): one dispatch of each benchmark shader (4096 workgroups of 64 or
-256 invocations), 5 warm-up dispatches and then 40 timed ones, reporting median and p90. The time
-comes from timestamp queries on the compute pass where the device supports them
+256 invocations), 5 warm-up dispatches and then 40 timed ones, reporting the minimum, median and
+p90. The time comes from timestamp queries on the compute pass where the device supports them
 (`timing_source: timestamp`) and from wall time around submit and poll otherwise (`wall`, which
 includes some overhead). The shaders:
 
@@ -127,12 +144,33 @@ reported as `skipped` with the reason "N/A".
 The output of the first dispatch is hashed (`checksum`), and the comparison reports `MISMATCH`
 if the two builds compute different results.
 
+## Statistics and the load guard
+
+Each case's number is its **minimum** over all samples and rounds, because noise on a busy
+machine only adds time; the median (of the per-round medians) is shown beside it for reference.
+The summary rows of `comparison.md` are **geometric means of the per-case new/base ratios** over
+the cases that succeeded in both checkouts, so a few long shaders cannot dominate them, as they
+would in a ratio of sums.
+
+Before and after every benchmark group (one benchmark process on one checkout) the runner reads
+the system load, as busy cores: the 1 minute load average on Linux and macOS, and the CPU load
+from PowerShell times the number of cores on Windows. The two readings and the times go into the
+`meta` of the group's result file (`load_before`, `load_after`, `load_limit`, `started_utc`,
+`finished_utc`) and into `load-guard.txt`. If either reading is above the limit, which is
+`1 + 0.25 * cores` by default (the one is the benchmark itself; the rest means more than a quarter
+of the cores are busy with other work), the runner prints a loud warning, the group gets
+`high_load: true`, and `comparison.md` lists it under "Machine load". Before each group the runner
+waits up to 30 seconds for a load left by a build or the previous group to settle (`--load-wait`).
+Change the limit with `--max-load`. Rerun the flagged groups on a quiet machine.
+
 ## What to send back
 
 Send the archive `naga-passes-results/<date>-<host>.tar.gz` that the script prints at the end,
 or the directory it was made from. It contains:
 
-- `comparison.md` and `comparison.csv`: the comparison table with absolute and % change;
+- `comparison.md` and `comparison.csv`: the comparison tables;
+- `load-guard.txt`: the machine load and the time before and after every benchmark group (see
+  below);
 - `<checkout>/<backend>/r<N>/*.json` and `*.log`: the raw results and the output of each run;
 - `tests/` (only with `--full-tests`): the logs, failure lists and `failure-diff.txt` of the test
   runs;
@@ -178,8 +216,8 @@ Also look at:
 
 - `first_ms` against the median: a large first time with a normal median is a driver cache or
   lazy compilation, not a slowdown;
-- `n` and the spread between `median` and `p90`: a large spread means a noisy machine, so run
-  again with `--rounds 3`;
+- `n` and the spread between `min`, `median` and `p90`: a large spread means a noisy machine, so
+  run again with more `--rounds` on a quiet one;
 - for `gpu_runtime`, `timing_source` should be the same in both checkouts; the comparison shows
   `ts` or `wall`.
 
@@ -190,7 +228,7 @@ All optional environment variables: `NAGA_PASSES_PIPELINE_ITERS` (default 8),
 `NAGA_PASSES_GPU_CAP_MS` (8000, stop timing a shader after that long), `NAGA_PASSES_GPU_WALL`
 (set it to use wall time even when timestamps exist), `WGPU_BENCH_ONLY_FORCE_ZERO_INIT_POLYFILL` (see above), `NAGA_PASSES_FILTER` (comma separated
 substrings of shader names), `NAGA_PASSES_SKIP` (substrings of cases to skip, for example one that
-crashes the driver), `NAGA_PASSES_OUT` (where the JSON goes). `NAGA_PASSES_SALT_BASE` (0 to 89; by default a random offset is added to the variation per process, so that repeated runs and `--rounds` do not hit an on-disk shader cache). To run one benchmark by hand:
+crashes the driver), `NAGA_PASSES_OUT` (where the JSON goes). `NAGA_PASSES_SALT_BASE` (any `u32`; by default a random value is mixed into the salt per process, so that repeated runs and `--rounds` do not hit an on-disk shader cache), `NAGA_PASSES_DUMP_VARIED` (a directory to write the compiled WGSL of every iteration to). To run one benchmark by hand:
 
 ```sh
 WGPU_BACKEND=vulkan cargo bench -p wgpu-benchmark --bench naga-passes-driver -- naga_passes::gpu_runtime
