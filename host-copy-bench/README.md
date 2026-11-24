@@ -23,8 +23,8 @@ after another, and writes a `host-copy-bench-<date>.tar.gz` file to the current
 directory. Please send that file back. It contains the results, the
 benchmark's output, the machine's model, CPU, GPUs, memory size, OS version and
 power source, and the git commit. It doesn't contain your username, hostname,
-file paths or any serial numbers. It takes a few minutes
-on recent hardware.
+file paths or any serial numbers. It takes about 10 minutes
+on a recent laptop, and longer on older or slower GPUs.
 
 Each benchmark group runs in its own process, so if a driver crashes, the other
 groups' results are still collected, along with the crash log.
@@ -60,11 +60,21 @@ is skipped.
 
 ### Textures
 
-For `Rgba8Unorm`, `Rgba16Float`, `Bc1RgbaUnorm` and `Etc2Rgb8Unorm` (where
-supported), at 256, 1024 and 4096 pixels square, with smooth content (which
-lossless compression helps) and random content (which it can't help):
+For `Rgba8Unorm`, `R8Unorm`, `Rgba16Float`, `Astc4x4Unorm`, `Bc1RgbaUnorm`
+and `Etc2Rgb8Unorm` (where supported), at 256, 512, 1024, 2048 and 4096 pixels
+square. Uncompressed formats get smooth gradients (which lossless compression
+helps), gradients with a little noise, like a photo (`detail`), and random
+content (which it can't help). Compressed formats get one repeated block and
+random blocks. The ASTC blocks are checked to decode as expected on the GPU
+(`decode_ok`), so the timings aren't of invalid blocks.
 
-- `staging`: a normal texture written with `Queue::write_texture`.
+- `staging`: a normal texture written with `Queue::write_texture`, on a device
+  with `DISABLE_IMPLICIT_HOST_TEXTURE_COPY`, so always through a staging buffer.
+- `staging-control`: the same on a second device. Its ratios to `staging` show
+  how much two devices doing the same work differ, which is the noise that
+  `implicit` has to stand out from.
+- `implicit`: the same on a device without that flag, where wgpu adds host copy
+  usage and writes new textures from the host if the backend says that's free.
 - `host`: a `HOST_VISIBLE` texture written from the CPU with
   `copy_from_memory`. On Metal this is a `Shared` texture, on Vulkan an image
   with `HOST_TRANSFER` usage, and on DX12 a texture in a CPU-visible heap.

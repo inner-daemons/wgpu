@@ -92,7 +92,8 @@ impl Ctx {
             | wgpu::Features::MAPPABLE_PRIMARY_BUFFERS
             | wgpu::Features::TIMESTAMP_QUERY
             | wgpu::Features::TEXTURE_COMPRESSION_BC
-            | wgpu::Features::TEXTURE_COMPRESSION_ETC2;
+            | wgpu::Features::TEXTURE_COMPRESSION_ETC2
+            | wgpu::Features::TEXTURE_COMPRESSION_ASTC;
         let (device, queue) = request_device(adapter, adapter.features() & wanted)?;
         let errors = Arc::new(AtomicBool::new(false));
         let flag = errors.clone();
@@ -401,9 +402,16 @@ fn describe_metal(_: &wgpu::Adapter, _: &mut String) {}
 // Textures
 // ---------------------------------------------------------------------------
 
+const ASTC_4X4: wgpu::TextureFormat = wgpu::TextureFormat::Astc {
+    block: wgpu::AstcBlock::B4x4,
+    channel: wgpu::AstcChannel::Unorm,
+};
+
 const TEXTURE_FORMATS: &[(wgpu::TextureFormat, wgpu::Features)] = &[
     (wgpu::TextureFormat::Rgba8Unorm, wgpu::Features::empty()),
+    (wgpu::TextureFormat::R8Unorm, wgpu::Features::empty()),
     (wgpu::TextureFormat::Rgba16Float, wgpu::Features::empty()),
+    (ASTC_4X4, wgpu::Features::TEXTURE_COMPRESSION_ASTC),
     (
         wgpu::TextureFormat::Bc1RgbaUnorm,
         wgpu::Features::TEXTURE_COMPRESSION_BC,
@@ -419,6 +427,8 @@ enum Content {
     /// Smooth gradients, or repeated blocks for compressed formats. Lossless
     /// framebuffer-style compression should help.
     Smooth,
+    /// Gradients with a little noise, like a photo. Uncompressed formats only.
+    Detail,
     /// Random bytes. Lossless compression can't help.
     Noise,
 }
@@ -427,6 +437,7 @@ impl Content {
     fn name(self) -> &'static str {
         match self {
             Content::Smooth => "smooth",
+            Content::Detail => "detail",
             Content::Noise => "noise",
         }
     }
@@ -437,6 +448,12 @@ enum TextureVariant {
     /// `COPY_DST` texture written with `Queue::write_texture`, which goes
     /// through a staging buffer and a copy on the GPU.
     Staging,
+    /// Like `Staging`, on a second device, to show how much two devices doing
+    /// the same work differ.
+    StagingControl,
+    /// Like `Staging`, on a device that lets wgpu add host copy usage and
+    /// write from the host where the backend says that's free.
+    Implicit,
     /// `HOST_VISIBLE` texture written with `copy_from_memory`.
     Host,
     /// Metal only: like `Host`, followed by `optimizeContentsForGPUAccess`.
@@ -447,6 +464,8 @@ impl TextureVariant {
     fn name(self) -> &'static str {
         match self {
             TextureVariant::Staging => "staging",
+            TextureVariant::StagingControl => "staging-control",
+            TextureVariant::Implicit => "implicit",
             TextureVariant::Host => "host",
             TextureVariant::HostOptimized => "host+optimize",
         }
@@ -469,10 +488,21 @@ impl TextureCase {
         let blocks_y = size / block_h;
         let bytes_per_row = blocks_x * block_bytes;
         let len = (bytes_per_row * blocks_y) as usize;
-        let data = match content {
-            Content::Noise => noise(len, size as u64),
-            Content::Smooth => smooth(format, size, len, block_bytes as usize),
+        let data = if format == ASTC_4X4 {
+            astc_blocks(len / 16, content == Content::Noise)
+        } else if format.is_compressed() {
+            match content {
+                Content::Noise => noise(len, size as u64),
+                _ => repeated_block(len, block_bytes as usize),
+            }
+        } else {
+            match content {
+                Content::Noise => noise(len, size as u64),
+                Content::Smooth => gradient(format, size, 0),
+                Content::Detail => gradient(format, size, 6),
+            }
         };
+        assert_eq!(data.len(), len);
         TextureCase {
             format,
             size,
@@ -488,8 +518,8 @@ impl TextureCase {
 
     fn name(&self) -> String {
         format!(
-            "{:?} {}x{} {}",
-            self.format,
+            "{} {}x{} {}",
+            format_name(self.format),
             self.size,
             self.size,
             self.content.name()
@@ -506,7 +536,7 @@ impl TextureCase {
 
     fn create(&self, ctx: &Ctx, variant: TextureVariant, mapped: bool) -> wgpu::Texture {
         let usage = match variant {
-            TextureVariant::Staging => {
+            TextureVariant::Staging | TextureVariant::StagingControl | TextureVariant::Implicit => {
                 wgpu::TextureUsages::COPY_DST
                     | wgpu::TextureUsages::COPY_SRC
                     | wgpu::TextureUsages::TEXTURE_BINDING
@@ -548,7 +578,7 @@ impl TextureCase {
     fn upload_fresh(&self, ctx: &Ctx, variant: TextureVariant) -> (wgpu::Texture, f64) {
         let start = Instant::now();
         let texture = match variant {
-            TextureVariant::Staging => {
+            TextureVariant::Staging | TextureVariant::StagingControl | TextureVariant::Implicit => {
                 let texture = self.create(ctx, variant, false);
                 ctx.queue.write_texture(
                     texture.as_image_copy(),
@@ -578,7 +608,7 @@ impl TextureCase {
         let start = Instant::now();
         let mut phases = Phases::default();
         match variant {
-            TextureVariant::Staging => {
+            TextureVariant::Staging | TextureVariant::StagingControl | TextureVariant::Implicit => {
                 ctx.queue.write_texture(
                     texture.as_image_copy(),
                     &self.data,
@@ -614,7 +644,7 @@ impl TextureCase {
         let start = Instant::now();
         let mut out = vec![0u8; self.data.len()];
         match variant {
-            TextureVariant::Staging => {
+            TextureVariant::Staging | TextureVariant::StagingControl | TextureVariant::Implicit => {
                 let row = self.layout.bytes_per_row.unwrap();
                 let rows = self.layout.rows_per_image.unwrap();
                 let padded = row.next_multiple_of(wgpu::COPY_BYTES_PER_ROW_ALIGNMENT);
@@ -717,40 +747,195 @@ fn noise(len: usize, seed: u64) -> Vec<u8> {
     out
 }
 
-fn smooth(format: wgpu::TextureFormat, size: u32, len: usize, block_bytes: usize) -> Vec<u8> {
-    let mut out = Vec::with_capacity(len);
-    match format {
-        wgpu::TextureFormat::Rgba8Unorm => {
-            for y in 0..size {
-                for x in 0..size {
-                    out.extend_from_slice(&[
-                        (x * 255 / size) as u8,
-                        (y * 255 / size) as u8,
-                        128,
-                        255,
-                    ]);
-                }
-            }
+/// Horizontal and vertical gradients, with noise of up to `amplitude` levels
+/// out of 255 added to each color channel.
+fn gradient(format: wgpu::TextureFormat, size: u32, amplitude: u64) -> Vec<u8> {
+    let mut state = 0x2545_F491_4F6C_DD1Du64 ^ size as u64;
+    let mut jitter = move || {
+        if amplitude == 0 {
+            return 0.0;
         }
-        wgpu::TextureFormat::Rgba16Float => {
-            for y in 0..size {
-                for x in 0..size {
-                    for v in [x as f32 / size as f32, y as f32 / size as f32, 0.5, 1.0] {
-                        out.extend_from_slice(&f16(v).to_le_bytes());
+        state ^= state << 13;
+        state ^= state >> 7;
+        state ^= state << 17;
+        ((state % (2 * amplitude + 1)) as f32 - amplitude as f32) / 255.0
+    };
+    let unorm8 = |v: f32| (v.clamp(0.0, 1.0) * 255.0).round() as u8;
+    let mut out = Vec::new();
+    for y in 0..size {
+        for x in 0..size {
+            let u = x as f32 / size as f32;
+            let v = y as f32 / size as f32;
+            match format {
+                wgpu::TextureFormat::R8Unorm => out.push(unorm8((u + v) / 2.0 + jitter())),
+                wgpu::TextureFormat::Rgba8Unorm => {
+                    for c in [u, v, 0.5] {
+                        out.push(unorm8(c + jitter()));
+                    }
+                    out.push(255);
+                }
+                wgpu::TextureFormat::Rgba16Float => {
+                    for c in [u + jitter(), v + jitter(), 0.5 + jitter(), 1.0] {
+                        out.extend_from_slice(&f16(c.clamp(0.0, 1.0)).to_le_bytes());
                     }
                 }
-            }
-        }
-        _ => {
-            // One repeated block. Any bit pattern is a valid BC1 or ETC2 block.
-            let block = [0x84u8, 0x42, 0x21, 0x02, 0x10, 0x32, 0x54, 0x76];
-            while out.len() < len {
-                out.extend_from_slice(&block[..block_bytes.min(8)]);
+                _ => unreachable!("no gradient for {format:?}"),
             }
         }
     }
-    out.truncate(len);
     out
+}
+
+/// One block repeated. Any bit pattern is a valid BC1 or ETC2 block.
+fn repeated_block(len: usize, block_bytes: usize) -> Vec<u8> {
+    let block = [0x84u8, 0x42, 0x21, 0x02, 0x10, 0x32, 0x54, 0x76];
+    block[..block_bytes.min(8)]
+        .iter()
+        .copied()
+        .cycle()
+        .take(len)
+        .collect()
+}
+
+/// The low 17 bits of an ASTC block: block mode 0x042 (a 4x4 grid of 2-bit
+/// weights), one partition and direct RGBA endpoints (CEM 12). The rest is
+/// 64 bits of 8-bit endpoints and 32 bits of weights, so any value for those
+/// bits is a valid block.
+const ASTC_HEADER: u128 = 0x042 | (12 << 13);
+const ASTC_HEADER_MASK: u128 = (1 << 17) - 1;
+
+fn format_name(format: wgpu::TextureFormat) -> String {
+    if format == ASTC_4X4 {
+        "Astc4x4Unorm".to_string()
+    } else {
+        format!("{format:?}")
+    }
+}
+
+fn astc_block(payload: u128) -> u128 {
+    (payload & !ASTC_HEADER_MASK) | ASTC_HEADER
+}
+
+/// ASTC 4x4 blocks with random endpoints and weights, or one block repeated.
+fn astc_blocks(count: usize, random: bool) -> Vec<u8> {
+    let fixed = astc_block(0x0123_4567_89AB_CDEF_FEDC_BA98_7654_3210);
+    let mut out = Vec::with_capacity(count * 16);
+    for chunk in noise(count * 16, 0xA57C).chunks_exact(16) {
+        let block = if random {
+            astc_block(u128::from_le_bytes(chunk.try_into().unwrap()))
+        } else {
+            fixed
+        };
+        out.extend_from_slice(&block.to_le_bytes());
+    }
+    out
+}
+
+/// Decodes a block made by `astc_block` to RGBA8, texels in row order.
+fn decode_astc_block(block: u128) -> [[u8; 4]; 16] {
+    let v: [u32; 8] = std::array::from_fn(|i| ((block >> (17 + 8 * i)) & 0xff) as u32);
+    let mut e0 = [v[0], v[2], v[4], v[6]];
+    let mut e1 = [v[1], v[3], v[5], v[7]];
+    if v[1] + v[3] + v[5] < v[0] + v[2] + v[4] {
+        let contract = |c: [u32; 4]| [(c[0] + c[2]) >> 1, (c[1] + c[2]) >> 1, c[2], c[3]];
+        (e0, e1) = (contract(e1), contract(e0));
+    }
+    // Weights are stored bit-reversed from the top of the block.
+    let weights = block.reverse_bits();
+    std::array::from_fn(|i| {
+        let w = [0, 21, 43, 64][((weights >> (2 * i)) & 3) as usize];
+        std::array::from_fn(|c| {
+            let value = (e0[c] * 257 * (64 - w) + e1[c] * 257 * w + 32) / 64;
+            (value >> 8) as u8
+        })
+    })
+}
+
+/// Checks that the GPU decodes the generated ASTC blocks as `decode_astc_block`
+/// does, so the timings aren't of invalid blocks.
+fn check_astc(ctx: &Ctx, case: &TextureCase, texture: &wgpu::Texture) -> Result<(), String> {
+    let module = ctx
+        .device
+        .create_shader_module(wgpu::include_wgsl!("astc_check.wgsl"));
+    let pipeline = ctx
+        .device
+        .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+            label: Some("astc_check"),
+            layout: None,
+            module: &module,
+            entry_point: Some("main"),
+            compilation_options: Default::default(),
+            cache: None,
+        });
+    let storage = |size| {
+        ctx.device.create_buffer(&wgpu::BufferDescriptor {
+            label: None,
+            size,
+            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_SRC,
+            mapped_at_creation: false,
+        })
+    };
+    let first_block = storage(256);
+    let error_texels = storage(4);
+    let readback = ctx.device.create_buffer(&wgpu::BufferDescriptor {
+        label: None,
+        size: 260,
+        usage: wgpu::BufferUsages::MAP_READ | wgpu::BufferUsages::COPY_DST,
+        mapped_at_creation: false,
+    });
+    let view = texture.create_view(&Default::default());
+    let bind_group = ctx.device.create_bind_group(&wgpu::BindGroupDescriptor {
+        label: None,
+        layout: &pipeline.get_bind_group_layout(0),
+        entries: &[
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: wgpu::BindingResource::TextureView(&view),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: first_block.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: error_texels.as_entire_binding(),
+            },
+        ],
+    });
+    let mut encoder = ctx.device.create_command_encoder(&Default::default());
+    {
+        let mut pass = encoder.begin_compute_pass(&Default::default());
+        pass.set_pipeline(&pipeline);
+        pass.set_bind_group(0, &bind_group, &[]);
+        pass.dispatch_workgroups(case.size.div_ceil(8), case.size.div_ceil(8), 1);
+    }
+    encoder.copy_buffer_to_buffer(&first_block, 0, &readback, 0, 256);
+    encoder.copy_buffer_to_buffer(&error_texels, 0, &readback, 256, 4);
+    ctx.queue.submit(Some(encoder.finish()));
+    map_buffer(ctx, &readback, wgpu::MapMode::Read);
+    let (texels, errors) = {
+        let view = readback.get_mapped_range(..).unwrap();
+        let texels: Vec<f32> = bytemuck::cast_slice(&view[..256]).to_vec();
+        let errors = u32::from_le_bytes(view[256..260].try_into().unwrap());
+        (texels, errors)
+    };
+    readback.unmap();
+    if errors > 0 {
+        return Err(format!("{errors} texels decoded to the ASTC error color"));
+    }
+    let expected = decode_astc_block(u128::from_le_bytes(case.data[..16].try_into().unwrap()));
+    for (i, texel) in expected.iter().enumerate() {
+        for c in 0..4 {
+            let got = texels[i * 4 + c] * 255.0;
+            if (got - texel[c] as f32).abs() > 2.0 {
+                return Err(format!(
+                    "texel {i} channel {c} decoded to {got:.1}, expected {}",
+                    texel[c]
+                ));
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Converts a value in `0.0..=1.0` to half precision.
@@ -880,13 +1065,15 @@ fn warm_up(ctx: &Ctx, sampler: &Sampler) {
     }
 }
 
-fn bench_textures(ctx: &mut Ctx) {
+fn bench_textures(ctx: &mut Ctx, control: Option<&Ctx>, implicit: Option<&Ctx>) {
     let sampler = Sampler::new(ctx);
     warm_up(ctx, &sampler);
+    let control = control.map(|c| (c, Sampler::new(c)));
+    let implicit = implicit.map(|c| (c, Sampler::new(c)));
     let sizes: &[u32] = if ctx.quick {
         &[1024]
     } else {
-        &[256, 1024, 4096]
+        &[256, 512, 1024, 2048, 4096]
     };
     let iterations = if ctx.quick { 3 } else { 5 };
     let host_feature = ctx
@@ -894,28 +1081,39 @@ fn bench_textures(ctx: &mut Ctx) {
         .features()
         .contains(wgpu::Features::HOST_TEXTURE_COPY);
     let is_metal = ctx.adapter.get_info().backend == wgpu::Backend::Metal;
+    let mut records = Vec::new();
+    let main = &*ctx;
 
     for &(format, feature) in TEXTURE_FORMATS {
-        if !ctx.device.features().contains(feature) {
+        if !main.device.features().contains(feature) {
             continue;
         }
         let host_visible = host_feature
-            && ctx
+            && main
                 .adapter
                 .get_texture_format_features(format)
                 .allowed_usages
                 .contains(wgpu::TextureUsages::HOST_VISIBLE);
-        let mut variants = vec![TextureVariant::Staging];
+        let mut variants: Vec<(TextureVariant, &Ctx, &Sampler)> =
+            vec![(TextureVariant::Staging, main, &sampler)];
+        if let Some((c, s)) = &control {
+            variants.push((TextureVariant::StagingControl, c, s));
+        }
+        if let Some((c, s)) = &implicit {
+            variants.push((TextureVariant::Implicit, c, s));
+        }
         if host_visible {
-            variants.push(TextureVariant::Host);
+            variants.push((TextureVariant::Host, main, &sampler));
             if is_metal {
-                variants.push(TextureVariant::HostOptimized);
+                variants.push((TextureVariant::HostOptimized, main, &sampler));
             }
         }
-        let contents: &[Content] = if ctx.quick {
+        let contents: &[Content] = if main.quick {
             &[Content::Smooth]
-        } else {
+        } else if format.is_compressed() {
             &[Content::Smooth, Content::Noise]
+        } else {
+            &[Content::Smooth, Content::Detail, Content::Noise]
         };
         for &size in sizes {
             for &content in contents {
@@ -930,44 +1128,76 @@ fn bench_textures(ctx: &mut Ctx) {
                 // and thermal changes affect them equally.
                 let mut samples: Vec<Samples> =
                     variants.iter().map(|_| Samples::default()).collect();
+                // Short CPU-side timings are noisy, so small textures get more of them.
+                let copies = if main.quick {
+                    iterations
+                } else {
+                    match size {
+                        ..=1024 => 21,
+                        2048 => 11,
+                        _ => 7,
+                    }
+                };
+                // Each device's first texture of a size can pay for allocating memory.
+                for &(variant, c, _) in &variants {
+                    drop(case.upload_fresh(c, variant));
+                }
                 let mut textures = Vec::new();
-                for iteration in 0..iterations {
-                    for (i, &variant) in variants.iter().enumerate() {
-                        let (texture, ms) = case.upload_fresh(ctx, variant);
+                for iteration in 0..copies {
+                    for (i, &(variant, c, s)) in variants.iter().enumerate() {
+                        let (texture, ms) = case.upload_fresh(c, variant);
                         samples[i].fresh.push(ms);
-                        samples[i].first_use.push(sampler.run(ctx, &texture, reps));
-                        if iteration == iterations - 1 {
+                        if iteration == 0 && i == 0 && format == ASTC_4X4 {
+                            let ok = check_astc(c, &case, &texture);
+                            if let Err(e) = &ok {
+                                eprintln!("  {name}: ASTC blocks didn't decode as expected: {e}");
+                            }
+                            records.push((
+                                name.clone(),
+                                "staging",
+                                "decode_ok",
+                                ok.is_ok() as u32 as f64,
+                                "bool",
+                            ));
+                        }
+                        if iteration < iterations {
+                            samples[i].first_use.push(s.run(c, &texture, reps));
+                        }
+                        if iteration == copies - 1 {
                             textures.push(texture);
                         }
                     }
                 }
-                for _ in 0..iterations {
-                    for (i, &variant) in variants.iter().enumerate() {
-                        let phases = case.upload_again(ctx, &textures[i], variant);
+                for _ in 0..copies {
+                    for (i, &(variant, c, s)) in variants.iter().enumerate() {
+                        let phases = case.upload_again(c, &textures[i], variant);
                         samples[i].again.push(phases.total);
                         samples[i].again_cpu.push(phases.cpu);
                         samples[i].again_wait.push(phases.wait);
-                        sampler.run(ctx, &textures[i], 1);
+                        s.run(c, &textures[i], 1);
                     }
                 }
                 for _ in 0..iterations * 2 {
-                    for (i, texture) in textures.iter().enumerate() {
-                        samples[i].steady.push(sampler.run(ctx, texture, reps));
+                    for (i, &(_, c, s)) in variants.iter().enumerate() {
+                        samples[i].steady.push(s.run(c, &textures[i], reps));
                     }
                 }
-                for _ in 0..iterations {
-                    for (i, &variant) in variants.iter().enumerate() {
-                        sampler.run(ctx, &textures[i], 1);
+                for _ in 0..copies {
+                    for (i, &(variant, c, s)) in variants.iter().enumerate() {
+                        s.run(c, &textures[i], 1);
                         samples[i]
                             .readback
-                            .push(case.read_back(ctx, &textures[i], variant));
+                            .push(case.read_back(c, &textures[i], variant));
                     }
                 }
-                if ctx.took_error() {
+                if main.took_error()
+                    || control.as_ref().is_some_and(|(c, _)| c.took_error())
+                    || implicit.as_ref().is_some_and(|(c, _)| c.took_error())
+                {
                     eprintln!("  {name}: skipped after an error");
                     continue;
                 }
-                for (i, &variant) in variants.iter().enumerate() {
+                for (i, &(variant, _, _)) in variants.iter().enumerate() {
                     let s = &samples[i];
                     let v = variant.name();
                     let steady = median(s.steady.clone());
@@ -980,16 +1210,15 @@ fn bench_textures(ctx: &mut Ctx) {
                         ("readback", &s.readback),
                         ("sample", &s.steady),
                     ] {
-                        ctx.record("texture", &name, v, metric, median(values.clone()), "ms");
+                        records.push((name.clone(), v, metric, median(values.clone()), "ms"));
                     }
-                    ctx.record(
-                        "texture",
-                        &name,
+                    records.push((
+                        name.clone(),
                         v,
                         "sample_rate",
                         texel_reads / (steady * 1e6),
                         "Gtexel/s",
-                    );
+                    ));
                     if i > 0 {
                         let base = &samples[0];
                         for (metric, values, base) in [
@@ -998,31 +1227,34 @@ fn bench_textures(ctx: &mut Ctx) {
                             ("readback_vs_staging", &s.readback, &base.readback),
                             ("sample_vs_staging", &s.steady, &base.steady),
                         ] {
-                            ctx.record(
-                                "texture",
-                                &name,
+                            records.push((
+                                name.clone(),
                                 v,
                                 metric,
                                 paired_ratio(values, base),
                                 "x",
-                            );
+                            ));
                         }
                     }
-                    if variant != TextureVariant::Staging
-                        && let Some(allowed) = allows_gpu_optimized_contents(&textures[i])
+                    if matches!(
+                        variant,
+                        TextureVariant::Host | TextureVariant::HostOptimized
+                    ) && let Some(allowed) = allows_gpu_optimized_contents(&textures[i])
                     {
-                        ctx.record(
-                            "texture",
-                            &name,
+                        records.push((
+                            name.clone(),
                             v,
                             "allowGPUOptimizedContents",
                             allowed as u32 as f64,
                             "bool",
-                        );
+                        ));
                     }
                 }
             }
         }
+    }
+    for (case, variant, metric, value, unit) in records {
+        ctx.record("texture", &case, variant, metric, value, unit);
     }
 }
 
@@ -1458,11 +1690,24 @@ fn main() {
         );
     }
 
-    let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
-    descriptor.backends = wgpu::Backends::VULKAN | wgpu::Backends::METAL | wgpu::Backends::DX12;
-    descriptor.flags = wgpu::InstanceFlags::empty();
-    let instance = wgpu::Instance::new(descriptor.with_env());
+    // The implicit variant gets its own instance; everything else measures
+    // `write_texture` through staging.
+    let instance_with = |implicit: bool| {
+        let mut descriptor = wgpu::InstanceDescriptor::new_without_display_handle();
+        descriptor.backends = wgpu::Backends::VULKAN | wgpu::Backends::METAL | wgpu::Backends::DX12;
+        descriptor.flags = wgpu::InstanceFlags::empty();
+        let mut descriptor = descriptor.with_env();
+        descriptor.flags.set(
+            wgpu::InstanceFlags::DISABLE_IMPLICIT_HOST_TEXTURE_COPY,
+            !implicit,
+        );
+        wgpu::Instance::new(descriptor)
+    };
+    let instance = instance_with(false);
+    let implicit_instance = instance_with(true);
     let adapters = pollster::block_on(instance.enumerate_adapters(wgpu::Backends::all()));
+    let implicit_adapters =
+        pollster::block_on(implicit_instance.enumerate_adapters(wgpu::Backends::all()));
 
     let mut report = String::from("# host-copy-bench\n\n");
     let mut all_rows = Vec::new();
@@ -1494,7 +1739,20 @@ fn main() {
         let mut rows = Vec::new();
         if let Some(mut ctx) = Ctx::new(&adapter, options.quick) {
             if options.runs("textures") {
-                bench_textures(&mut ctx);
+                let implicit = implicit_adapters
+                    .iter()
+                    .find(|a| {
+                        let other = a.get_info();
+                        (
+                            other.name.as_str(),
+                            other.backend,
+                            other.vendor,
+                            other.device,
+                        ) == (info.name.as_str(), info.backend, info.vendor, info.device)
+                    })
+                    .and_then(|a| Ctx::new(a, options.quick));
+                let control = Ctx::new(&adapter, options.quick);
+                bench_textures(&mut ctx, control.as_ref(), implicit.as_ref());
             }
             if options.runs("buffers") {
                 bench_buffers(&mut ctx);
