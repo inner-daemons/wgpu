@@ -94,12 +94,27 @@ pub fn pipeline_creation(ctx: BenchmarkContext) -> anyhow::Result<Vec<SubBenchRe
             }
         };
 
+        let missing = missing_capability(&module, state.capabilities);
         for spec in reflect::pipeline_specs(&module) {
             let case = format!("{}::{}", shader.name, spec.name());
             if store.is_done(&case) {
                 continue;
             }
             if let PipelineSpec::Skipped { reason, .. } = &spec {
+                store.finish(
+                    &case,
+                    vec![Record::failed(
+                        BENCH,
+                        shader.group,
+                        &case,
+                        "total",
+                        "skipped",
+                        reason.clone(),
+                    )],
+                );
+                continue;
+            }
+            if let Some(reason) = &missing {
                 store.finish(
                     &case,
                     vec![Record::failed(
@@ -177,6 +192,28 @@ pub fn pipeline_creation(ctx: BenchmarkContext) -> anyhow::Result<Vec<SubBenchRe
             throughput_count_per_iteration: 1,
         })
         .collect())
+}
+
+/// Why the device cannot take the shader, if it validates with every capability but not with the
+/// ones this device has.
+fn missing_capability(
+    module: &naga::Module,
+    capabilities: naga::valid::Capabilities,
+) -> Option<String> {
+    let validate = |capabilities| {
+        naga::valid::Validator::new(naga::valid::ValidationFlags::all(), capabilities)
+            .validate(module)
+    };
+    let error = validate(capabilities).err()?;
+    validate(naga::valid::Capabilities::all()).ok()?;
+    let mut message = error.as_inner().to_string();
+    let mut source = std::error::Error::source(error.as_inner());
+    while let Some(cause) = source {
+        message.push_str(": ");
+        message.push_str(&cause.to_string());
+        source = cause.source();
+    }
+    Some(format!("needs a feature this device lacks: {message}"))
 }
 
 fn measure(

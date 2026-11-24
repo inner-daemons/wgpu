@@ -63,3 +63,4 @@ nanorand.workspace = true
 pollster.workspace = true
 rayon.workspace = true
 wgpu.workspace = true
+wgpu-naga-bridge.workspace = true
