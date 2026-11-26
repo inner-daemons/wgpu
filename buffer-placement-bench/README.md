@@ -42,7 +42,7 @@ current directory. Please send that file back. It contains the results, the
 benchmark's output, each GPU's memory layout (`memory-properties.json`), the
 machine's model, CPU, GPUs, memory size, OS version and power source, and the
 git commit. It doesn't contain your username, hostname, file paths or any
-serial numbers. It takes a few minutes on a recent machine.
+serial numbers. It takes about a minute on an M3 MacBook Air, and longer on slower machines.
 
 Each benchmark group runs in its own process, so if a driver crashes, the other
 groups' results are still collected, along with the crash log.

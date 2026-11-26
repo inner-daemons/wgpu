@@ -285,11 +285,11 @@ pub fn iterations(quick: bool, bytes: u64) -> usize {
     if quick {
         3
     } else if bytes <= MIB {
-        20
+        100
     } else if bytes <= 16 * MIB {
-        10
+        40
     } else {
-        6
+        20
     }
 }
 
