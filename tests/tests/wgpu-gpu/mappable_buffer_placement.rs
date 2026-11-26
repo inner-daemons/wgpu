@@ -38,8 +38,7 @@ static MAPPABLE_BUFFER_PLACEMENT_ROUNDTRIP: GpuTestConfiguration = GpuTestConfig
     .parameters(
         TestParameters::default()
             .features(wgpu::Features::MAPPABLE_PRIMARY_BUFFERS)
-            .limits(wgpu::Limits::downlevel_defaults())
-            .enable_noop(),
+            .limits(wgpu::Limits::downlevel_defaults()),
     )
     .run_async(|ctx| async move {
         roundtrip(
