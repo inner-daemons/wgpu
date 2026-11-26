@@ -5,7 +5,10 @@ use wgpu_sync::Mutex;
 use windows::Win32::Graphics::{Direct3D12, Dxgi};
 
 use crate::{
-    auxil::dxgi::{name::ObjectExt as _, result::HResult as _},
+    auxil::{
+        dxgi::{name::ObjectExt as _, result::HResult as _},
+        memory::{buffer_placement, MemoryPlacement},
+    },
     dx12::conv,
     AllocationSizes,
 };
@@ -169,14 +172,10 @@ impl<'a> DeviceAllocationContext<'a> {
         &self,
         desc: &crate::BufferDescriptor,
     ) -> Result<(Direct3D12::ID3D12Resource, Allocation), crate::DeviceError> {
-        let is_cpu_read = desc.usage.contains(wgt::BufferUses::MAP_READ);
-        let is_cpu_write = desc.usage.contains(wgt::BufferUses::MAP_WRITE);
-
-        let location = match (is_cpu_read, is_cpu_write) {
-            (true, true) => MemoryLocation::CpuToGpu,
-            (true, false) => MemoryLocation::GpuToCpu,
-            (false, true) => MemoryLocation::CpuToGpu,
-            (false, false) => MemoryLocation::GpuOnly,
+        let location = match buffer_placement(desc.usage) {
+            MemoryPlacement::DeviceOnly => MemoryLocation::GpuOnly,
+            MemoryPlacement::HostWriteCombined => MemoryLocation::CpuToGpu,
+            MemoryPlacement::HostCached => MemoryLocation::GpuToCpu,
         };
 
         let raw_desc = conv::map_buffer_descriptor(desc);

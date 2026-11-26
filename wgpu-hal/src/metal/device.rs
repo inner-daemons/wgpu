@@ -25,7 +25,13 @@ use objc2_metal::{
 use wgpu_sync::{Condvar, CondvarMutex};
 
 use super::{adapter::MAX_BUFFERS, conv, AttachmentInfo, PassthroughShader, ShaderModuleSource};
-use crate::{auxil::map_naga_stage, DropCallback, DropGuard, TlasInstance};
+use crate::{
+    auxil::{
+        map_naga_stage,
+        memory::{buffer_placement, MemoryPlacement},
+    },
+    DropCallback, DropGuard, TlasInstance,
+};
 
 type DeviceResult<T> = Result<T, crate::DeviceError>;
 
@@ -504,17 +510,15 @@ impl crate::Device for super::Device {
         &self,
         desc: &crate::BufferDescriptor,
     ) -> DeviceResult<(super::Buffer, wgt::BufferAddress)> {
-        let map_read = desc.usage.contains(wgt::BufferUses::MAP_READ);
-        let map_write = desc.usage.contains(wgt::BufferUses::MAP_WRITE);
-
-        let mut options = MTLResourceOptions::empty();
-        options |= if map_read || map_write {
-            // `crate::MemoryFlags::PREFER_COHERENT` is ignored here
-            MTLResourceOptions::StorageModeShared
-        } else {
-            MTLResourceOptions::StorageModePrivate
+        // `crate::MemoryFlags::PREFER_COHERENT` is ignored here
+        let options = match buffer_placement(desc.usage) {
+            MemoryPlacement::DeviceOnly => MTLResourceOptions::StorageModePrivate,
+            MemoryPlacement::HostCached => MTLResourceOptions::StorageModeShared,
+            MemoryPlacement::HostWriteCombined => {
+                MTLResourceOptions::StorageModeShared
+                    | MTLResourceOptions::CPUCacheModeWriteCombined
+            }
         };
-        options.set(MTLResourceOptions::CPUCacheModeWriteCombined, map_write);
 
         //TODO: HazardTrackingModeUntracked
 
