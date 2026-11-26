@@ -431,9 +431,9 @@ features! {
         /// Webgpu only allows the MAP_READ and MAP_WRITE buffer usage to be matched with
         /// COPY_DST and COPY_SRC respectively. This removes this requirement.
         ///
-        /// This is only beneficial on systems that share memory between CPU and GPU. If enabled
-        /// on a system that doesn't, this can severely hinder performance. Only use if you understand
-        /// the consequences.
+        /// Buffers with `MAP_READ` or `MAP_WRITE` are placed in host memory: cached if they have
+        /// `MAP_READ`, write-combined otherwise. On GPUs that don't share memory with the CPU, GPU
+        /// access to them crosses the PCIe bus and is much slower than access to other buffers.
         ///
         /// Supported platforms:
         /// - Vulkan
