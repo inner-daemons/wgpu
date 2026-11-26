@@ -4,6 +4,9 @@ pub(super) mod dxgi;
 #[cfg(dxgi)]
 pub(super) mod dyn_lib;
 
+#[cfg(any(vulkan, dx12, metal))]
+pub(crate) mod memory;
+
 #[cfg(all(native, feature = "renderdoc"))]
 pub(super) mod renderdoc;
 
