@@ -18,6 +18,13 @@ pub(crate) fn buffer_placement(usage: wgt::BufferUses) -> MemoryPlacement {
     }
 }
 
+/// Bench-only (`buffer-placement-bench` branch, never upstreamed): whether a
+/// device being opened should use trunk's buffer placement instead of
+/// [`buffer_placement`].
+pub(crate) fn bench_legacy_buffer_placement() -> bool {
+    std::env::var_os("WGPU_BENCH_LEGACY_BUFFER_PLACEMENT").is_some_and(|v| v == "1")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

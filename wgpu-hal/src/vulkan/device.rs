@@ -1106,25 +1106,53 @@ impl crate::Device for super::Device {
 
         let mut requirements = unsafe { self.shared.raw.get_buffer_memory_requirements(raw) };
 
-        let placement = crate::auxil::memory::buffer_placement(desc.usage);
-        let memory_type_index = super::memory::select_memory_type(
-            &self.memory_types,
-            requirements.memory_type_bits & self.valid_ash_memory_types,
-            placement,
-        );
-        let Some(memory_type_index) = memory_type_index else {
-            log::error!(
-                "No memory type for {placement:?} buffer (allowed type bits {:#x})",
-                requirements.memory_type_bits & self.valid_ash_memory_types,
-            );
-            unsafe { self.shared.raw.destroy_buffer(raw, None) };
-            return Err(crate::DeviceError::Unexpected);
-        };
+        // Bench-only: trunk's placement, letting gpu-allocator choose the type.
+        let (memory_type_bits, location) = if self.legacy_buffer_placement {
+            let is_cpu_read = desc.usage.contains(wgt::BufferUses::MAP_READ);
+            let is_cpu_write = desc.usage.contains(wgt::BufferUses::MAP_WRITE);
 
-        self.error_if_would_oom_in_memory_type(memory_type_index, requirements.size)
-            .inspect_err(|_| {
+            let location = match (is_cpu_read, is_cpu_write) {
+                (true, true) => gpu_allocator::MemoryLocation::CpuToGpu,
+                (true, false) => gpu_allocator::MemoryLocation::GpuToCpu,
+                (false, true) => gpu_allocator::MemoryLocation::CpuToGpu,
+                (false, false) => gpu_allocator::MemoryLocation::GpuOnly,
+            };
+
+            self.error_if_would_oom_on_resource_allocation(location, &requirements)
+                .inspect_err(|_| {
+                    unsafe { self.shared.raw.destroy_buffer(raw, None) };
+                })?;
+
+            (
+                requirements.memory_type_bits & self.valid_ash_memory_types,
+                location,
+            )
+        } else {
+            let placement = crate::auxil::memory::buffer_placement(desc.usage);
+            let memory_type_index = super::memory::select_memory_type(
+                &self.memory_types,
+                requirements.memory_type_bits & self.valid_ash_memory_types,
+                placement,
+            );
+            let Some(memory_type_index) = memory_type_index else {
+                log::error!(
+                    "No memory type for {placement:?} buffer (allowed type bits {:#x})",
+                    requirements.memory_type_bits & self.valid_ash_memory_types,
+                );
                 unsafe { self.shared.raw.destroy_buffer(raw, None) };
-            })?;
+                return Err(crate::DeviceError::Unexpected);
+            };
+
+            self.error_if_would_oom_in_memory_type(memory_type_index, requirements.size)
+                .inspect_err(|_| {
+                    unsafe { self.shared.raw.destroy_buffer(raw, None) };
+                })?;
+
+            (
+                1 << memory_type_index,
+                gpu_allocator::MemoryLocation::Unknown,
+            )
+        };
 
         let name = desc.label.unwrap_or("Unlabeled buffer");
 
@@ -1154,10 +1182,10 @@ impl crate::Device for super::Device {
                 &gpu_allocator::vulkan::AllocationCreateDesc {
                     name,
                     requirements: vk::MemoryRequirements {
-                        memory_type_bits: 1 << memory_type_index,
+                        memory_type_bits,
                         ..requirements
                     },
-                    location: gpu_allocator::MemoryLocation::Unknown,
+                    location,
                     linear: true, // Buffers are always linear
                     allocation_scheme: gpu_allocator::vulkan::AllocationScheme::GpuAllocatorManaged,
                 },

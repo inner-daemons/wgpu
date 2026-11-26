@@ -3295,6 +3295,7 @@ impl super::Adapter {
             desc_allocator: Mutex::new(desc_allocator),
             valid_ash_memory_types,
             memory_types: memory_types.iter().copied().collect(),
+            legacy_buffer_placement: crate::auxil::memory::bench_legacy_buffer_placement(),
             naga_options,
             #[cfg(feature = "renderdoc")]
             render_doc: Default::default(),

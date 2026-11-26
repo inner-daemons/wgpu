@@ -208,6 +208,7 @@ impl crate::Adapter for super::Adapter {
                     counters,
                     limits: limits.clone(),
                     icb: icb.clone(),
+                    legacy_buffer_placement: crate::auxil::memory::bench_legacy_buffer_placement(),
                 },
                 queue: super::Queue {
                     shared: Arc::new(QueueShared {

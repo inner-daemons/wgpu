@@ -446,6 +446,8 @@ struct DeviceShared {
     heap_views: descriptor::GeneralHeap,
     sampler_heap: sampler::SamplerHeap,
     private_caps: PrivateCapabilities,
+    /// Bench-only, see [`crate::auxil::memory::bench_legacy_buffer_placement`].
+    legacy_buffer_placement: bool,
 }
 
 unsafe impl Send for DeviceShared {}

@@ -175,6 +175,13 @@ impl<'a> DeviceAllocationContext<'a> {
         let location = match buffer_placement(desc.usage) {
             MemoryPlacement::DeviceOnly => MemoryLocation::GpuOnly,
             MemoryPlacement::HostWriteCombined => MemoryLocation::CpuToGpu,
+            // Bench-only: trunk put MAP_READ | MAP_WRITE in upload memory.
+            MemoryPlacement::HostCached
+                if self.shared.legacy_buffer_placement
+                    && desc.usage.contains(wgt::BufferUses::MAP_WRITE) =>
+            {
+                MemoryLocation::CpuToGpu
+            }
             MemoryPlacement::HostCached => MemoryLocation::GpuToCpu,
         };
 

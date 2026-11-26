@@ -718,6 +718,8 @@ pub struct Device {
     desc_allocator: Mutex<descriptor::DescriptorAllocator>,
     valid_ash_memory_types: u32,
     memory_types: ArrayVec<vk::MemoryType, { vk::MAX_MEMORY_TYPES }>,
+    /// Bench-only, see [`crate::auxil::memory::bench_legacy_buffer_placement`].
+    legacy_buffer_placement: bool,
     naga_options: naga::back::spv::Options<'static>,
     #[cfg(feature = "renderdoc")]
     render_doc: crate::auxil::renderdoc::RenderDoc,

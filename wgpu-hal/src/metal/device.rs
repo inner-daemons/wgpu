@@ -491,6 +491,7 @@ impl super::Device {
             counters,
             limits: limits.clone(),
             icb,
+            legacy_buffer_placement: crate::auxil::memory::bench_legacy_buffer_placement(),
         }
     }
 
@@ -513,6 +514,14 @@ impl crate::Device for super::Device {
         // `crate::MemoryFlags::PREFER_COHERENT` is ignored here
         let options = match buffer_placement(desc.usage) {
             MemoryPlacement::DeviceOnly => MTLResourceOptions::StorageModePrivate,
+            // Bench-only: trunk write-combined every MAP_WRITE buffer.
+            MemoryPlacement::HostCached
+                if self.legacy_buffer_placement
+                    && desc.usage.contains(wgt::BufferUses::MAP_WRITE) =>
+            {
+                MTLResourceOptions::StorageModeShared
+                    | MTLResourceOptions::CPUCacheModeWriteCombined
+            }
             MemoryPlacement::HostCached => MTLResourceOptions::StorageModeShared,
             MemoryPlacement::HostWriteCombined => {
                 MTLResourceOptions::StorageModeShared

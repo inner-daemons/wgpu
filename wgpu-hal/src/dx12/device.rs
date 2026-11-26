@@ -178,6 +178,7 @@ impl super::Device {
             )?,
             sampler_heap: super::sampler::SamplerHeap::new(&raw, &private_caps)?,
             private_caps,
+            legacy_buffer_placement: auxil::memory::bench_legacy_buffer_placement(),
         };
 
         let mut rtv_pool =

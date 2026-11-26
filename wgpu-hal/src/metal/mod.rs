@@ -682,6 +682,8 @@ pub struct Device {
     /// Set up when the device is opened; `None` when multi-draws keep the
     /// per-draw loop. See [`icb::IcbContext::new`].
     icb: Option<Arc<icb::IcbContext>>,
+    /// Bench-only, see [`crate::auxil::memory::bench_legacy_buffer_placement`].
+    legacy_buffer_placement: bool,
 }
 
 #[derive(Debug)]
