@@ -1030,23 +1030,56 @@ impl super::Device {
                 });
         }
 
-        if let Some((_, ty)) = selected_heap {
-            let i = ty.heap_index as usize;
-            let heap_usage = memory_properties.heap_usage()[i];
-            let heap_budget = memory_properties.heap_budget()[i];
-            if heap_usage + requirements.size < heap_budget / 100 * threshold as u64 {
-                Ok(())
-            } else {
-                log::warn!(
-                    "Allocation would result in an OOM condition\n\
-                    Request: {requirements:?}\n\
-                    Heap {index} had {heap_usage}B used of {heap_budget}B total before this request.",
-                    index = ty.heap_index,
-                );
-                Err(crate::DeviceError::OutOfMemory)
-            }
+        if let Some((i, _)) = selected_heap {
+            Self::check_heap_budget(&memory_properties, threshold, i as u32, requirements.size)
         } else {
             log::warn!("Failed to find a suitable heap for {requirements:?}");
+            Err(crate::DeviceError::OutOfMemory)
+        }
+    }
+
+    /// Predict whether allocating `size` bytes from `memory_type_index` will
+    /// result in an OOM condition.
+    fn error_if_would_oom_in_memory_type(
+        &self,
+        memory_type_index: u32,
+        size: vk::DeviceSize,
+    ) -> Result<(), crate::DeviceError> {
+        let Some(threshold) = self
+            .shared
+            .instance
+            .memory_budget_thresholds
+            .for_resource_creation
+        else {
+            return Ok(());
+        };
+
+        let Some(memory_properties) = self.get_memory_properties() else {
+            return Ok(());
+        };
+
+        Self::check_heap_budget(&memory_properties, threshold, memory_type_index, size)
+    }
+
+    fn check_heap_budget(
+        memory_properties: &MemoryProperties,
+        threshold: u8,
+        memory_type_index: u32,
+        size: vk::DeviceSize,
+    ) -> Result<(), crate::DeviceError> {
+        let ty = memory_properties.types()[memory_type_index as usize];
+        let i = ty.heap_index as usize;
+        let heap_usage = memory_properties.heap_usage()[i];
+        let heap_budget = memory_properties.heap_budget()[i];
+        if heap_usage + size < heap_budget / 100 * threshold as u64 {
+            Ok(())
+        } else {
+            log::warn!(
+                "Allocation would result in an OOM condition\n\
+                Request: {size}B from memory type {memory_type_index}\n\
+                Heap {index} had {heap_usage}B used of {heap_budget}B total before this request.",
+                index = ty.heap_index,
+            );
             Err(crate::DeviceError::OutOfMemory)
         }
     }
@@ -1073,17 +1106,25 @@ impl crate::Device for super::Device {
 
         let mut requirements = unsafe { self.shared.raw.get_buffer_memory_requirements(raw) };
 
-        let is_cpu_read = desc.usage.contains(wgt::BufferUses::MAP_READ);
-        let is_cpu_write = desc.usage.contains(wgt::BufferUses::MAP_WRITE);
-
-        let location = match (is_cpu_read, is_cpu_write) {
-            (true, true) => gpu_allocator::MemoryLocation::CpuToGpu,
-            (true, false) => gpu_allocator::MemoryLocation::GpuToCpu,
-            (false, true) => gpu_allocator::MemoryLocation::CpuToGpu,
-            (false, false) => gpu_allocator::MemoryLocation::GpuOnly,
+        let placement = crate::auxil::memory::buffer_placement(desc.usage);
+        let memory_types = unsafe {
+            self.shared
+                .instance
+                .raw
+                .get_physical_device_memory_properties(self.shared.physical_device)
+        };
+        let memory_type_index = super::memory::select_memory_type(
+            memory_types.memory_types_as_slice(),
+            requirements.memory_type_bits & self.valid_ash_memory_types,
+            placement,
+        );
+        let Some(memory_type_index) = memory_type_index else {
+            log::warn!("No memory type for {placement:?} buffer ({requirements:?})");
+            unsafe { self.shared.raw.destroy_buffer(raw, None) };
+            return Err(gpu_allocator::AllocationError::NoCompatibleMemoryTypeFound.into());
         };
 
-        self.error_if_would_oom_on_resource_allocation(location, &requirements)
+        self.error_if_would_oom_in_memory_type(memory_type_index, requirements.size)
             .inspect_err(|_| {
                 unsafe { self.shared.raw.destroy_buffer(raw, None) };
             })?;
@@ -1116,11 +1157,10 @@ impl crate::Device for super::Device {
                 &gpu_allocator::vulkan::AllocationCreateDesc {
                     name,
                     requirements: vk::MemoryRequirements {
-                        memory_type_bits: requirements.memory_type_bits
-                            & self.valid_ash_memory_types,
+                        memory_type_bits: 1 << memory_type_index,
                         ..requirements
                     },
-                    location,
+                    location: gpu_allocator::MemoryLocation::Unknown,
                     linear: true, // Buffers are always linear
                     allocation_scheme: gpu_allocator::vulkan::AllocationScheme::GpuAllocatorManaged,
                 },

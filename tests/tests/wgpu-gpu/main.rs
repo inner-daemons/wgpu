@@ -47,6 +47,7 @@ mod image_atomics;
 mod immediates;
 mod instance;
 mod life_cycle;
+mod mappable_buffer_placement;
 mod mesh_shader;
 mod multiview;
 mod naga_capabilities;
@@ -128,6 +129,7 @@ fn all_tests() -> Vec<wgpu_test::GpuTestInitializer> {
     image_atomics::all_tests(&mut tests);
     instance::all_tests(&mut tests);
     life_cycle::all_tests(&mut tests);
+    mappable_buffer_placement::all_tests(&mut tests);
     mesh_shader::all_tests(&mut tests);
     multiview::all_tests(&mut tests);
     occlusion_query::all_tests(&mut tests);
