@@ -1,0 +1,22 @@
+[package]
+name = "buffer-placement-bench"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Compares wgpu's mappable buffer placement with trunk's"
+
+[dependencies]
+bytemuck.workspace = true
+env_logger.workspace = true
+pollster.workspace = true
+serde_json.workspace = true
+wgpu.workspace = true
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+ash.workspace = true
+
+[target.'cfg(target_vendor = "apple")'.dependencies]
+objc2-metal.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+windows = { workspace = true, features = ["Win32_Graphics_Direct3D12"] }

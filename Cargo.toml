@@ -1,6 +1,7 @@
 [workspace]
 resolver = "3"
 members = [
+    "buffer-placement-bench",
     "cts_runner",
     "deno_webgpu",
 
