@@ -3294,6 +3294,7 @@ impl super::Adapter {
             mem_allocator,
             desc_allocator: Mutex::new(desc_allocator),
             valid_ash_memory_types,
+            memory_types: memory_types.iter().copied().collect(),
             naga_options,
             #[cfg(feature = "renderdoc")]
             render_doc: Default::default(),

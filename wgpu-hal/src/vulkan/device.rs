@@ -1107,21 +1107,18 @@ impl crate::Device for super::Device {
         let mut requirements = unsafe { self.shared.raw.get_buffer_memory_requirements(raw) };
 
         let placement = crate::auxil::memory::buffer_placement(desc.usage);
-        let memory_types = unsafe {
-            self.shared
-                .instance
-                .raw
-                .get_physical_device_memory_properties(self.shared.physical_device)
-        };
         let memory_type_index = super::memory::select_memory_type(
-            memory_types.memory_types_as_slice(),
+            &self.memory_types,
             requirements.memory_type_bits & self.valid_ash_memory_types,
             placement,
         );
         let Some(memory_type_index) = memory_type_index else {
-            log::warn!("No memory type for {placement:?} buffer ({requirements:?})");
+            log::error!(
+                "No memory type for {placement:?} buffer (allowed type bits {:#x})",
+                requirements.memory_type_bits & self.valid_ash_memory_types,
+            );
             unsafe { self.shared.raw.destroy_buffer(raw, None) };
-            return Err(gpu_allocator::AllocationError::NoCompatibleMemoryTypeFound.into());
+            return Err(crate::DeviceError::Unexpected);
         };
 
         self.error_if_would_oom_in_memory_type(memory_type_index, requirements.size)

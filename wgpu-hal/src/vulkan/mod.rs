@@ -717,6 +717,7 @@ pub struct Device {
     mem_allocator: MemoryAllocators,
     desc_allocator: Mutex<descriptor::DescriptorAllocator>,
     valid_ash_memory_types: u32,
+    memory_types: ArrayVec<vk::MemoryType, { vk::MAX_MEMORY_TYPES }>,
     naga_options: naga::back::spv::Options<'static>,
     #[cfg(feature = "renderdoc")]
     render_doc: crate::auxil::renderdoc::RenderDoc,
